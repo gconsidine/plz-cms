@@ -93,16 +93,16 @@
 
   `storeName: "roleplayStore" // The name of the store Roleplay will use`
 
-#### "roles" property
+#### roles property
   
-  Roles are listed hierarchically in an array, with index roles[0] as the most 
+  Roles are listed hierarchically in an array, with roles[0] as the most 
   privileged user, and roles[roles.length - 1] being the least privileged user.
   An arbitrary number of roles are supported, and role names can be any string.
 
   Roles exist to provide sanity checks upon user creation and to denote access 
   more concisely.
 
-#### "access" property
+#### access property
 
   Property names represent the route in which you're assigning CRUD permissions 
   to particular roles.  Suppose the following routes exist:
@@ -113,7 +113,7 @@
     /user/account
     /user/account/profile
  
-  Properties within access (routes) can be formed in the following ways:
+  Access routes can be formed in the following ways:
 
   No wildcards (most explicit):
 
@@ -142,10 +142,10 @@
     /user/***
 
   Matches `/user`, `/user/billing`, `/user/billing/profile/`, `/user/account`, 
-  `/user/account/profile`, and any other route that begins with `/user`.
+  `/user/account/profile`, and any other route that begins with `/user/`.
 
   Roleplay will first search for the most explicit match for a given user's 
-  role and route.  This means, you can define broad access without as much 
+  role and route.  This means you can define broad access without as much 
   repetition.  For example, you can start by giving all of your roles broad 
   access, then partitioning off more exclusive routes for higher-level roles.  
   Here are some example routes:
