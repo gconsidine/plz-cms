@@ -1,0 +1,23 @@
+{
+  "name": "roleplay",
+  "version": "0.0.0",
+  "description": "Role creation and access",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gconsidine/roleplay"
+  },
+  "author": "Greg Considine <greg@greg-considine.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gconsidine/roleplay/issues"
+  },
+  "homepage": "https://github.com/gconsidine/roleplay",
+  "devDependencies": {
+    "mongodb": "^1.4.8",
+    "mongoose": "^3.8.14"
+  }
+}
