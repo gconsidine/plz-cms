@@ -1,8 +1,10 @@
 {
   "name": "roleplay",
   "version": "0.0.0",
-  "description": "Role creation and access",
+  "description": "Role creation and access specification",
+  "author": "Greg Considine <greg@greg-considine.com>",
   "main": "index.js",
+  "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -10,8 +12,6 @@
     "type": "git",
     "url": "https://github.com/gconsidine/roleplay"
   },
-  "author": "Greg Considine <greg@greg-considine.com>",
-  "license": "ISC",
   "bugs": {
     "url": "https://github.com/gconsidine/roleplay/issues"
   },

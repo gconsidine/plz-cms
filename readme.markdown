@@ -1,6 +1,6 @@
-# Roleplay
+# roleplay
 
-  A Node.js authorization and access module built for Seamus
+  A Node.js role creation and authorization module
 
 - - -
  
@@ -204,7 +204,6 @@
     "/": {
       "read": ["ALL"]
     }
-
        
 - - -
 
