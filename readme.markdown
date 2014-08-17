@@ -25,72 +25,73 @@
         "storeType":    "Redis",
         "storeName":    "roleplayStore",
         "https":        false,
-        "explict":      false
+        "explict":      false,
+        "shorthand":    false
       },
 
       "roles": ["super-admin", "admin", "author"],
 
       "access": {
         "/": {
-          "read":   ["super-admin", "admin", "author"]
+          "read": ["ALL"]
         },
         "/api/v1/***": {
-          "create": ["super-admin"],
-          "read":   ["super-admin"],
-          "update": ["super-admin"],
-          "delete": ["super-admin"]
+          "CRUD": ["ALL"],
         },
         "/api/v1/user": {
-          "create": ["super-admin", "admin"],
+          "CRUD": ["super-admin", "admin"]
+        },
+        "/api/v1/admin": {
+          "create": ["super-admin"],
           "read":   ["super-admin", "admin"],
-          "update": ["super-admin", "admin"],
-          "delete": ["super-admin", "admin"]
+          "update": ["super-admin"],
+          "delete": ["super-admin"]
         }
       }
     }
 
-#### "configuration" property
+#### configuration property:
 
   Configuration consists of several required properties, and several optional 
   properties with default values.
 
-  **Required** properties:
+  **Required**:
   
-  `database: "MongoDB"` 
+  `database: <string> // Currently, only MongoDB is supported`  
 
-  The *type* of database you're using.  As of now, only MongoDB is supported.
+  `databaseName: <string> // Where your collection will be created`
 
-  `databaseName: "roleplayDatabase"`
+    /*
+     * When set to `false`, the user is assumed to have access to any route 
+     * that isn't explicitly defined in access.
+     *
+     * When set to `true`, the user is assumed to have **no** access to any 
+     * route that isn't explicitly defined in access.
+     */
 
-  The name of database in which a roleplay collection or table will be created.
+    explicit: <boolean> 
 
-  `explicit: false`
+    /*
+     * When set to true, CRUD access can be listed as role index e.g. 
+     * "create": [0, 1, 2], 
+     */
 
-  When set to `false`, the user is assumed to have access to any route that 
-  isn't explicitly defined in access.
+    shorthand: <boolean>
 
-  When set to `true`, the user is assumed to have **no** access to any route 
-  that isn't explicitly defined in access.
+  **Optional**:
 
-  **Optional** properties:
+  `https: <boolean> // If true, all non-HTTPS checks will be denied`
 
-  `https: false`
+    /*
+     * A store can be used to load your permissions into memory for fast 
+     * checking on app start.  Not using a store is discouraged
+     */
 
-  If set to `true`, all non-HTTPS checks will be denied
+    store: <boolean>
 
-  `store: true`
+  `storeType: "Redis" // Currently, only Redis is supported`
 
-  If set to `true`, permissions will be loaded into a store on app start for 
-  quick permissions checking.
-
-  `storeType: "Redis"`
-
-  Redis is currently the only supported store.
-
-  `storeName: "roleplayStore"`
-
-  The name of the store that Roleplay will use.
-
+  `storeName: "roleplayStore" // The name of the store Roleplay will use`
 
 #### "roles" property
   
@@ -114,7 +115,7 @@
  
   Properties within access (routes) can be formed in the following ways:
 
-  Level 3: Explicit
+  No wildcards (most explicit):
 
     /user
     /user/billing
@@ -122,21 +123,21 @@
     /user/account
     /user/account/profile
 
-  Level 2: `*`
+  `*`:
       
     /user/* 
 
   Matches `/user`, `/user/billing`, `user/account`, and any other valid 
   basename after `/user/`
 
-  Level 1: `**`
+  `**`:
     
     /user/**/profile
 
   Matches `/user/billing/profile`, `/user/account/profile`, and any other route 
   with valid URL characters between `/user` and `/profile`
 
-  Level 0: `***`
+  `***` (least explicit):
 
     /user/***
 
@@ -147,7 +148,7 @@
   role and route.  This means, you can define broad access without as much 
   repetition.  For example, you can start by giving all of your roles broad 
   access, then partitioning off more exclusive routes for higher-level roles.  
-  Here's an example API:
+  Here are some example routes:
 
     /* Start with broad API route access for all users */
 
@@ -169,6 +170,41 @@
       "update": ["super-admin"],
       "delete": ["super-admin"],
     }
+
+  Here's the same example using the `shorthand: true` configuration property 
+  and the more concise `CRUD` property within routes:
+
+    "/api/v1/***": {
+      "CRUD": [0, 1, 2]
+    },
+
+    "/api/v1/admin: {
+      "create": [0],
+      "read":   [0, 1],
+      "update": [0],
+      "delete": [0],
+    }
+
+  Use `CRUD` if `create`, `read`, `update`, and `delete` all share the same 
+  roles.
+
+  Regardless of whether `explicit` is set to `true` or `false`, for any missing
+  `create`s, `read`s, `update`s, and `delete`s within an access route are 
+  assumed to be non-existant and denied as a result. This can be useful if 
+  there's any area of the site that is read-only to all roles.
+
+    "/": {
+      "read": [0, 1, 2]
+    }
+
+  Lastly, whether the `shorthand` is set to `true` or `false`, the string 
+  `"ALL"` may be passed to an access route's property/properties to set access 
+  for all roles more concisely
+
+    "/": {
+      "read": ["ALL"]
+    }
+
        
 - - -
 
