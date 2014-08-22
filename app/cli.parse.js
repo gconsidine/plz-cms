@@ -3,16 +3,27 @@ var Parse = function () {
 
   var Fs = require('fs'),
       Path = require('path');
+  
+  var ROLEPLAY_JSON = 'roleplay.json';
 
   var _startingPath = Path.dirname(__filename),
       _currentPath = _startingPath,
       _depth = 0;
+  
+  function roleplayJson(callback) {
+    normalizeJson(function (roleplayJson, error) {
+      if(error) {
+        callback(null, error);
+      } else {
+        callback(roleplayJson, error);
+      }
+    });
+  }
 
-
-  function getJson(callback) {
+  function getJsonContent(callback) {
     getLocation(function (filename, error) {
       if(error) {
-        callback(null, true);     
+        callback(null, error);     
       } else {
 
         var options = {
@@ -21,9 +32,9 @@ var Parse = function () {
 
         Fs.readFile(filename, options, function (error, data) {
           if(error) {
-            callback(null, true);
+            callback(null, error);
           } else {
-            callback(data, false);
+            callback(data, error);
           }
         });
 
@@ -32,27 +43,86 @@ var Parse = function () {
   }
 
   function normalizeJson(callback) {
-    getJson(function (file, error) {
+    getJsonContent(function (file, error) {
       if(error) {
-        callback(null, true);
+        callback(null, error);
       } else {
         var json = JSON.parse(file);
 
-        if(json.shorthand) {
+        if(json.configuration.shorthand) {
           json = inflateShorthand(json);        
         } else {
           json = inflateLonghand(json);
         }
         
-        callback(json, false);
+        callback(json, error);
       }
     });
   }
 
   function inflateShorthand(json) {
+    var tempRoles,
+        roleIndex,
+        i;
+
     for(var route in json.access) {
-      
+      if(json.access[route].CRUD) {
+
+        if(json.access[route].CRUD[0] === 'ALL') {
+          json.access[route].create = json.roles;
+          json.access[route].update = json.roles;
+          json.access[route].read = json.roles;
+          json.access[route].delete = json.roles;
+        } else {
+
+          tempRoles = [];
+          for(i = 0; i < json.access[route].CRUD.length; i++) {
+            roleIndex = json.access[route].CRUD[i];
+            tempRoles.push(json.roles[roleIndex]);
+          }
+
+          json.access[route].create = tempRoles;
+          json.access[route].update = tempRoles;
+          json.access[route].read = tempRoles;
+          json.access[route].delete = tempRoles;
+        } 
+
+        delete json.access[route].CRUD;
+
+      } else {
+
+        if(!json.access[route].create) {
+          json.access[route].create = [];
+        }
+        if(!json.access[route].read) {
+          json.access[route].read = [];
+        }
+        if(!json.access[route].update) {
+          json.access[route].update = [];
+        }
+        if(!json.access[route].delete) {
+          json.access[route].delete = [];
+        }
+
+        for(var action in json.access[route]) {
+          if(json.access[route][action][0] === 'ALL') {
+            json.access[route][action] = json.roles;
+          } else {
+
+            tempRoles = [];
+            for(i = 0; i < json.access[route][action].length; i++) {
+              roleIndex = json.access[route][action][i];
+              tempRoles.push(json.roles[roleIndex]);
+            }
+
+            json.access[route][action] = tempRoles;
+          }
+        }
+
+      }
     }
+
+    return json;
   }
 
   function inflateLonghand(json) {
@@ -77,33 +147,20 @@ var Parse = function () {
 
         if(!json.access[route].create) {
           json.access[route].create = [];
-        } else {
-          if(json.access[route].create[0] === 'All') {
-            json.access[route].create = json.roles;
-          }
         }
-
         if(!json.access[route].read) {
           json.access[route].read = [];
-        } else {
-          if(json.access[route].read[0] === 'ALL') {
-            json.access[route].read = json.roles;
-          }
         }
-
         if(!json.access[route].update) {
           json.access[route].update = [];
-        } else {
-          if(json.access[route].update[0] === 'ALL') {
-            json.access[route].update = json.roles;
-          }
         }
-
         if(!json.access[route].delete) {
           json.access[route].delete = [];
-        } else {
-          if(json.access[route].delete[0] === 'ALL') {
-            json.access[route].delete = json.roles;
+        }
+
+        for(var action in json.access[route]) {
+          if(json.access[route][action][0] === 'All') {
+            json.access[route][action] = json.roles;
           }
         }
 
@@ -120,18 +177,18 @@ var Parse = function () {
 
     locateJson(function (filename, error) {
       if(error && _currentPath === '') {
-        callback(null, true);
+        callback(null, error);
       } else if(error) {
         _depth++;
         getLocation(callback);
       } else {
-        callback(filename, false);
+        callback(filename, error);
       }
     });
   }
 
   function locateJson(callback) {
-    var location = Path.join(_currentPath, 'roleplay.json');
+    var location = Path.join(_currentPath, ROLEPLAY_JSON);
 
     Fs.exists(location, function (exists) {
       if(exists) {
@@ -144,8 +201,9 @@ var Parse = function () {
 
   return {
     getLocation: getLocation,
-    getJson: getJson,
-    normalizeJson: normalizeJson
+    getJsonContent: getJsonContent,
+    normalizeJson: normalizeJson,
+    roleplayJson: roleplayJson
   };
 
 };
