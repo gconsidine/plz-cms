@@ -1,4 +1,4 @@
-var Parse = function () {
+var Parse = function (startingPath) {
   'use strict';
 
   var Fs = require('fs'),
@@ -6,16 +6,15 @@ var Parse = function () {
   
   var ROLEPLAY_JSON = 'roleplay.json';
 
-  var _startingPath = Path.dirname(__filename),
-      _currentPath = _startingPath,
+  var _currentPath = startingPath,
       _depth = 0;
   
   function roleplayJson(callback) {
     normalizeJson(function (roleplayJson, error) {
       if(error) {
-        callback(null, error);
+        callback(null, true);
       } else {
-        callback(roleplayJson, error);
+        callback(roleplayJson, false);
       }
     });
   }
@@ -23,7 +22,7 @@ var Parse = function () {
   function getJsonContent(callback) {
     getLocation(function (filename, error) {
       if(error) {
-        callback(null, error);     
+        callback(null, true);     
       } else {
 
         var options = {
@@ -32,9 +31,9 @@ var Parse = function () {
 
         Fs.readFile(filename, options, function (error, data) {
           if(error) {
-            callback(null, error);
+            callback(null, true);
           } else {
-            callback(data, error);
+            callback(data, false);
           }
         });
 
@@ -159,7 +158,7 @@ var Parse = function () {
         }
 
         for(var action in json.access[route]) {
-          if(json.access[route][action][0] === 'All') {
+          if(json.access[route][action][0] === 'ALL') {
             json.access[route][action] = json.roles;
           }
         }
@@ -177,12 +176,12 @@ var Parse = function () {
 
     locateJson(function (filename, error) {
       if(error && _currentPath === '') {
-        callback(null, error);
+        callback(null, true);
       } else if(error) {
         _depth++;
         getLocation(callback);
       } else {
-        callback(filename, error);
+        callback(filename, false);
       }
     });
   }

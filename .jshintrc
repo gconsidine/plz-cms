@@ -34,7 +34,7 @@
     "moz"           : false,     
                                  
     "evil"          : false,     
-    "expr"          : false,     
+    "expr"          : true,     
     "funcscope"     : false,     
     "globalstrict"  : false,     
     "iterator"      : false,     
@@ -65,5 +65,12 @@
     "wsh"           : false,    
     "yui"           : false,    
     
-    "globals"       : {}        
+    "globals"       : {
+      "describe"    : true,
+      "it"          : true,
+      "before"      : true,
+      "beforeEach"  : true,
+      "after"       : true,
+      "afterEach"   : true
+    }        
 }
