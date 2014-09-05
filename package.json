@@ -1,7 +1,7 @@
 {
-  "name": "roleplay",
+  "name": "plz-cms",
   "version": "0.0.0",
-  "description": "Role creation and access specification",
+  "description": "plz-cms module hub",
   "author": "Greg Considine <greg@greg-considine.com>",
   "main": "index.js",
   "private": true,
@@ -10,12 +10,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/gconsidine/roleplay"
+    "url": "https://github.com/gconsidine/plz-cms"
   },
   "bugs": {
-    "url": "https://github.com/gconsidine/roleplay/issues"
+    "url": "https://github.com/gconsidine/plz-cms/issues"
   },
-  "homepage": "https://github.com/gconsidine/roleplay",
+  "homepage": "https://github.com/gconsidine/plz-cms",
   "devDependencies": {
     "grunt": "^0.4.5",
     "grunt-cli": "^0.1.13",
@@ -24,7 +24,8 @@
     "grunt-shell": "^1.0.1",
     "mocha": "^1.21.4",
     "mongodb": "^1.4.8",
-    "mongoose": "^3.8.14",
-    "should": "^4.0.4"
+    "nodemailer": "^1.2.1",
+    "should": "^4.0.4",
+    "validator": "^3.17.1"
   }
 }

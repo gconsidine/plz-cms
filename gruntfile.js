@@ -2,14 +2,12 @@ module.exports = function (grunt) {
   'use strict';
   
   var _source = {
-    app: ['app/app*.js'],
-    cli: ['app/cli*.js'],
+    app: ['app/*.js'],
     test: ['test/*spec.js'],
     process: ['gruntfile.js']
   };
 
-  _source.all = _source.app.concat(_source.app, _source.cli, _source.test, 
-                                   _source.process);
+  _source.all = _source.app.concat(_source.app, _source.test, _source.process);
 
   grunt.initConfig({
 
@@ -31,10 +29,9 @@ module.exports = function (grunt) {
     watch: {
       all: {
         files: _source.all,
-        tasks: ['jshint', 'shell:mocha']
+        tasks: ['jshint']
       }
-    },
-
+    }
 
   });
 
