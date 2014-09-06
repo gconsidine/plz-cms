@@ -12,7 +12,7 @@
  
 ### plz-cms configuration
 
-  `plz-cms.configure()` is required before use, and it accepts one 
+  `plz.configure()` is required before use, and it accepts one 
   configuration object that takes the following form:
 
     {
@@ -22,10 +22,14 @@
         scribe: false
       },
       database: { // Can accept multiple database connections
-        default: process.env.PLZ_DATABASE_DEFAULT
+        default: app,
+        app: {
+          uri: process.env.PLZ_DATABASE_DEFAULT
+        }
       },
       mailer: { // Can accept multiple mailers
-        activation: { 
+        default: app,
+        app: { 
           service: 'Gmail',
           address: process.env.PLZ_MAILER_ACTIVATION_ADDRESS,
           password: process.env.PLZ_MAILER_ACTIVATION_PASSWORD'
@@ -36,17 +40,17 @@
 ### plz-admin configuration
 
   plz-admin configuration must be added to the object passed to 
-  `plz-cms.configure()`, nested at the same level as modules, database, and 
+  `plz.configure()`, nested at the same level as modules, database, and 
   mailer.  It's required if admin in modules is set to true.
 
-  admin: { 
-    roles: ['admin', 'author'], // at least one string role is required
-    collections: {
-      users: {
-        dateCreated: true, // required document fields
-        email: true,
-        password: true
+    admin: { 
+      roles: ['admin', 'author'], // at least one string role is required
+      collections: {
+        users: {
+          dateCreated: true, // required document fields
+          email: true,
+          password: true
+        }
       }
     }
-  }
 

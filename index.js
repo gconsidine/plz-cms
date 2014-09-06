@@ -1,4 +1,7 @@
-#!/usr/bin/env node
+module.exports = (function (options) {
+  'use strict';
 
-var config = require('./app/config')();
+  var Hub = require('./app/Hub');
 
+  return Hub.configure(options);
+}());
