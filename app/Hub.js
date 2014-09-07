@@ -1,26 +1,25 @@
 var Hub = function () {
   'use strict';
 
-  var Mongo = require('mongodb'),
+  var Mongo = require('mongodb').MongoClient,
       Mailer = require('nodemailer'),
       Api = require('./ApiGenerator');
 
   var _databases = {},
-      _transporters = {},
-      _activeDatabase,
-      _activeMailer;
+      _mailers = {};
   
   function configure(options) { 
     var api;
 
     setDatabases(options.database);
     setTransporters(options.mailer);
- 
+    
     api = Api.registerModules(options.modules);
+
+    api.get = api.get || {};
+
     api.get.mailer = getMailer;
-    api.set.mailer = setTransporter;
     api.get.database = getDatabase;
-    api.set.database = setDatabase;
 
     return api;
   }
@@ -28,28 +27,20 @@ var Hub = function () {
   function setDatabases(databases) {
     for(var name in databases) {
       if(databases.hasOwnProperty(name)) {
-        setDatabase(name, databases[name]);
+        setDatabase(name, databases[name].uri);
       }
     }
   }
 
   function setDatabase(name, uri) {
-    if(uri !== 'undefined') {
-      Mongo.connect(uri, function (error, database) {
-        if(error) {
-          console.log('DB connection error'); 
-          return;
-        }
+    Mongo.connect(uri, function (error, database) {
+      if(error) {
+        console.log('DB connection error'); 
+        return;
+      }
 
-        addDatabase(name, database);
-
-        if(name === 'default') {
-          _activeDatabase = database;
-        }
-      });
-    } else {
-      _activeDatabase = getDatabase(name);
-    }
+      addDatabase(name, database);
+    });
   }
 
   function addDatabase(name, database) {
@@ -58,10 +49,10 @@ var Hub = function () {
 
   function getDatabase(name) {
     if(name !== 'undefined') {
-      _activeDatabase = _databases[name];
+      return _databases.default;
     }
 
-    return _activeDatabase;
+    return _databases[name];
   }
 
   function setTransporters(transporters) {
@@ -73,35 +64,27 @@ var Hub = function () {
   }
 
   function setTransporter(name, config) {
-    if(config !== 'undefined') {
-      var transporter = Mailer.createTransport({
-          service: config.service,
-          auth: {
-              user: config.email,
-              pass: config.password
-          }
-      });
-      
-      addTransporter(name, transporter);
-
-      if(name === 'default') {
-        _activeMailer = transporter;
-      }
-    } else {
-      _activeMailer = getMailer(name);
-    }
+    var transporter = Mailer.createTransport({
+        service: config.service,
+        auth: {
+            user: config.email,
+            pass: config.password
+        }
+    });
+    
+    addTransporter(name, transporter);
   }
 
   function addTransporter(name, transporter) {
-    _transporters[name] = transporter;
+    _mailers[name] = transporter;
   }
 
   function getMailer(name) {
     if(name !== 'undefined') {
-      _activeMailer = _transporters[name];
+      return _mailers.default;
     }
     
-    return _activeMailer;
+    return _mailers[name];
   }
 
   return {
