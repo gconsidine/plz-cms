@@ -25,7 +25,6 @@
     "mocha": "^1.21.4",
     "mongodb": "^1.4.8",
     "nodemailer": "^1.2.1",
-    "should": "^4.0.4",
-    "validator": "^3.17.1"
+    "should": "^4.0.4"
   }
 }
