@@ -16,6 +16,10 @@
     "url": "https://github.com/gconsidine/plz-cms/issues"
   },
   "homepage": "https://github.com/gconsidine/plz-cms",
+  "dependencies": {
+    "mongodb": "^1.4.8",
+    "nodemailer": "^1.2.1"
+  },
   "devDependencies": {
     "grunt": "^0.4.5",
     "grunt-bump": "0.0.15",
@@ -27,5 +31,6 @@
     "mongodb": "^1.4.8",
     "nodemailer": "^1.2.1",
     "should": "^4.0.4"
+
   }
 }
