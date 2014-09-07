@@ -1,23 +1,7 @@
-#!/usr/bin/env node
+module.exports = (function (options) {
+  'use strict';
 
-var Parser = require('./app/cli.parse')(__dirname);
+  var Hub = require('./app/Hub');
 
-Parser.getLocation(function (json, error) { 
-  if(error) {
-    console.log('file not found')
-  } else {
-    console.log(Parser._currentPath);
-    console.log(JSON.stringify(json));
-  }
-});
-
-Parser.getJsonContent(function (json, error) { 
-  if(error) {
-    console.log('file not found')
-  } else {
-    console.log(Parser._currentPath);
-    console.log(JSON.stringify(json));
-  }
-});
-
-
+  return Hub.configure(options);
+}());
