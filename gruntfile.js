@@ -2,8 +2,8 @@ module.exports = function (grunt) {
   'use strict';
   
   var _source = {
-    app: ['app/*.js'],
-    test: ['test/*spec.js'],
+    app: ['app/*.js', 'index.js'],
+    test: ['test/*Spec.js'],
     process: ['gruntfile.js']
   };
 
@@ -31,13 +31,26 @@ module.exports = function (grunt) {
         files: _source.all,
         tasks: ['jshint']
       }
-    }
+    },
 
+    bump: {
+      options : {
+        files: ["package.json"],
+        updateConfigs: [],
+        commit: false,
+        createTag: true,
+        tagName: "v%VERSION%",
+        tagMessage: "Version %VERSION%",
+        push: false
+      }
+    }
+    
   });
 
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-shell');
+  grunt.loadNpmTasks('grunt-bump');
 
   grunt.registerTask('default', [
     'jshint',
