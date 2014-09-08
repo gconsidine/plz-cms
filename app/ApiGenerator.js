@@ -7,6 +7,10 @@ var ApiGenerator = function () {
 
     for(var name in modules) {
       if(modules.hasOwnProperty(name)) {
+        if(modules[name] === false) {
+          continue;
+        }
+
         switch(name) {
           case 'admin':
             registerApi(require('plz-admin'));

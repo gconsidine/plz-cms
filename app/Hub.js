@@ -9,6 +9,10 @@ var Hub = function () {
       _mailers = {};
   
   function configure(options) { 
+    if(validConfiguration(options) === false) {
+      throw new Error('Malformed configuration options');
+    }
+
     var api;
 
     setDatabases(options.database);
@@ -22,6 +26,19 @@ var Hub = function () {
     api.get.database = getDatabase;
 
     return api;
+  }
+
+  function validConfiguration(options) {
+    if(options === 'undefined' ||
+       typeof options.modules !== 'object' || 
+       Object.keys(options.modules).length === 0 ||
+       typeof options.database.default.uri !== 'string' ||
+       typeof options.mailer.default !== 'object') {
+
+      return false;
+    }
+
+    return true;
   }
 
   function setDatabases(databases) {

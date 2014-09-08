@@ -29,7 +29,7 @@ module.exports = function (grunt) {
     watch: {
       all: {
         files: _source.all,
-        tasks: ['jshint']
+        tasks: ['jshint', 'shell:mocha']
       }
     },
 
