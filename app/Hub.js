@@ -30,8 +30,6 @@ var Hub = function () {
 
   function validConfiguration(options) {
     if(options === 'undefined' ||
-       typeof options.modules !== 'object' || 
-       Object.keys(options.modules).length === 0 ||
        typeof options.database.default.uri !== 'string' ||
        typeof options.mailer.default !== 'object') {
 

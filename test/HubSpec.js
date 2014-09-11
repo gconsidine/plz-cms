@@ -1,22 +1,23 @@
 (function () {
   'use strict';
 
-  var Should = require('should'),
-      Hub = require('../app/Hub');
+  require('should');
+
+  var Hub = require('../app/Hub');
   
   var _validOptions = {
     modules: {
     },
     database: {
       default: {
-        uri: process.env.PLZ_DATABASE_DEFAULT
+        uri: process.env.PLZ_DB_DEFAULT
       }
     },
     mailer: {
       default: {
         service: 'Gmail',
-        address: process.env.PLZ_MAILER_DEFAULT_ADDRESS,
-        password: process.env.PLZ_MAILER_ACTIVATION_PASSWORD
+        address: process.env.PLZ_MAIL_DEFAULT_ADDRESS,
+        password: process.env.PLZ_MAIL_DEFAULT_PASSWORD
       }
     }
   };
@@ -33,36 +34,34 @@
 
   describe('Hub | configure()', function () {
 
-    it('should not accpet undefined options', function (done) {
-      try {
+    it('should not accpet undefined options', function () {
+      (function () {
         Hub.configure();
-        Should.fail();
-      } catch(error) {
-        done();
-      }
+      }).should.throw();
     });
 
-    it('should not accept malformed options', function (done) {
-      try {
-        Hub.configure(_invalidOptions); 
-        Should.fail();
-      } catch(error) {
-        done();
-      }
+    it('should not accept malformed options', function () {
+      (function () {
+        Hub.configure(_invalidOptions);
+      }).should.throw();
     });
 
-    it('should accept valid options', function (done) {
-      try {
-        Hub.configure(_validOptions);  
-        Should.pass();
-      } catch(error) {
-        done();
-      }
+    it('should accept valid options', function () {
+      (function () {
+        Hub.configure(_validOptions);
+      }).should.not.throw();
     });
 
   });
 
   describe('Hub | Hub-specific generated API', function () {
+   var plz;
+
+   before(function (done) {
+     plz = Hub.configure(_validOptions);  
+     done();
+   });
+
    it('is a placeholder', function () {
      true.should.be.true;
    });
