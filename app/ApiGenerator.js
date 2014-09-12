@@ -4,7 +4,6 @@ var ApiGenerator = function () {
   var _api = {};
 
   function registerModules(modules) {
-
     for(var name in modules) {
       if(modules.hasOwnProperty(name)) {
         if(modules[name] === false) {

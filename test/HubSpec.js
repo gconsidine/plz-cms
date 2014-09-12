@@ -10,7 +10,7 @@
     },
     database: {
       default: {
-        uri: process.env.PLZ_DB_DEFAULT
+        uri: process.env.PLZ_DB_DEFAULT + '/test'
       }
     },
     mailer: {
@@ -33,7 +33,6 @@
   };
 
   describe('Hub | configure()', function () {
-
     it('should not accpet undefined options', function () {
       (function () {
         Hub.configure();
@@ -46,37 +45,42 @@
       }).should.throw();
     });
 
-    it('should accept valid options', function () {
-      (function () {
-        Hub.configure(_validOptions);
-      }).should.not.throw();
-    });
+    it('should accept valid options', function (done) {
+      Hub.configure(_validOptions, function (error, api) {
+        error.should.be.false; 
+        (typeof api === 'object').should.be.true;
 
+        done();
+      });
+    });
   });
 
   describe('Hub | Hub-specific generated API', function () {
-   var plz;
+    var plz;
 
-   before(function (done) {
-     plz = Hub.configure(_validOptions);  
-     done();
-   });
+    before(function (done) {
+      Hub.configure(_validOptions, function (error, api) {
+        plz = api;
+        done();
+      });  
+    });
 
-   it('is a placeholder', function () {
-     true.should.be.true;
-   });
-  });
+    it('should have correct verb-category objects available', function () {
+      (typeof plz.get === 'object').should.be.true;
+    });
 
-  describe('Hub | plz-admin-specific generated API', function () {
-    it('is a placeholder', function () {
-     true.should.be.true;
+    it('should have all methods associated with verb-categories', function () {
+      (typeof plz.get.mailer === 'function').should.be.true;
+      (typeof plz.get.database === 'function').should.be.true;
+    });
+
+    it('should contain an active database connection', function () {
+      (typeof plz.get.database() === 'object').should.be.true;
+    });
+
+    it('should contain an active mailer', function () {
+      (typeof plz.get.mailer() === 'object').should.be.true;
     });
   });
 
-  describe('Hub | Combined APIs', function () {
-    it('is a placeholder', function () {
-     true.should.be.true;
-    });
-  });
- 
 }());

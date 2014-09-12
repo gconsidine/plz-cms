@@ -8,30 +8,39 @@ var Hub = function () {
   var _databases = {},
       _mailers = {};
   
-  function configure(options) { 
-    if(validConfiguration(options) === false) {
+  function configure(options, callback) { 
+    if(validConfiguration(options, callback) === false) {
       throw new Error('Malformed configuration options');
     }
 
     var api;
 
-    setDatabases(options.database);
-    setTransporters(options.mailer);
-    
-    api = Api.registerModules(options.modules);
+    Mongo.connect(options.database.default.uri, function (error, database) {
+      if(error) {
+        callback(true);
+        return;
+      }
+      
+      addDatabase('default', database);
+      setDatabases(options.database);
+      setTransporters(options.mailer);
+      
+      api = Api.registerModules(options.modules);
 
-    api.get = api.get || {};
+      api.get = api.get || {};
 
-    api.get.mailer = getMailer;
-    api.get.database = getDatabase;
+      api.get.mailer = getMailer;
+      api.get.database = getDatabase;
 
-    return api;
+      callback(false, api);
+    });
   }
 
-  function validConfiguration(options) {
+  function validConfiguration(options, callback) {
     if(options === 'undefined' ||
        typeof options.database.default.uri !== 'string' ||
-       typeof options.mailer.default !== 'object') {
+       typeof options.mailer.default !== 'object' ||
+       typeof callback !== 'function') {
 
       return false;
     }
@@ -42,7 +51,9 @@ var Hub = function () {
   function setDatabases(databases) {
     for(var name in databases) {
       if(databases.hasOwnProperty(name)) {
-        setDatabase(name, databases[name].uri);
+        if(name !== 'default') {
+          setDatabase(name, databases[name].uri);
+        }
       }
     }
   }
