@@ -1,19 +1,23 @@
 # plz-cms
 
-  A Node.js module built to link together the following plz-cms components:
+  A Node.js module built as a hub for the following plz-cms components:
 
-  * plz-admin 
-  * plz-author
-  * plz-scribe
-  * plz-scout
-  * plz-merchant
+  * [plz-admin](https://github.com/gconsidine/plz-admin)
+  * [plz-author](https://github.com/gconsidine/plz-author)
+  * [plz-merchant](https://github.com/gconsidine/plz-merchant)
+  * [plz-scribe](https://github.com/gconsidine/plz-scribe)
+  * [plz-scout](https://github.com/gconsidine/plz-scout)
+
+  Browse the modules above to see how the plz-cms API can be extended when
+  included in a configuration.
 
 - - -
  
-### plz-cms configuration
+### Configuration
 
-  `plz.configure()` is required before use, and it accepts one 
-  configuration object that takes the following form:
+  when plz-cms is require()'d for use, a single member function is exposed: 
+  `configure(options, callback);` Configuration options are supplied in the 
+  following form:
 
     {
       modules: {
@@ -21,15 +25,13 @@
         author: false, // unused modules can be ommitted to the same effect
         scribe: false
       },
-      database: { // Can accept multiple database connections
-        default: app,
-        app: {
+      database: {  // Can accept multiple database connections...
+        default: { // ...but must have a default Mongo connection
           uri: process.env.PLZ_DATABASE_DEFAULT
         }
       },
-      mailer: { // Can accept multiple mailers
-        default: app,
-        app: { 
+      mailer: {    // Can accept multiple mailers ...
+        default: { // ...but must have a default gmail address
           service: 'Gmail',
           address: process.env.PLZ_MAILER_ACTIVATION_ADDRESS,
           password: process.env.PLZ_MAILER_ACTIVATION_PASSWORD'
@@ -37,20 +39,11 @@
       }
     }
 
-### plz-admin configuration
+### Basic Usage
 
-  plz-admin configuration must be added to the object passed to 
-  `plz.configure()`, nested at the same level as modules, database, and 
-  mailer.  It's required if admin in modules is set to true.
+  coming soon...
 
-    admin: { 
-      roles: ['admin', 'author'], // at least one string role is required
-      collections: {
-        users: {
-          dateCreated: true, // required document fields
-          email: true,
-          password: true
-        }
-      }
-    }
 
+### API
+
+  coming soon...
