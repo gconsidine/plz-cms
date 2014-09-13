@@ -55,7 +55,7 @@
     });
   });
 
-  describe('Hub | Hub-specific generated API', function () {
+  describe('Hub | Generated API', function () {
     var plz;
 
     before(function (done) {
