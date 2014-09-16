@@ -7,12 +7,8 @@ var Validate = function () {
     return Validator.isEmail(address);
   }
 
-  function match(one, two, modifier) {
-    if(modifier !== 'undefined') {
-      return Validator.match(one, two, modifier);
-    } else {
-      return Validator.match(one, two);
-    }
+  function match(one, two) {
+    return Validator.equals(one, two);
   }
 
   function complexity(password) {
