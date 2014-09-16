@@ -1,16 +1,14 @@
 # plz-cms
 
-  A Node.js module built as a hub for the following plz-cms components:
+A Node.js module built as a hub for the following plz-cms components:
 
   * [plz-admin](https://github.com/gconsidine/plz-admin)
   * [plz-author](https://github.com/gconsidine/plz-author)
   * [plz-merchant](https://github.com/gconsidine/plz-merchant)
-  * [plz-scribe](https://github.com/gconsidine/plz-scribe)
   * [plz-scout](https://github.com/gconsidine/plz-scout)
 
-
-  Browse the modules above to see how the plz-cms API can be extended when
-  included in a configuration.
+Browse the modules above to see how the plz-cms API can be extended when
+included in a configuration.
 
 - - -
  

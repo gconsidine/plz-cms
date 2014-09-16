@@ -3,7 +3,7 @@ var Hub = function () {
 
   var Mongo = require('mongodb').MongoClient,
       Mailer = require('nodemailer'),
-      Api = require('./ApiGenerator');
+      Api = require('./Api');
 
   var _databases = {},
       _mailers = {};
@@ -13,26 +13,14 @@ var Hub = function () {
       throw new Error('Malformed configuration options');
     }
 
-    var api;
-
     Mongo.connect(options.database.default.uri, function (error, database) {
-      if(error) {
-        callback(true);
-        return;
-      }
+      if(error) { callback(true); return; }
       
       addDatabase('default', database);
       setDatabases(options.database);
       setTransporters(options.mailer);
-      
-      api = Api.registerModules(options.modules);
 
-      api.get = api.get || {};
-
-      api.get.mailer = getMailer;
-      api.get.database = getDatabase;
-
-      callback(false, api);
+      callback(false, getApi(options.modules));
     });
   }
 
@@ -111,6 +99,17 @@ var Hub = function () {
     }
     
     return _mailers[name];
+  }
+
+  function getApi(modules) {
+    var api = Api.registerModules(modules);
+
+    api.get = api.get || {};
+
+    api.get.mailer = getMailer;
+    api.get.database = getDatabase;
+
+    return api;
   }
 
   return {

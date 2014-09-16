@@ -18,7 +18,8 @@
   "homepage": "https://github.com/gconsidine/plz-cms",
   "dependencies": {
     "mongodb": "^1.4.8",
-    "nodemailer": "^1.2.1"
+    "nodemailer": "^1.2.1",
+    "validator": "^3.18.1"
   },
   "devDependencies": {
     "grunt": "^0.4.5",

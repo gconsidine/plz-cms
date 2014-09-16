@@ -1,5 +1,8 @@
-var ApiGenerator = function () {
+var Api = function () {
   'use strict';
+
+  var Validate = require('./Validate'),
+      Sanitize = require('./Sanitize');
   
   var _api = {};
 
@@ -23,12 +26,11 @@ var ApiGenerator = function () {
           case 'scout':
             registerApi(require('plz-scout'));
             break; 
-          case 'scribe':
-            registerApi(require('plz-scribe'));
-            break;
         }
       }
     }
+
+    setDefaultApi();
 
     return _api;
   }
@@ -48,10 +50,29 @@ var ApiGenerator = function () {
       }
     }
   }
+
+  function setDefaultApi() {
+    var action;
+
+    _api.validate = _api.validate || {};
+    _api.sanitize = _api.sanitize || {};
+
+    for(action in Validate) {
+      if(Validate.hasOwnProperty(action)) {
+        _api.validate[action] = Validate[action];
+      }
+    }
+
+    for(action in Sanitize) {
+      if(Sanitize.hasOwnProperty(action)) {
+        _api.sanitize[action] = Sanitize[action];
+      }
+    }
+  }
   
   return {
     registerModules: registerModules
   };
 };
 
-module.exports = ApiGenerator();
+module.exports = Api();
