@@ -1,8 +1,8 @@
 {
   "name": "plz-cms",
   "version": "0.0.1",
-  "description": "plz-cms module hub",
-  "author": "Greg Considine <greg@greg-considine.com>",
+  "description": "plz-cms (A Node.js CMS Library) module hub",
+  "author": "greg considine <greg@caprahorn.com>",
   "main": "index.js",
   "private": true,
   "scripts": {

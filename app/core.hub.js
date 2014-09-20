@@ -1,9 +1,9 @@
-var Hub = function () {
+var CoreHub = function () {
   'use strict';
 
   var Mongo = require('mongodb').MongoClient,
       Mailer = require('nodemailer'),
-      Api = require('./Api');
+      Api = require('./core.api');
 
   var _databases = {},
       _mailers = {};
@@ -20,7 +20,7 @@ var Hub = function () {
       setDatabases(options.database);
       setTransporters(options.mailer);
 
-      callback(false, getApi(options.modules));
+      callback(false, getApi(options));
     });
   }
 
@@ -102,14 +102,14 @@ var Hub = function () {
   }
 
   function getApi(modules) {
-    var api = Api.registerModules(modules);
+    var api = {
+      get: {
+        mailer: getMailer,
+        database: getDatabase
+      }
+    };
 
-    api.get = api.get || {};
-
-    api.get.mailer = getMailer;
-    api.get.database = getDatabase;
-
-    return api;
+    return Api.registerModules(modules, api);
   }
 
   return {
@@ -117,4 +117,4 @@ var Hub = function () {
   };
 };
 
-module.exports = Hub();
+module.exports = CoreHub();

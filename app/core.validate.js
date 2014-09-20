@@ -1,4 +1,4 @@
-var Validate = function () {
+var CoreValidate = function () {
   'use strict';
 
   var Validator = require('validator');
@@ -35,4 +35,4 @@ var Validate = function () {
 
 };
 
-module.exports = Validate();
+module.exports = CoreValidate();

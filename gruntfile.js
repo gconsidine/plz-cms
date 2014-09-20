@@ -3,7 +3,7 @@ module.exports = function (grunt) {
   
   var _source = {
     app: ['app/*.js', 'index.js'],
-    test: ['test/*Spec.js'],
+    test: ['test/*-spec.js'],
     process: ['gruntfile.js']
   };
 

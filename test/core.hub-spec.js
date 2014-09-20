@@ -3,7 +3,7 @@
 
   require('should');
 
-  var Hub = require('../app/Hub');
+  var Hub = require('../app/core.hub');
   
   var _validOptions = {
     modules: {

@@ -1,12 +1,16 @@
-var Api = function () {
+var CoreApi = function () {
   'use strict';
 
-  var Validate = require('./Validate'),
-      Sanitize = require('./Sanitize');
+  var Validate = require('./core.validate'),
+      Sanitize = require('./core.sanitize');
   
   var _api = {};
 
-  function registerModules(modules) {
+  function registerModules(options, api) {
+    var modules = options.modules;
+
+    setDefaultApi(api);
+    
     for(var name in modules) {
       if(modules.hasOwnProperty(name)) {
         if(modules[name] === false) {
@@ -15,22 +19,20 @@ var Api = function () {
 
         switch(name) {
           case 'admin':
-            registerApi(require('plz-admin'));
+            registerApi(require('./admin.api')(options));
             break;
           case 'author':
-            registerApi(require('plz-author'));
+            registerApi(require('./author.api')(options));
             break;
           case 'merchant':
-            registerApi(require('plz-merchant'));
+            registerApi(require('./merchant.api')(options));
             break;
           case 'scout':
-            registerApi(require('plz-scout'));
+            registerApi(require('./scout.api')(options));
             break; 
         }
       }
     }
-
-    setDefaultApi();
 
     return _api;
   }
@@ -51,8 +53,10 @@ var Api = function () {
     }
   }
 
-  function setDefaultApi() {
+  function setDefaultApi(api) {
     var action;
+
+    _api = api;
 
     _api.validate = _api.validate || {};
     _api.sanitize = _api.sanitize || {};
@@ -75,4 +79,4 @@ var Api = function () {
   };
 };
 
-module.exports = Api();
+module.exports = CoreApi();

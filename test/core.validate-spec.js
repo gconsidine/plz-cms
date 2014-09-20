@@ -3,7 +3,7 @@
 
   require('should');
 
-  var Validate = require('../app/Validate');
+  var Validate = require('../app/core.validate');
 
   describe('Validate | All validation member functions', function () {
     it('should validate common email formats', function () {
