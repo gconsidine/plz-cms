@@ -32,7 +32,7 @@
     }
   };
 
-  describe('Hub | configure()', function () {
+  describe('core.hub | configure()', function () {
     it('should not accpet undefined options', function () {
       (function () {
         Hub.configure();
@@ -55,7 +55,7 @@
     });
   });
 
-  describe('Hub | Generated API', function () {
+  describe('core.hub | Generated API', function () {
     var plz;
 
     before(function (done) {

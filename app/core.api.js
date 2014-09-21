@@ -6,8 +6,8 @@ var CoreApi = function () {
   
   var _api = {};
 
-  function registerModules(options, api) {
-    var modules = options.modules;
+  function registerModules(config, api) {
+    var modules = config.modules;
 
     setDefaultApi(api);
     
@@ -19,16 +19,16 @@ var CoreApi = function () {
 
         switch(name) {
           case 'admin':
-            registerApi(require('./admin.api')(options));
+            registerApi(require('./admin.api')(config, _api));
             break;
           case 'author':
-            registerApi(require('./author.api')(options));
+            registerApi(require('./author.api')(config, _api));
             break;
           case 'merchant':
-            registerApi(require('./merchant.api')(options));
+            registerApi(require('./merchant.api')(config, _api));
             break;
           case 'scout':
-            registerApi(require('./scout.api')(options));
+            registerApi(require('./scout.api')(config, _api));
             break; 
         }
       }

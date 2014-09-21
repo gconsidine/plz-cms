@@ -5,7 +5,7 @@
 
   var Validate = require('../app/core.validate');
 
-  describe('Validate | All validation member functions', function () {
+  describe('core.validate | All validation methods', function () {
     it('should validate common email formats', function () {
       var i;
 

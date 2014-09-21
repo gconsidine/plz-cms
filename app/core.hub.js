@@ -25,12 +25,49 @@ var CoreHub = function () {
   }
 
   function validConfiguration(options, callback) {
-    if(options === 'undefined' ||
+    if(typeof options === 'undefined' ||
        typeof options.database.default.uri !== 'string' ||
        typeof options.mailer.default !== 'object' ||
        typeof callback !== 'function') {
-
+      
       return false;
+    }
+    
+    for(var module in options.modules) {
+      if(options.modules.hasOwnProperty(module)) {
+        if(options.modules[module] === false) {
+          continue;
+        }
+
+        if(!validateModuleConfiguration(module, options)) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  function validateModuleConfiguration(module, options) {
+    switch(module) {
+      case 'admin':
+        if(typeof options.admin === 'undefined' || 
+           (!options.admin.roles instanceof Array && 
+            options.admin.roles.length >= 1)) {
+
+          return false;
+        }
+
+        break;
+      case 'author':
+
+        break;
+      case 'merchant':
+        
+        break;
+      case 'scout':
+
+        break;
     }
 
     return true;
