@@ -27,9 +27,9 @@
         name: 'string',
         email: 'email',
         password: 'password',
-        createdAt: 'datetime',
-        modifiedAt: 'datetime',
-        lastLogin: 'datetime',
+        createdAt: 'unixTime',
+        modifiedAt: 'unixTime',
+        lastLogin: 'unixTime',
         status: 'string'
       }
     }
@@ -72,7 +72,7 @@
 
   });
 
-  describe('admin.user | should validate required fields', function () {
+  describe('admin.user | User creation', function () {
     var plz;
 
     before(function (done) {
@@ -80,6 +80,10 @@
         plz = api;
         done();
       });
+    });
+
+    it('should verify required fields are present', function() {
+
     });
 
   });

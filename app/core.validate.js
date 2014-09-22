@@ -27,10 +27,39 @@ var CoreValidate = function () {
     }
   }
 
+  function unixTime() {
+  }
+
+  function number() {
+  }
+  
+  function string() {
+  }
+
+  function asType(type, data) {
+    console.log(data);
+    switch(type) {
+      case 'unixTime':
+        break;
+      case 'email':
+        break;
+      case 'number':
+        break;
+      case 'password':
+        break;
+      case 'string':
+        break;
+    }
+  }
+
   return {
     email: email,
     match: match,
-    complexity: complexity
+    complexity: complexity,
+    asType: asType,
+    unixTime: unixTime,
+    number: number,
+    string: string
   };
 
 };

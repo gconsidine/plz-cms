@@ -20,7 +20,7 @@ var CoreHub = function () {
       setDatabases(options.database);
       setTransporters(options.mailer);
 
-      callback(false, getApi(options));
+      callback(false, getPlz(options));
     });
   }
 
@@ -138,15 +138,16 @@ var CoreHub = function () {
     return _mailers[name];
   }
 
-  function getApi(modules) {
-    var api = {
+  function getPlz(options) {
+    var plz = {
       get: {
         mailer: getMailer,
         database: getDatabase
-      }
+      },
+      config: options
     };
 
-    return Api.registerModules(modules, api);
+    return Api.registerModules(plz);
   }
 
   return {

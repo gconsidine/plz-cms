@@ -4,12 +4,12 @@ var CoreApi = function () {
   var Validate = require('./core.validate'),
       Sanitize = require('./core.sanitize');
   
-  var _api = {};
+  var _plz = {};
 
-  function registerModules(config, api) {
-    var modules = config.modules;
+  function registerModules(plz) {
+    var modules = plz.config.modules;
 
-    setDefaultApi(api);
+    setDefaultApi(plz);
     
     for(var name in modules) {
       if(modules.hasOwnProperty(name)) {
@@ -19,57 +19,57 @@ var CoreApi = function () {
 
         switch(name) {
           case 'admin':
-            registerApi(require('./admin.api')(config, _api));
+            registerApi(require('./admin.api')(_plz));
             break;
           case 'author':
-            registerApi(require('./author.api')(config, _api));
+            registerApi(require('./author.api')(_plz));
             break;
           case 'merchant':
-            registerApi(require('./merchant.api')(config, _api));
+            registerApi(require('./merchant.api')(_plz));
             break;
           case 'scout':
-            registerApi(require('./scout.api')(config, _api));
+            registerApi(require('./scout.api')(_plz));
             break; 
         }
       }
     }
 
-    return _api;
+    return _plz;
   }
 
-  function registerApi(plzModule) {
-    for(var verbCategory in plzModule) {
-      if(plzModule.hasOwnProperty(verbCategory)) {
-        if(_api[verbCategory] === 'undefined') {
-          _api[verbCategory] = {}; 
+  function registerApi(module) {
+    for(var verbCategory in module) {
+      if(module.hasOwnProperty(verbCategory)) {
+        if(_plz[verbCategory] === 'undefined') {
+          _plz[verbCategory] = {}; 
         }
 
-        for(var noun in plzModule[verbCategory]) {
-          if(plzModule[verbCategory].hasOwnProperty(noun)) {
-            _api[verbCategory][noun] = plzModule[verbCategory][noun];
+        for(var noun in module[verbCategory]) {
+          if(module[verbCategory].hasOwnProperty(noun)) {
+            _plz[verbCategory][noun] = module[verbCategory][noun];
           }
         }
       }
     }
   }
 
-  function setDefaultApi(api) {
+  function setDefaultApi(plz) {
     var action;
 
-    _api = api;
+    _plz = plz;
 
-    _api.validate = _api.validate || {};
-    _api.sanitize = _api.sanitize || {};
+    _plz.validate = _plz.validate || {};
+    _plz.sanitize = _plz.sanitize || {};
 
     for(action in Validate) {
       if(Validate.hasOwnProperty(action)) {
-        _api.validate[action] = Validate[action];
+        _plz.validate[action] = Validate[action];
       }
     }
 
     for(action in Sanitize) {
       if(Sanitize.hasOwnProperty(action)) {
-        _api.sanitize[action] = Sanitize[action];
+        _plz.sanitize[action] = Sanitize[action];
       }
     }
   }
