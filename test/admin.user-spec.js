@@ -27,9 +27,9 @@
         name: 'string',
         email: 'email',
         password: 'password',
-        createdAt: 'unixTime',
-        modifiedAt: 'unixTime',
-        lastLogin: 'unixTime',
+        createdAt: 'number',
+        modifiedAt: 'number',
+        lastLogin: 'number',
         status: 'string'
       }
     }

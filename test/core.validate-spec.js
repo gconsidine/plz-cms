@@ -91,5 +91,57 @@
         Validate.complexity(notComplex[i], notComplex[i]).should.be.false;
       }
     });
+ 
+    it('should validate number types', function () {
+      var i;
+
+      var valid = [-1, 0, 1, 0.01, 1.00, 0x1A4, 2e4, 2.3e4];
+      var invalid = ['-1', '0', '0.01', [], {}, true];
+
+      for(i = 0; i < valid.length; i++) {
+        Validate.number(valid[i]).should.be.true;
+      }
+
+      for(i = 0; i < invalid.length; i++) {
+        Validate.number(invalid[i]).should.be.false;
+      }
+
+    });
+
+    it('should validate string types', function () {
+      var i;
+
+      var valid = ['h', 'HI', '1', '-1', '0x1a4', '0000'];
+      var invalid = [-1, 1.0, {}, [], false];
+
+      for(i = 0; i < valid.length; i++) {
+        Validate.string(valid[i]).should.be.true;
+      }
+
+      for(i = 0; i < invalid.length; i++) {
+        Validate.string(invalid[i]).should.be.false;
+      }
+    });
+    
+    it('should validate based on given type string', function () {
+      var cases = {
+        email: 'name@domain.com',
+        number: 1,
+        string: 'hello',
+        password: 'abc123XYZ!'
+      };
+
+      for(var type in cases) {
+        if(cases.hasOwnProperty(type)) {
+          Validate.asType(type, cases[type]).should.be.true;
+        }
+      }
+
+      (function () {
+        Validate.asType('sith', '?');
+      }).should.throw.error;
+
+    });
+
   });
 }());

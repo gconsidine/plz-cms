@@ -27,28 +27,26 @@ var CoreValidate = function () {
     }
   }
 
-  function unixTime() {
-  }
-
-  function number() {
+  function number(value) {
+    return typeof value === 'number' ? true : false;  
   }
   
-  function string() {
+  function string(value) {
+    return typeof value === 'string' ? true : false;
   }
 
   function asType(type, data) {
-    console.log(data);
     switch(type) {
-      case 'unixTime':
-        break;
       case 'email':
-        break;
+        return email(data);
       case 'number':
-        break;
+        return number(data);
       case 'password':
-        break;
+        return complexity(data);
       case 'string':
-        break;
+        return string(data);
+      default:
+        throw new Error('Unsupported validation type');
     }
   }
 
@@ -57,7 +55,6 @@ var CoreValidate = function () {
     match: match,
     complexity: complexity,
     asType: asType,
-    unixTime: unixTime,
     number: number,
     string: string
   };
