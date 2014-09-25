@@ -22,7 +22,10 @@
       }
     },
     admin: {
-      roles: ['user', 'admin'],
+      roles: {
+        admin: true,
+        user: true
+      },
       required: {
         name: 'string',
         email: 'email',
@@ -69,7 +72,6 @@
         done();
       });
     });
-
   });
 
   describe('admin.user | User creation', function () {
@@ -83,9 +85,8 @@
     });
 
     it('should verify required fields are present', function() {
-
+        
     });
-
   });
 
 }());

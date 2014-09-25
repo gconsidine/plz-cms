@@ -40,10 +40,10 @@ var CoreApi = function () {
   function registerApi(module) {
     for(var verbCategory in module) {
       if(module.hasOwnProperty(verbCategory)) {
-        if(_plz[verbCategory] === 'undefined') {
+        if(typeof _plz[verbCategory] === 'undefined') {
           _plz[verbCategory] = {}; 
         }
-
+        
         for(var noun in module[verbCategory]) {
           if(module[verbCategory].hasOwnProperty(noun)) {
             _plz[verbCategory][noun] = module[verbCategory][noun];
