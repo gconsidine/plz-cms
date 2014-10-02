@@ -133,12 +133,12 @@
 
       for(var type in cases) {
         if(cases.hasOwnProperty(type)) {
-          Validate.asType(type, cases[type]).should.be.true;
+          Validate.typeAs(type, cases[type]).should.be.true;
         }
       }
 
       (function () {
-        Validate.asType('sith', '?');
+        Validate.typeAs('sith', '?');
       }).should.throw.error;
 
     });

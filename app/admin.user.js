@@ -3,48 +3,75 @@ var AdminUser = function (plz) {
 
   var _plz = plz,
       _db = _plz.get.database(),
-      _roles = plz.config.admin.roles,
-      _required = plz.config.admin.required;
+      _roles = _plz.config.admin.roles,
+      _required = _plz.config.admin.required,
+      _collection = _plz.config.admin.collection;
 
   var create = {};
 
   create.user = function (options, callback) {
-    createUserCheck(options, function (error, result) {
+    prepareUserCreation(options, function (error, result) {
       if(error) {
         callback(true, result);
+        return;
       }
 
-      _db.users.insert(options, function (error, records) {
+      // TODO: Insert only if email is unique
+      _db.collection(_collection).insert(options, function (error, result) {
         if(error) {
           callback(true, 'Insert failed');
+          return;
         }
 
-        callback(false, records);
+        callback(false, result);
       });
     });
   };
 
-  function createUserCheck(options, callback) {
-    if(!_roles[options.role]) {
-      callback(true, 'Required role not present in options');
+  function prepareUserCreation(options, callback) {
+    confirmCollectionExists(function (error, result) {
+      if(error) {
+        callback(true, result);
+        return;
+      }
+
+      if(!_roles[options.role]) {
+        callback(true, 'Required role not present in options');
+        return;
+      }
+
+      for(var field in _required) {
+        if(_required.hasOwnProperty(field)) {
+          if(typeof options[field] === 'undefined') {
+            callback(true, 'Required field not present in options');
+            return;
+          }
+
+          if(!_plz.validate.typeAs(_required[field], options[field])) {
+            callback(true, 'Required fields\' types not valid in options');
+            return;
+          }
+        }
+      }
+
+      callback(false);
+    });
+  }
+
+  function confirmCollectionExists(callback) {
+    if(_db[_collection]) {
+      callback(false, 'Collection exists');
       return;
     }
 
-    for(var field in _required) {
-      if(_required.hasOwnProperty(field)) {
-        if(!options[field]) {
-          callback(true, 'Required field not present in options');
-          return;
-        }
-
-        if(!_plz.validate.typeAs(_required[field], options[field])) {
-          callback(true, 'Required fields\' types not valid in options');
-          return;
-        }
+    _db.createCollection(_collection, function (error, result) {
+      if(error) {
+        callback(true, 'Cannot create collection');
+        return;
       }
-    }
 
-    callback(false);
+      callback(false, result);
+    });
   }
 
   return {

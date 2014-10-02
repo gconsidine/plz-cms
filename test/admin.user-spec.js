@@ -22,6 +22,7 @@
       }
     },
     admin: {
+      collection: 'user',
       roles: {
         admin: true,
         user: true
@@ -74,7 +75,7 @@
     });
   });
 
-  describe('admin.user | User creation', function () {
+  describe('admin.user | create.user()', function () {
     var plz;
 
     before(function (done) {
@@ -84,9 +85,42 @@
       });
     });
 
-    it('should verify required fields are present', function() {
-        
+    it('should return an error if required fields are missing', function(done) {
+      var user = {
+        name: 'greg',
+        email: 'name@domain.com',
+        password: 'someFakePass0',
+        createdAt: 3134999944,
+        modifiedAt: 3134999944,
+        lastLogin: 0,
+        status: 'created'
+      };
+
+      plz.create.user(user, function (error) {
+        error.should.be.true;
+        done();
+      });
     });
+
+    it('should insert a user with required fields present', function(done) {
+      var user = {
+        name: 'greg',
+        email: 'name@domain.com',
+        password: 'someFakePass0',
+        createdAt: 3134999944,
+        modifiedAt: 3134999944,
+        lastLogin: 0,
+        status: 'created',
+        role: 'admin'
+      };
+
+      plz.create.user(user, function (error, result) {
+        error.should.be.false;
+        console.log(result);
+        done();
+      });
+    });
+
   });
 
 }());

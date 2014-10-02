@@ -25,7 +25,7 @@ var CoreHub = function () {
   }
 
   function validConfiguration(options, callback) {
-    if(typeof options === 'undefined' ||
+    if(typeof options !== 'object' ||
        typeof options.database.default.uri !== 'string' ||
        typeof options.mailer.default !== 'object' ||
        typeof callback !== 'function') {
@@ -51,13 +51,13 @@ var CoreHub = function () {
   function validateModuleConfiguration(module, options) {
     switch(module) {
       case 'admin':
-        if(typeof options.admin === 'undefined' || 
-           (!options.admin.roles instanceof Array && 
-            options.admin.roles.length >= 1)) {
+        if(typeof options.admin !== 'object' || 
+           typeof options.admin.collection !== 'string' ||
+           !options.admin.roles instanceof Array || 
+           options.admin.roles.length <= 0) {
 
           return false;
         }
-
         break;
       case 'author':
 

@@ -35,7 +35,7 @@ var CoreValidate = function () {
     return typeof value === 'string' ? true : false;
   }
 
-  function asType(type, data) {
+  function typeAs(type, data) {
     switch(type) {
       case 'email':
         return email(data);
@@ -54,7 +54,7 @@ var CoreValidate = function () {
     email: email,
     match: match,
     complexity: complexity,
-    asType: asType,
+    typeAs: typeAs,
     number: number,
     string: string
   };
