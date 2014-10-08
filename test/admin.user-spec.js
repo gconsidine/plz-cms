@@ -114,9 +114,8 @@
         role: 'admin'
       };
 
-      plz.create.user(user, function (error, result) {
+      plz.create.user(user, function (error) {
         error.should.be.false;
-        console.log(result);
         done();
       });
     });

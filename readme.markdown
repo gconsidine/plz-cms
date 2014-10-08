@@ -2,10 +2,10 @@
 
 A Node.js module built as a hub for the following plz-cms components:
 
-  * [plz-admin](https://github.com/gconsidine/plz-cms/wiki/admin)
-  * [plz-author](https://github.com/gconsidine/plz-cms/wiki/author)
-  * [plz-merchant](https://github.com/gconsidine/plz-cms/wiki/merchant)
-  * [plz-scout](https://github.com/gconsidine/plz-cms/wiki/scout)
+  * [admin](https://github.com/gconsidine/plz-cms/wiki/admin)
+  * [author](https://github.com/gconsidine/plz-cms/wiki/author)
+  * [merchant](https://github.com/gconsidine/plz-cms/wiki/merchant)
+  * [scout](https://github.com/gconsidine/plz-cms/wiki/scout)
 
 Browse the components above to see how the plz-cms API can be extended when
 included in a configuration.
@@ -42,7 +42,8 @@ included in a configuration.
 
 ### Basic Usage
 
-  Here's a basic configuration including the *Admin* component:
+  Here's a basic configuration including just the *Admin* component within an
+  express project:
 
     var options = {
       modules: {
@@ -50,14 +51,14 @@ included in a configuration.
       },
       database: {
         default: {
-          uri: process.env.PLZ_DB_DEFAULT + '/test'
+          uri: mongodb://localhost:27017/plz-test'
         }
       },
       mailer: {
         default: {
           service: 'Gmail',
-          address: process.env.PLZ_MAIL_DEFAULT_ADDRESS,
-          password: process.env.PLZ_MAIL_DEFAULT_PASSWORD
+          address: name@domain.tld,
+          password: some-password
         }
       },
       admin: {
@@ -78,24 +79,30 @@ included in a configuration.
       }
     };
 
-    var plzCms = require('plz-cms'),
+    var express = require('express'),
+        plzCms = require('plz-cms'),
+        app = express(),
         plz;
+    
+    app.use(function (req, res, next) {
+      plzCms.configure(options, function (error, api) {
+        plz = api;
+      });
 
-    plzCms.configure(options, function (error, api) {
-      plz = api
-    });
+      next();
+    }
 
     plz.validate.typeAs('string', 'success'); // true
 
 ### API
 
   plz-cms takes on the API structure of `plz`, followed by a verb category 
-  (e.g. validate, sanitize, create), followed by an actor a or a descriptor 
+  (e.g. validate, sanitize, create), followed by an actor or a descriptor 
   (user, typeAs, string, number).  
   
   The goal is to make the API consistent, concise, and read more like a request
   to a human for a thing or an action.
 
-  *Please validate this string* becomes `plz.validate.string()`
+  *"Please create a user"* becomes `plz.create.user(options, callback)`
 
 
