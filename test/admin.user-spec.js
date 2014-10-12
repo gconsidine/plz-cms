@@ -86,18 +86,20 @@
         db = plz.get.database();
         user = db.collection('user');
 
-        user.drop(function (error) {
-          if(error) {
-            return false;
+        user.count(function(error, count) {
+          if(count >= 1) {
+            user.drop(function () {
+              done();
+            });
+          } else {
+            done();
           }
-
-          done();
         });
       });
     });
 
     it('should return an error if required fields are missing', function(done) {
-      var user = {
+      var document = {
         name: 'greg',
         email: 'name@domain.com',
         password: 'someFakePass0',
@@ -107,14 +109,14 @@
         status: 'created'
       };
 
-      plz.create.user(user, function (error) {
+      plz.create.user(document, function (error) {
         error.should.be.true;
         done();
       });
     });
 
     it('should insert a user with required fields present', function(done) {
-      var user = {
+      var document = {
         name: 'greg',
         email: 'name@domain.com',
         password: 'someFakePass0',
@@ -125,14 +127,14 @@
         role: 'admin'
       };
 
-      plz.create.user(user, function (error) {
+      plz.create.user(document, function (error) {
         error.should.be.false;
         done();
       });
     });
 
     it('should not insert a user that already exists', function(done) {
-      var user = {
+      var document = {
         name: 'greg',
         email: 'name@domain.com',
         password: 'someFakePass0',
@@ -143,18 +145,14 @@
         role: 'admin'
       };
 
-      plz.create.user(user, function (error) {
+      plz.create.user(document, function (error) {
         error.should.be.true;
         done();
       });
     });
 
     after(function (done) {
-       user.drop(function (error) {
-        if(error) {
-          return false;
-        }
-
+      user.drop(function () {
         done();
       });
     });

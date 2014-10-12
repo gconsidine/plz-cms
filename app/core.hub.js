@@ -14,7 +14,10 @@ var CoreHub = function () {
     }
 
     Mongo.connect(options.database.default.uri, function (error, database) {
-      if(error) { callback(true); return; }
+      if(error) { 
+        callback(true); 
+        return; 
+      }
       
       addDatabase('default', database);
       setDatabases(options.database);
