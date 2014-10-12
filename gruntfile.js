@@ -7,10 +7,11 @@ module.exports = function (grunt) {
     process: ['gruntfile.js']
   };
 
+  var _docPath = 'node_modules/grunt-jsdoc/node_modules/ink-docstrap/template';
+
   _source.all = _source.app.concat(_source.app, _source.test, _source.process);
 
   grunt.initConfig({
-
     pkg: grunt.file.readJSON('package.json'),
 
     jshint: {
@@ -18,6 +19,17 @@ module.exports = function (grunt) {
         jshintrc: true
       },
       all: _source.all
+    },
+
+    jsdoc: {
+      dist: {
+        src: ['app/*'],
+        options: {
+          destination: 'doc',
+          template: _docPath,
+          configure : 'jsdoc.json'
+        }
+      }
     },
     
     shell: {
@@ -44,11 +56,11 @@ module.exports = function (grunt) {
         push: false
       }
     }
-    
   });
 
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-jsdoc');
   grunt.loadNpmTasks('grunt-shell');
   grunt.loadNpmTasks('grunt-bump');
 
