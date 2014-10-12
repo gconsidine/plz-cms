@@ -76,12 +76,23 @@
   });
 
   describe('admin.user | create.user()', function () {
-    var plz;
+    var plz,
+        db,
+        user;
 
     before(function (done) {
       Hub.configure(_options, function(error, api) {
         plz = api;
-        done();
+        db = plz.get.database();
+        user = db.collection('user');
+
+        user.drop(function (error) {
+          if(error) {
+            return false;
+          }
+
+          done();
+        });
       });
     });
 
@@ -116,6 +127,34 @@
 
       plz.create.user(user, function (error) {
         error.should.be.false;
+        done();
+      });
+    });
+
+    it('should not insert a user that already exists', function(done) {
+      var user = {
+        name: 'greg',
+        email: 'name@domain.com',
+        password: 'someFakePass0',
+        createdAt: 3134999944,
+        modifiedAt: 3134999945,
+        lastLogin: 0,
+        status: 'created',
+        role: 'admin'
+      };
+
+      plz.create.user(user, function (error) {
+        error.should.be.true;
+        done();
+      });
+    });
+
+    after(function (done) {
+       user.drop(function (error) {
+        if(error) {
+          return false;
+        }
+
         done();
       });
     });
