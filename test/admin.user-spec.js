@@ -178,43 +178,7 @@
     });
   });
 
- describe('admin.user | get.user()', function () {
-    var user, plz;
-
-    before(function (done) {
-      Hub.configure(_options, function(error, api) {
-        plz = api;
-        user = plz.get.database().collection('user');
-
-        plz.create.user(document, function () {
-          done();
-        });
-      });
-    });
-
-    it('should find a user that exists', function (done) {
-      plz.get.user({name: 'greg'}, function (error, result) {
-        error.should.be.false;
-        result.should.not.be.empty;
-        done();
-      });
-    });
-
-    it('should return error if user does not exist', function (done) {
-      plz.get.user({name: 'zanzabar'}, function (error) {
-        error.should.be.true;
-        done();
-      });
-    });
-
-    after(function (done) {
-      user.drop(function () {
-        done();
-      });
-    });
-  });
-
- describe('admin.user | remove.user()', function () {
+  describe('admin.user | remove.user()', function () {
     var user, plz;
 
     before(function (done) {
