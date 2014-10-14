@@ -7,8 +7,16 @@ var AdminUser = function (plz) {
       _required = _plz.config.admin.required,
       _user = _db.collection(_plz.config.admin.collection);
 
-  var create = {};
+  var create = {},
+      get = {},
+      edit = {},
+      remove = {};
 
+  /**
+  * Creates a user only if the required fields specified in the configuration 
+  * are present and if the user doesn't already exist.  The user's email must
+  * be unique.
+  */
   create.user = function (options, callback) {
     prepareUserCreation(options, function (error, result) {
       if(error) {
@@ -16,13 +24,18 @@ var AdminUser = function (plz) {
         return;
       }
 
-      _user.find({email: options.email}).toArray(function (error, result) {
-        if(error || result.length >= 1) {
-          callback(true, 'User already exists / Lookup failed');
+      _user.findOne({email: options.email}, function (error, result) {
+        if(error) {
+          callback(true, 'Lookup failed');
           return;
         }
 
-        _user.insert(options, function (error, result) {
+        if(result) {
+          callback(true, 'User already exists');
+          return;
+        }
+
+        _user.insertOne(options, function (error, result) {
           if(error) {
             callback(true, 'Insert failed');
             return;
@@ -31,6 +44,63 @@ var AdminUser = function (plz) {
           callback(false, result);
         });
       });
+    });
+  };
+
+  /**
+  * Returns a single user matching the query options passed as the first
+  * argument.
+  */
+  get.user = function (options, callback) {
+    _user.findOne(options, function (error, result) {
+      if(error) {
+        callback(true, 'Lookup failed');
+        return;
+      }
+
+      if(!result) {
+        callback(true, 'User does not exist');
+        return;
+      }
+
+      callback(false, result);
+    });
+  };
+
+  /**
+  * Deletes a user if it exists based on the criteria options passed as the
+  * first argument.
+  */
+  remove.user = function (options, callback) {
+    _user.findOneAndRemove(options, function (error, result) {
+      if(error) {
+        callback(true, 'Remove failed');
+        return;
+      }
+
+      callback(false, result);
+    });
+  };
+
+  /**
+  * Updates a user if it exists by matching against options.criteria property, 
+  * then updating with the options.update property passed in the options 
+  * object as the first argument.
+  */
+  edit.user = function (options, callback) {
+    _user.findOneAndUpdate(options.criteria, options.update, 
+      function (error, result) {
+      if(error) {
+        callback(true, 'Edit failed');
+        return;
+      }
+
+      if(!result) {
+        callback(true, 'User does not exist');
+        return;
+      }
+
+      callback(false, result);
     });
   };
 
@@ -58,7 +128,10 @@ var AdminUser = function (plz) {
   }
 
   return {
-    create: create
+    create: create,
+    get: get,
+    edit: edit,
+    remove: remove
   };
 };
 

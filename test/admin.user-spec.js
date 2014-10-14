@@ -57,6 +57,17 @@
     }
   };
 
+  var document = {
+    name: 'greg',
+    email: 'name@domain.com',
+    password: 'someFakePass0',
+    createdAt: 3134999944,
+    modifiedAt: 3134999945,
+    lastLogin: 0,
+    status: 'created',
+    role: 'admin'
+  };
+
   describe('admin | Addtional configuration options', function () {
 
     it('should not accept undefined admin options', function () {
@@ -76,15 +87,12 @@
   });
 
   describe('admin.user | create.user()', function () {
-    var plz,
-        db,
-        user;
+    var plz, user;
 
     before(function (done) {
       Hub.configure(_options, function(error, api) {
         plz = api;
-        db = plz.get.database();
-        user = db.collection('user');
+        user = plz.get.database().collection('user');
 
         user.count(function(error, count) {
           if(count >= 1) {
@@ -98,35 +106,21 @@
       });
     });
 
-    it('should return an error if required fields are missing', function(done) {
-      var document = {
+    it('should return error if required fields are missing', function(done) {
+      var invalidDocument = {
         name: 'greg',
-        email: 'name@domain.com',
         password: 'someFakePass0',
         createdAt: 3134999944,
-        modifiedAt: 3134999944,
-        lastLogin: 0,
         status: 'created'
       };
 
-      plz.create.user(document, function (error) {
+      plz.create.user(invalidDocument, function (error) {
         error.should.be.true;
         done();
       });
     });
 
     it('should insert a user with required fields present', function(done) {
-      var document = {
-        name: 'greg',
-        email: 'name@domain.com',
-        password: 'someFakePass0',
-        createdAt: 3134999944,
-        modifiedAt: 3134999944,
-        lastLogin: 0,
-        status: 'created',
-        role: 'admin'
-      };
-
       plz.create.user(document, function (error) {
         error.should.be.false;
         done();
@@ -134,17 +128,6 @@
     });
 
     it('should not insert a user that already exists', function(done) {
-      var document = {
-        name: 'greg',
-        email: 'name@domain.com',
-        password: 'someFakePass0',
-        createdAt: 3134999944,
-        modifiedAt: 3134999945,
-        lastLogin: 0,
-        status: 'created',
-        role: 'admin'
-      };
-
       plz.create.user(document, function (error) {
         error.should.be.true;
         done();
@@ -157,6 +140,168 @@
       });
     });
 
+  });
+
+  describe('admin.user | get.user()', function () {
+    var user, plz;
+
+    before(function (done) {
+      Hub.configure(_options, function(error, api) {
+        plz = api;
+        user = plz.get.database().collection('user');
+
+        plz.create.user(document, function () {
+          done();
+        });
+      });
+    });
+
+    it('should find a user that exists', function (done) {
+      plz.get.user({name: 'greg'}, function (error, result) {
+        error.should.be.false;
+        result.should.not.be.empty;
+        done();
+      });
+    });
+
+    it('should return error if user does not exist', function (done) {
+      plz.get.user({name: 'zanzabar'}, function (error) {
+        error.should.be.true;
+        done();
+      });
+    });
+
+    after(function (done) {
+      user.drop(function () {
+        done();
+      });
+    });
+  });
+
+ describe('admin.user | get.user()', function () {
+    var user, plz;
+
+    before(function (done) {
+      Hub.configure(_options, function(error, api) {
+        plz = api;
+        user = plz.get.database().collection('user');
+
+        plz.create.user(document, function () {
+          done();
+        });
+      });
+    });
+
+    it('should find a user that exists', function (done) {
+      plz.get.user({name: 'greg'}, function (error, result) {
+        error.should.be.false;
+        result.should.not.be.empty;
+        done();
+      });
+    });
+
+    it('should return error if user does not exist', function (done) {
+      plz.get.user({name: 'zanzabar'}, function (error) {
+        error.should.be.true;
+        done();
+      });
+    });
+
+    after(function (done) {
+      user.drop(function () {
+        done();
+      });
+    });
+  });
+
+ describe('admin.user | remove.user()', function () {
+    var user, plz;
+
+    before(function (done) {
+      Hub.configure(_options, function(error, api) {
+        plz = api;
+        user = plz.get.database().collection('user');
+
+        plz.create.user(document, function () {
+          done();
+        });
+      });
+    });
+
+    it('should remove a user that exists', function (done) {
+      plz.get.user({name: 'greg'}, function (error, result) {
+        error.should.be.false;
+        result.should.not.be.empty;
+        done();
+      });
+    });
+
+    it('should return error if user does not exist', function (done) {
+      plz.get.user({name: 'doppio'}, function (error) {
+        error.should.be.true;
+        done();
+      });
+    });
+
+    after(function (done) {
+      user.drop(function () {
+        done();
+      });
+    });
+  });
+
+  describe('admin.user | edit.user()', function () {
+    var user, plz;
+
+    before(function (done) {
+      Hub.configure(_options, function(error, api) {
+        plz = api;
+        user = plz.get.database().collection('user');
+
+        plz.create.user(document, function () {
+          done();
+        });
+      });
+    });
+
+    it('should edit a user that exists', function (done) {
+      var options = {
+        criteria: {
+          name: 'greg'
+        },
+        update: {
+          name: 'doppio'
+        }
+      };
+
+      plz.get.user({name: 'greg'}, function (error, result) {
+        error.should.be.false;
+        result.name.should.equal('greg');
+
+        plz.edit.user(options, function (error, result) {
+          error.should.be.false;
+          result.should.not.be.empty;
+
+          plz.get.user({name: 'doppio'}, function (error, result) {
+            result.name.should.equal('doppio');
+            done();
+          });
+        });
+      });
+    });
+
+    it('should return error if user does not exist', function (done) {
+      plz.get.user({name: 'greg'}, function (error) {
+        error.should.be.true;
+        done();
+      });
+    });
+
+    after(function (done) {
+      user.drop(function () {
+        done();
+      });
+    });
   });
 
 }());
