@@ -32,30 +32,7 @@
     }
   };
 
-  describe('core.hub | configure()', function () {
-    it('should not accpet undefined options', function () {
-      (function () {
-        Hub.configure();
-      }).should.throw();
-    });
-
-    it('should not accept malformed options', function () {
-      (function () {
-        Hub.configure(_invalidOptions);
-      }).should.throw();
-    });
-
-    it('should accept valid options', function (done) {
-      Hub.configure(_validOptions, function (error, api) {
-        error.should.be.false; 
-        (typeof api === 'object').should.be.true;
-
-        done();
-      });
-    });
-  });
-
-  describe('core.hub | Generated API', function () {
+  describe('core | Internal Behavior', function () {
     var plz;
 
     before(function (done) {
@@ -73,14 +50,62 @@
       (typeof plz.get.mailer === 'function').should.be.true;
       (typeof plz.get.database === 'function').should.be.true;
     });
+  });
 
-    it('should contain an active database connection', function () {
-      (typeof plz.get.database() === 'object').should.be.true;
+  describe('core.hub | Public API', function () {
+    describe('plz.configure()', function () {
+      it('should not accpet undefined options', function () {
+        (function () {
+          Hub.configure();
+        }).should.throw();
+      });
+
+      it('should not accept malformed options', function () {
+        (function () {
+          Hub.configure(_invalidOptions);
+        }).should.throw();
+      });
+
+      it('should accept valid options', function (done) {
+        Hub.configure(_validOptions, function (error, api) {
+          error.should.be.false; 
+          (typeof api === 'object').should.be.true;
+
+          done();
+        });
+      });
     });
 
-    it('should contain an active mailer', function () {
-      (typeof plz.get.mailer() === 'object').should.be.true;
+    describe('plz.get.database()', function () {
+      var plz;
+
+      before(function (done) {
+        Hub.configure(_validOptions, function (error, api) {
+          plz = api;
+          done();
+        });  
+      });
+
+      it('should contain an active database connection', function () {
+        (typeof plz.get.database() === 'object').should.be.true;
+      });
     });
+
+    describe('plz.get.mailer()', function () {
+      var plz;
+
+      before(function (done) {
+        Hub.configure(_validOptions, function (error, api) {
+          plz = api;
+          done();
+        });  
+      });
+
+      it('should contain an active mailer', function () {
+        (typeof plz.get.mailer() === 'object').should.be.true;
+      });
+    });
+
   });
 
 }());
