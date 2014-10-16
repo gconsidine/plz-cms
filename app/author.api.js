@@ -1,6 +1,7 @@
-//author.api.js
-//API entry-point for the author component
-// Contains general CMS functionality including: article creation, commenting, archiving, etc.
+// author.api.js
+// API entry-point for the author component
+// Contains general CMS functionality including: article creation, commenting, 
+// archiving, etc.
 
 var AuthorApi = function (plz) {
   'use strict'; 

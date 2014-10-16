@@ -1,9 +1,9 @@
 var AdminApi = function (plz) {
   'use strict'; 
   
-  var User = require('./admin.user')(plz);
+  require('./admin.user')(plz);
 
-  return User;
+  return plz;
 };
 
 module.exports = AdminApi;

@@ -3,9 +3,7 @@
 
   require('should');
 
-  var Hub = require('../app/core.hub');
-
-  var _options = {
+  var _validConfig = {
     modules: {
       admin: true
     },
@@ -39,7 +37,7 @@
     }
   };
 
-  var _invalidOptions = {
+  var _invalidConfig = {
     modules: {
       admin: true
     },
@@ -68,20 +66,17 @@
     role: 'admin'
   };
 
-  describe('admin | Internal Behavior', function () {
+  describe('admin | Configuration', function () {
     it('should not accept undefined admin options', function () {
       (function () {
-        Hub.configure(_invalidOptions, function () {});
+        require('../app/core.hub.js')(_invalidConfig);
       }).should.throw();
     });
 
-    it('should accept properly defined admin options', function (done) {
-      Hub.configure(_options, function (error, api) {
-        error.should.be.false; 
-        (typeof api === 'object').should.be.true;
-
-        done();
-      });
+    it('should accept properly defined admin options', function () {
+      (function () {
+        require('../app/core.hub.js')(_validConfig);
+      }).should.not.throw();
     });
   });
 
@@ -89,11 +84,12 @@
     var plz, user;
 
     describe('plz.create.user()', function () {
-      before(function (done) {
-        Hub.configure(_options, function(error, api) {
-          plz = api;
-          user = plz.get.database().collection('user');
 
+      before(function (done) {
+        plz = require('../app/core.hub.js')(_validConfig);
+
+        plz.get.database(function (error, database) {
+          user = database.collection('user');
           user.count(function(error, count) {
             if(count >= 1) {
               user.drop(function () {
@@ -103,6 +99,13 @@
               done();
             }
           });
+        });
+      });
+
+      it('should insert a user with required fields present', function(done) {
+        plz.create.user(document, function (error) {
+          error.should.be.false;
+          done();
         });
       });
 
@@ -120,12 +123,6 @@
         });
       });
 
-      it('should insert a user with required fields present', function(done) {
-        plz.create.user(document, function (error) {
-          error.should.be.false;
-          done();
-        });
-      });
 
       it('should not insert a user that already exists', function(done) {
         plz.create.user(document, function (error) {
@@ -135,21 +132,21 @@
       });
 
       after(function (done) {
-        user.drop(function () {
-          done();
+        plz.get.database(function (error, database) {
+          user = database.collection('user');
+          user.drop(function () {
+            done();
+          });
         });
       });
     });
 
     describe('plz.get.user()', function () {
       before(function (done) {
-        Hub.configure(_options, function(error, api) {
-          plz = api;
-          user = plz.get.database().collection('user');
+        plz = require('../app/core.hub.js')(_validConfig);
 
-          plz.create.user(document, function () {
-            done();
-          });
+        plz.create.user(document, function () {
+          done();
         });
       });
 
@@ -169,21 +166,21 @@
       });
 
       after(function (done) {
-        user.drop(function () {
-          done();
+        plz.get.database(function (error, database) {
+          var user = database.collection('user');
+          user.drop(function () {
+            done();
+          });
         });
       });
     });
 
     describe('plz.remove.user()', function () {
       before(function (done) {
-        Hub.configure(_options, function(error, api) {
-          plz = api;
-          user = plz.get.database().collection('user');
+        plz = require('../app/core.hub.js')(_validConfig);
 
-          plz.create.user(document, function () {
-            done();
-          });
+        plz.create.user(document, function () {
+          done();
         });
       });
 
@@ -203,21 +200,21 @@
       });
 
       after(function (done) {
-        user.drop(function () {
-          done();
+        plz.get.database(function (error, database) {
+          var user = database.collection('user');
+          user.drop(function () {
+            done();
+          });
         });
       });
     });
 
     describe('plz.edit.user()', function () {
       before(function (done) {
-        Hub.configure(_options, function(error, api) {
-          plz = api;
-          user = plz.get.database().collection('user');
+        plz = require('../app/core.hub.js')(_validConfig);
 
-          plz.create.user(document, function () {
-            done();
-          });
+        plz.create.user(document, function () {
+          done();
         });
       });
 
@@ -255,11 +252,14 @@
       });
 
       after(function (done) {
-        user.drop(function () {
-          done();
+        plz.get.database(function (error, database) {
+          var user = database.collection('user');
+          user.drop(function () {
+            done();
+          });
         });
       });
     });
   });
-
 }());
+

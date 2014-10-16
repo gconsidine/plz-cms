@@ -3,7 +3,7 @@
 
   require('should');
 
-  var Validate = require('../app/core.validate');
+  var plz = require('../app/core.validate')();
 
   describe('core.validate | Public API', function () {
     describe('plz.validate.email()', function () {
@@ -26,11 +26,11 @@
         ];
 
         for(i = 0; i < valid.length; i++) {
-          Validate.email(valid[i]).should.be.true;
+          plz.validate.email(valid[i]).should.be.true;
         }
 
         for(i = 0; i < invalid.length; i++) {
-          Validate.email(invalid[i]).should.be.false;
+          plz.validate.email(invalid[i]).should.be.false;
         }
       });
     });
@@ -56,11 +56,11 @@
         ];
 
         for(i = 0; i < valid.length; i++) {
-          Validate.match(valid[i][0], valid[i][1]).should.be.true;
+          plz.validate.match(valid[i][0], valid[i][1]).should.be.true;
         }
 
         for(i = 0; i < invalid.length; i++) {
-          Validate.match(invalid[i][0], invalid[i][1]).should.be.false;
+          plz.validate.match(invalid[i][0], invalid[i][1]).should.be.false;
         }
       });
     });
@@ -89,11 +89,11 @@
         ];
 
         for(i = 0; i < complex.length; i++) {
-          Validate.complexity(complex[i], complex[i]).should.be.true;
+          plz.validate.complexity(complex[i], complex[i]).should.be.true;
         }
 
         for(i = 0; i < notComplex.length; i++) {
-          Validate.complexity(notComplex[i], notComplex[i]).should.be.false;
+          plz.validate.complexity(notComplex[i], notComplex[i]).should.be.false;
         }
       });
     }); 
@@ -106,11 +106,11 @@
         var invalid = ['-1', '0', '0.01', [], {}, true];
 
         for(i = 0; i < valid.length; i++) {
-          Validate.number(valid[i]).should.be.true;
+          plz.validate.number(valid[i]).should.be.true;
         }
 
         for(i = 0; i < invalid.length; i++) {
-          Validate.number(invalid[i]).should.be.false;
+          plz.validate.number(invalid[i]).should.be.false;
         }
 
       });
@@ -124,11 +124,11 @@
         var invalid = [-1, 1.0, {}, [], false];
 
         for(i = 0; i < valid.length; i++) {
-          Validate.string(valid[i]).should.be.true;
+          plz.validate.string(valid[i]).should.be.true;
         }
 
         for(i = 0; i < invalid.length; i++) {
-          Validate.string(invalid[i]).should.be.false;
+          plz.validate.string(invalid[i]).should.be.false;
         }
       });
     });
@@ -144,12 +144,12 @@
 
         for(var type in cases) {
           if(cases.hasOwnProperty(type)) {
-            Validate.typeAs(type, cases[type]).should.be.true;
+            plz.validate.typeAs(type, cases[type]).should.be.true;
           }
         }
 
         (function () {
-          Validate.typeAs('sith', '?');
+          plz.validate.typeAs('sith', '?');
         }).should.throw.error;
 
       });

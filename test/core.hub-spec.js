@@ -3,9 +3,7 @@
 
   require('should');
 
-  var Hub = require('../app/core.hub');
-  
-  var _validOptions = {
+  var _validConfig = {
     modules: {
     },
     database: {
@@ -22,7 +20,7 @@
     }
   };
 
-  var _invalidOptions = {
+  var _invalidConfig = {
     modules: {
     }, 
     database: {
@@ -32,80 +30,26 @@
     }
   };
 
-  describe('core | Internal Behavior', function () {
+  describe('core | Configuration', function () {
     var plz;
 
-    before(function (done) {
-      Hub.configure(_validOptions, function (error, api) {
-        plz = api;
-        done();
-      });  
+    it('should not accpet undefined options', function () {
+      (function () {
+        plz = require('../app/core.hub.js')();
+      }).should.throw();
     });
 
-    it('should have correct verb-category objects available', function () {
-      (typeof plz.get === 'object').should.be.true;
+    it('should not accept malformed options', function () {
+      (function () {
+        plz = require('../app/core.hub.js')(_invalidConfig);
+      }).should.throw();
     });
 
-    it('should have all methods associated with verb-categories', function () {
-      (typeof plz.get.mailer === 'function').should.be.true;
-      (typeof plz.get.database === 'function').should.be.true;
+    it('should accept valid options', function () {
+      (function () {
+        plz = require('../app/core.hub.js')(_validConfig);
+      }).should.not.throw();
     });
-  });
-
-  describe('core.hub | Public API', function () {
-    describe('plz.configure()', function () {
-      it('should not accpet undefined options', function () {
-        (function () {
-          Hub.configure();
-        }).should.throw();
-      });
-
-      it('should not accept malformed options', function () {
-        (function () {
-          Hub.configure(_invalidOptions);
-        }).should.throw();
-      });
-
-      it('should accept valid options', function (done) {
-        Hub.configure(_validOptions, function (error, api) {
-          error.should.be.false; 
-          (typeof api === 'object').should.be.true;
-
-          done();
-        });
-      });
-    });
-
-    describe('plz.get.database()', function () {
-      var plz;
-
-      before(function (done) {
-        Hub.configure(_validOptions, function (error, api) {
-          plz = api;
-          done();
-        });  
-      });
-
-      it('should contain an active database connection', function () {
-        (typeof plz.get.database() === 'object').should.be.true;
-      });
-    });
-
-    describe('plz.get.mailer()', function () {
-      var plz;
-
-      before(function (done) {
-        Hub.configure(_validOptions, function (error, api) {
-          plz = api;
-          done();
-        });  
-      });
-
-      it('should contain an active mailer', function () {
-        (typeof plz.get.mailer() === 'object').should.be.true;
-      });
-    });
-
   });
 
 }());

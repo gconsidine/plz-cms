@@ -1,47 +1,51 @@
 var AdminUser = function (plz) {
   'use strict';
 
-  var _plz = plz,
-      _db = _plz.get.database(),
-      _roles = _plz.config.admin.roles,
-      _required = _plz.config.admin.required,
-      _user = _db.collection(_plz.config.admin.collection);
-
-  var create = {},
-      get = {},
-      edit = {},
-      remove = {};
+  plz = plz || {},
+  plz.create = plz.create || {},
+  plz.get = plz.get || {},
+  plz.edit = plz.edit || {},
+  plz.remove = plz.remove || {};
 
   /**
   * Creates a user only if the required fields specified in the configuration 
   * are present and if the user doesn't already exist.  The user's email must
   * be unique.
   */
-  create.user = function (options, callback) {
+  plz.create.user = function (options, callback) {
     prepareUserCreation(options, function (error, result) {
       if(error) {
         callback(true, result);
         return;
       }
-
-      _user.findOne({email: options.email}, function (error, result) {
+      
+      plz.get.database(function(error, database) {
         if(error) {
-          callback(true, 'Lookup failed');
+          callback(true, 'Cannot establish database connection');
           return;
         }
 
-        if(result) {
-          callback(true, 'User already exists');
-          return;
-        }
+        var user = database.collection(plz.config.admin.collection);
 
-        _user.insertOne(options, function (error, result) {
+        user.findOne({email: options.email}, function (error, result) {
           if(error) {
-            callback(true, 'Insert failed');
+            callback(true, 'Lookup failed');
             return;
           }
 
-          callback(false, result);
+          if(result) {
+            callback(true, 'User already exists');
+            return;
+          }
+
+          user.insertOne(options, function (error, result) {
+            if(error) {
+              callback(true, 'Insert failed');
+              return;
+            }
+
+            callback(false, result);
+          });
         });
       });
     });
@@ -51,19 +55,28 @@ var AdminUser = function (plz) {
   * Returns a single user matching the query options passed as the first
   * argument.
   */
-  get.user = function (options, callback) {
-    _user.findOne(options, function (error, result) {
+  plz.get.user = function (options, callback) {
+    plz.get.database(function(error, database) {
       if(error) {
-        callback(true, 'Lookup failed');
+        callback(true, 'Cannot establish database connection');
         return;
       }
 
-      if(!result) {
-        callback(true, 'User does not exist');
-        return;
-      }
+      var user = database.collection(plz.config.admin.collection);
 
-      callback(false, result);
+      user.findOne(options, function (error, result) {
+        if(error) {
+          callback(true, 'Lookup failed');
+          return;
+        }
+
+        if(!result) {
+          callback(true, 'User does not exist');
+          return;
+        }
+
+        callback(false, result);
+      });
     });
   };
 
@@ -71,14 +84,23 @@ var AdminUser = function (plz) {
   * Deletes a user if it exists based on the criteria options passed as the
   * first argument.
   */
-  remove.user = function (options, callback) {
-    _user.findOneAndRemove(options, function (error, result) {
+  plz.remove.user = function (options, callback) {
+    plz.get.database(function(error, database) {
       if(error) {
-        callback(true, 'Remove failed');
+        callback(true, 'Cannot establish database connection');
         return;
       }
 
-      callback(false, result);
+      var user = database.collection(plz.config.admin.collection);
+
+      user.findOneAndRemove(options, function (error, result) {
+        if(error) {
+          callback(true, 'Remove failed');
+          return;
+        }
+
+        callback(false, result);
+      });
     });
   };
 
@@ -87,37 +109,49 @@ var AdminUser = function (plz) {
   * then updating with the options.update property passed in the options 
   * object as the first argument.
   */
-  edit.user = function (options, callback) {
-    _user.findOneAndUpdate(options.criteria, options.update, 
-      function (error, result) {
+  plz.edit.user = function (options, callback) {
+    plz.get.database(function(error, database) {
       if(error) {
-        callback(true, 'Edit failed');
+        callback(true, 'Cannot establish database connection');
         return;
       }
 
-      if(!result) {
-        callback(true, 'User does not exist');
-        return;
-      }
+      var user = database.collection(plz.config.admin.collection);
 
-      callback(false, result);
+      user.findOneAndUpdate(options.criteria, options.update, 
+        function (error, result) {
+        if(error) {
+          callback(true, 'Edit failed');
+          return;
+        }
+
+        if(!result) {
+          callback(true, 'User does not exist');
+          return;
+        }
+
+        callback(false, result);
+      });
     });
   };
 
   function prepareUserCreation(options, callback) {
-    if(!_roles[options.role]) {
+    var roles = plz.config.admin.roles,
+        required = plz.config.admin.required;
+
+    if(!roles[options.role]) {
       callback(true, 'Required role not present in options');
       return;
     }
 
-    for(var field in _required) {
-      if(_required.hasOwnProperty(field)) {
+    for(var field in required) {
+      if(required.hasOwnProperty(field)) {
         if(typeof options[field] === 'undefined') {
           callback(true, 'Required field not present in options');
           return;
         }
 
-        if(!_plz.validate.typeAs(_required[field], options[field])) {
+        if(!plz.validate.typeAs(required[field], options[field])) {
           callback(true, 'Required fields\' types not valid in options');
           return;
         }
@@ -127,12 +161,7 @@ var AdminUser = function (plz) {
     callback(false);
   }
 
-  return {
-    create: create,
-    get: get,
-    edit: edit,
-    remove: remove
-  };
+  return plz;
 };
 
 module.exports = AdminUser;

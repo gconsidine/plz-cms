@@ -1,17 +1,20 @@
-var CoreValidate = function () {
+var CoreValidate = function (plz) {
   'use strict';
 
   var Validator = require('validator');
-  
-  function email(address) {
+
+  plz = plz || {};
+  plz.validate = plz.validate || {};
+
+  plz.validate.email = function (address) {
     return Validator.isEmail(address);
-  }
+  };
 
-  function match(one, two) {
+  plz.validate.match = function (one, two) {
     return Validator.equals(one, two);
-  }
+  };
 
-  function complexity(password) {
+  plz.validate.complexity = function (password) {
     var hasUpperCase = /[A-Z]/g,
         hasLowerCase = /[a-z]/g,
         hasNumber = /[0-9]/g,
@@ -25,40 +28,32 @@ var CoreValidate = function () {
     } else {
       return false;
     }
-  }
+  };
 
-  function number(value) {
+  plz.validate.number = function (value) {
     return typeof value === 'number' ? true : false;  
-  }
+  };
   
-  function string(value) {
+  plz.validate.string = function (value) {
     return typeof value === 'string' ? true : false;
-  }
+  };
 
-  function typeAs(type, data) {
+  plz.validate.typeAs = function (type, data) {
     switch(type) {
       case 'email':
-        return email(data);
+        return plz.validate.email(data);
       case 'number':
-        return number(data);
+        return plz.validate.number(data);
       case 'password':
-        return complexity(data);
+        return plz.validate.complexity(data);
       case 'string':
-        return string(data);
+        return plz.validate.string(data);
       default:
         throw new Error('Unsupported validation type');
     }
-  }
-
-  return {
-    email: email,
-    match: match,
-    complexity: complexity,
-    typeAs: typeAs,
-    number: number,
-    string: string
   };
-
+  
+  return plz;
 };
 
-module.exports = CoreValidate();
+module.exports = CoreValidate;

@@ -34,7 +34,7 @@ module.exports = function (grunt) {
     
     shell: {
       mocha: {
-        command: 'npm test'
+        command: 'mocha test'
       }
     },
 

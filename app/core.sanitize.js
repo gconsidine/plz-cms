@@ -1,5 +1,9 @@
-var CoreSanitize = function () {
+var CoreSanitize = function (plz) {
+  'use strict';
 
+  plz = plz || {};
+
+  return plz;
 };
 
-module.exports = CoreSanitize();
+module.exports = CoreSanitize;

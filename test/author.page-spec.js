@@ -3,9 +3,7 @@
 
   require('should');
 
-  var Hub = require('../app/core.hub');
-
-  var _options = {
+  var _validConfig = {
     modules: {
       admin: false,
       author: true
@@ -56,7 +54,7 @@
     }
   };
 
-  var _invalidOptions = {
+  var _invalidConfig = {
     modules: {
       author: true
     },
@@ -74,115 +72,118 @@
     }
   };
 
-  describe('author | API configuration options', function () {
-
+  describe('author | Configuration', function () {
     it('should not accept undefined author options', function () {
       (function () {
-        Hub.configure(_invalidOptions, function () {});
+        require('../app/core.hub')(_invalidConfig);
       }).should.throw();
     });
 
-    it('should accept properly defined author options', function (done) {
-      Hub.configure(_options, function (error, api) {
-        error.should.be.false; 
-        (typeof api === 'object').should.be.true;
-
-        done();
-      });
+    it('should accept properly defined author options', function () {
+      (function () {
+        require('../app/core.hub')(_validConfig);
+      }).should.not.throw();
     });
   });
 
-  describe('author.page | create.page()', function () {
+  describe('author.page | Public API', function () {
     var plz,
-        db,
         pageTable;
 
-    before(function (done) {
-      Hub.configure(_options, function(error, api) {
-        plz = api;
-        db = plz.get.database();
-        pageTable = db.collection(_options.author.page.collection);
+    describe('plz.create.page()', function () {
 
-        pageTable.count(function(error, count) {
-          if(count >= 1) {
-            pageTable.drop(function () {
+      before(function (done) {
+        plz = require('../app/core.hub')(_validConfig);
+
+        plz.get.database(function (error, database) {
+          pageTable = database.collection(_validConfig.author.page.collection);
+
+          pageTable.count(function(error, count) {
+            if(count >= 1) {
+              pageTable.drop(function () {
+                done();
+              });
+            } else {
+              done();
+            }
+          });
+        });
+      });
+
+      it('should return error if required fields are missing', function(done) {
+        var page = {
+          pageTitle: 'invalid options',
+          createdAt: 3134999944,
+          modifiedAt: 3134999944,
+          status: 'draft'
+        };
+
+        plz.create.page(page, function (error) {
+          error.should.be.true;
+          done();
+        });
+      });
+
+      it('should insert a page with required fields present', function(done) {
+        var page = {
+          authorName: 'chahm',
+          pageTitle: 'Simple plz-cms page',
+          visibility: 'public',
+          createdAt: 3134999944,
+          modifiedAt: 3134999944,
+          status: 'draft',
+          contentType: 'journal',
+          content: ''
+        };
+
+
+        plz.create.page(page, function (error) {
+          error.should.be.false;
+
+          pageTable.count(function(error, count) {
+            count.should.equal(1);
+
+            var options = {pageTitle: page.pageTitle};
+
+            pageTable.findOne(options, function (error, result) {
+              for(var field in page) {
+                if(page.hasOwnProperty(field) && field !== "_id") {
+                  result[field].should.equal(page[field]);
+                }
+              }
               done();
             });
-          } else {
+          });
+        });
+      });
+
+      it('should not insert a page that already exists', function(done) {
+        var page = {
+          authorName: 'chahm',
+          pageTitle: 'Simple plz-cms page',
+          visibility: 'public',
+          createdAt: 3134999944,
+          modifiedAt: 3134999944,
+          status: 'draft',
+          contentType: 'journal',
+          content: ''
+        };
+
+        plz.create.page(page, function (error) {
+          error.should.be.true;
+          done();
+        });
+      });
+
+      after(function (done) {
+        plz.get.database(function (error, database) {
+          pageTable = database.collection(_validConfig.author.page.collection);
+
+          pageTable.drop(function () {
             done();
-          }
+          });
         });
       });
     });
-
-    it('should return an error if required fields are missing', function(done) {
-      var page = {
-        pageTitle: 'invalid options',
-        createdAt: 3134999944,
-        modifiedAt: 3134999944,
-        status: 'draft'
-      };
-
-      plz.create.page(page, function (error) {
-        error.should.be.true;
-        done();
-      });
-    });
-
-    it('should insert a page with required fields present', function(done) {
-      var page = {
-        authorName: 'chahm',
-        pageTitle: 'Simple plz-cms page',
-        visibility: 'public',
-        createdAt: 3134999944,
-        modifiedAt: 3134999944,
-        status: 'draft',
-        contentType: 'journal',
-        content: ''
-      };
-
-
-      plz.create.page(page, function (error) {
-        error.should.be.false;
-
-        pageTable.count(function(error, count) {
-          count.should.equal(1)
-          pageTable.findOne({pageTitle: page.pageTitle}, function (error, result) {
-            for(var field in page) {
-              if(page.hasOwnProperty(field) && field != "_id") {
-                result[field].should.equal(page[field]);
-              }
-            }
-            done();
-          });
-		});
-      });
-    });
-
-    it('should not insert a page that already exists', function(done) {
-      var page = {
-        authorName: 'chahm',
-        pageTitle: 'Simple plz-cms page',
-        visibility: 'public',
-        createdAt: 3134999944,
-        modifiedAt: 3134999944,
-        status: 'draft',
-        contentType: 'journal',
-        content: ''
-      };
-
-      plz.create.page(page, function (error, result) {
-        error.should.be.true;
-        done();
-      });
-    });
-
-    after(function (done) {
-      pageTable.drop(function () {
-        done();
-      });
-    });
-
   });
-
 }());
