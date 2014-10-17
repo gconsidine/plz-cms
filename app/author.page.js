@@ -74,31 +74,93 @@ var AuthorPage = function (plz) {
             callback(false, result);
           });
         });
-	    });
+	  });
     });
   };
 
-  /*
+  /**
+  * Publishes a page matching title in options, making it publicly
+  * available for reading/routing
+  * options properties: publisherName -- used to check permissions
+  *                     pageTitle -- unique id used in page lookup
+  * callback parameters: errorFlag -- true/false
+  *                      result -- result from DB insert upon success or 
+  *                                description string upon error
+  */
   plz.publish.page = function (options, callback) {
         //TODO: check permissions via plz.restritct.user
         //      check required fields
-        //      check database for page name
-        //      update database entry 
-		//		invoke callback with result
+    if(typeof options.publisherName !== 'string' ||
+       typeof options.pageTitle !== 'string') {
+      callback(true, 'Required field not present in options');
+      return;
+    }
+
+    plz.get.database(function (error, database) {
+      _page = database.collection(_collectionName);
+
+      var criteria = {pageTitle: options.pageTitle};
+      var update = {$set:{visibility: "public"}};
+
+      // update database entry 
+      _page.updateOne(criteria, update, function(error, result){
+
+		// invoke callback with result or error
+        if(error) {
+          callback(true, 'Edit failed: ' + error);
+          return;
+        }
+
+        if(!result) {
+          callback(true, 'Could not find page with title ' + options.pageTitle);
+          return;
+        }
+
+        callback(false, result);
+
+      });
+    });
   };
 
-
-  plz.get.page = function (options, callback) {
-        //TODO: check permissions via plz.restritct.user
-        //      check required fields
-        //      check database for page name
-        //      fetch database entry 
-		//		invoke callback with result
-  };
+  /**
+  * Fetches a page object matching the title specified in options
+  * options properties: publisherName -- used to check permissions
+  *                     pageTitle -- unique id used in page lookup
+  * callback parameters: errorFlag -- true/false
+  *                      result -- result from DB insert upon success or 
+  *                                description string upon error
   */
+  plz.get.page = function (options, callback) {
+    //TODO: check permissions via plz.restritct.user
+    // check required fields
+    if(typeof options.pageTitle !== 'string') {
+      callback(true, 'Required field not present in options');
+      return;
+    }
+
+    // fetch database entry 
+    _page.findOne({pageTitle: options.pageTitle}, function(error, result){
+      if (error)
+      {
+        var message = 'Failed to find entry matching ' + options.pageTitle;
+        message += ' in ' + plz.config.author.page.collection;
+        callback(true, message);
+        return;
+      }
+      else
+      {
+        // invoke callback with result
+        callback(false, result);
+      }
+    });
+  };
 
   //edit
+  //plz.edit.page = function (options, callback) {}
+
   //delete
+  //plz.delete.page = function (options, callback) {}
+
   function checkRequiredOptions(options, callback) {
     for(var field in _required) {
       if(_required.hasOwnProperty(field)) {
