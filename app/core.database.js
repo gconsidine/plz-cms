@@ -18,7 +18,7 @@ var CoreDatabase = function (plz) {
   * can be supplied as an optional second parameter.
   *
   * @memberof core.database
-  * @param {database.result} callback
+  * @param {database} callback
   * @param {string=} - The name of a database connection from the configuration
   * options.
   */
@@ -49,7 +49,7 @@ var CoreDatabase = function (plz) {
 module.exports = CoreDatabase;
 
 /**
-* @callback database.result
+* @callback database
 * @param {boolean} error - Indicating success/failure of the call
 * @param {string|object} result - A concise String message is returned on 
 * error. The database is returned on success.

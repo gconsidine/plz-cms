@@ -16,7 +16,7 @@ var CoreMailer = function (plz) {
   * be passed to specify a different mailer from the configuration.
   *
   * @memberof core.mailer
-  * @param {mailer.result} callback
+  * @param {mailer} callback
   * @param {string=} - The name of a mailer from the configuration options.
   */
   plz.get.mailer = function (callback, name) {
@@ -47,7 +47,7 @@ var CoreMailer = function (plz) {
 module.exports = CoreMailer;
 
 /**
-* @callback mailer.result
+* @callback mailer
 * @param {boolean} error - Indicating success/failure of the call
 * @param {string|object} result - A concise String message is returned on 
 * error. A mailer (transporter) is returned on success.
