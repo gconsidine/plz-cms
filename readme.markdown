@@ -6,6 +6,7 @@ A Node.js module built as a hub for the following plz-cms components:
   * [author](https://github.com/gconsidine/plz-cms/wiki/author)
   * [merchant](https://github.com/gconsidine/plz-cms/wiki/merchant)
   * [scout](https://github.com/gconsidine/plz-cms/wiki/scout)
+  * [socialite](https://github.com/gconsidine/plz-cms/wiki/socialite)
 
 Browse the components above to see how the plz-cms API can be extended when
 included in a configuration.
@@ -21,18 +22,18 @@ included in a configuration.
     {
       components: {
         admin: false,
-        author: false, // unused modules can be ommitted to the same effect
+        author: false // unused modules can be ommitted to the same effect
       },
       database: {  // Can accept multiple database connections...
         default: { // ...but must have a default Mongo connection
-          uri: process.env.PLZ_DATABASE_DEFAULT
+          uri: <your_mongo_uri_here>
         }
       },
       mailer: {    // Can accept multiple mailers ...
-        default: { // ...but must have a default gmail address
-          service: 'Gmail',
-          address: process.env.PLZ_MAILER_ACTIVATION_ADDRESS,
-          password: process.env.PLZ_MAILER_ACTIVATION_PASSWORD'
+        default: { // ...but must have a default address
+          service: 'Gmail', // only Gmail supported for now
+          address: <your_email_address>,
+          password: <your_email_password>
         }
       }
     }
@@ -42,8 +43,7 @@ included in a configuration.
 
 ### Basic Usage
 
-  Here's a basic configuration including just the *Admin* component within an
-  express project:
+  Here's a basic configuration including just the *Admin* component:
 
     var options = {
       modules: {
@@ -79,19 +79,8 @@ included in a configuration.
       }
     };
 
-    var express = require('express'),
-        plzCms = require('plz-cms'),
-        app = express(),
-        plz;
+    var plz = require('plz-cms');
     
-    app.use(function (req, res, next) {
-      plzCms.configure(options, function (error, api) {
-        plz = api;
-      });
-
-      next();
-    }
-
     plz.validate.typeAs('string', 'success'); // true
 
 ### API

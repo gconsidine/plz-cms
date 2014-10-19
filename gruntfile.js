@@ -39,9 +39,13 @@ module.exports = function (grunt) {
     },
 
     watch: {
-      all: {
+      dev: {
         files: _source.all,
         tasks: ['jshint', 'shell:mocha']
+      },
+      doc: {
+        files: _source.all,
+        tasks: ['jshint', 'jsdoc']
       }
     },
 
@@ -66,7 +70,8 @@ module.exports = function (grunt) {
 
   grunt.registerTask('default', [
     'jshint',
-    'shell:mocha'
+    'shell:mocha',
+    'jsdoc',
   ]);
 
 };
