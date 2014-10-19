@@ -6,6 +6,7 @@ A Node.js module built as a hub for the following plz-cms components:
   * [author](https://github.com/gconsidine/plz-cms/wiki/author)
   * [merchant](https://github.com/gconsidine/plz-cms/wiki/merchant)
   * [scout](https://github.com/gconsidine/plz-cms/wiki/scout)
+  * [socialite](https://github.com/gconsidine/plz-cms/wiki/socialite)
 
 Browse the components above to see how the plz-cms API can be extended when
 included in a configuration.
