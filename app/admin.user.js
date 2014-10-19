@@ -5,11 +5,13 @@
 var AdminUser = function (plz) {
   'use strict';
 
-  plz = plz || {},
-  plz.create = plz.create || {},
-  plz.get = plz.get || {},
-  plz.edit = plz.edit || {},
+  plz = plz || {};
+  plz.create = plz.create || {};
+  plz.get = plz.get || {};
+  plz.edit = plz.edit || {};
   plz.remove = plz.remove || {};
+  plz.restrict = plz.restrict || {};
+  plz.allow = plz.allow || {};
 
   /**
   * Creates a user only if the required fields specified in the configuration 
@@ -155,6 +157,44 @@ var AdminUser = function (plz) {
     });
   };
 
+  /**
+  * Returns a true result if a user's role is included in the roles provided in
+  * the options object (whitelist).
+  *
+  * @memberof admin.user
+  * @param {object} options
+  * @param {object} options.user - The user given via plz.login.user
+  * @param {array} options.roles - An array of roles that are allowed
+  * @param {access} callback
+  */
+  plz.allow.user = function (options, callback) {
+    if(options.roles.indexOf(options.user.role) === -1) {
+      callback(false, false);
+      return;
+    }
+
+    callback(false, true);
+  };
+
+  /**
+  * Returns a true result if a user's role is **not** included in the roles 
+  * provided in the options object (blacklist).
+  *
+  * @memberof admin.user
+  * @param {object} options
+  * @param {object} options.user - The user given via plz.login.user
+  * @param {array} options.roles - An array of roles that are not allowed
+  * @param {result} callback
+  */
+  plz.restrict.user = function (options, callback) {
+    if(options.roles.indexOf(options.user.role) !== -1) {
+      callback(false, false);
+      return;
+    }
+
+    callback(false, true);
+  };
+
   function prepareUserCreation(options, callback) {
     var roles = plz.config.admin.roles,
         required = plz.config.admin.required;
@@ -191,4 +231,10 @@ module.exports = AdminUser;
 * @param {boolean} error - Indicating success/failure of the call
 * @param {string|object} result - A concise String message is returned on 
 * error. A result object from Mongo is returned on success. 
+*/
+
+/**
+* @callback access
+* @param {boolean} error - Indicating success/failure of the call
+* @param {boolean} result - true if the user is allowed, false if not.
 */

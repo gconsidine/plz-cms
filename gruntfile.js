@@ -70,7 +70,8 @@ module.exports = function (grunt) {
 
   grunt.registerTask('default', [
     'jshint',
-    'shell:mocha'
+    'shell:mocha',
+    'jsdoc',
   ]);
 
 };

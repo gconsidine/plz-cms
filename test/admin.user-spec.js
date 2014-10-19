@@ -260,6 +260,102 @@
         });
       });
     });
+
+    describe('plz.restrict.user()', function () {
+      var user;
+
+      before(function (done) {
+        plz = require('../app/core.hub.js')(_validConfig);
+
+        plz.create.user(document, function (error, result) {
+          user = result.ops[0];
+          done();
+        });
+      });
+
+      it('should return true if a user has access', function (done) {
+        var options = {
+          user: user,
+          roles: ['peasant', 'peon']
+        };
+
+        plz.restrict.user(options, function (error, access) {
+          error.should.be.false;
+          access.should.be.true;
+          done();
+        });
+      });
+
+      it('should return false if a user does not have access', function (done) {
+        var options = {
+          user: user,
+          roles: ['admin']
+        };
+
+        plz.restrict.user(options, function (error, access) {
+          error.should.be.false;
+          access.should.be.false;
+          done();
+        });
+      });
+
+      after(function (done) {
+        plz.get.database(function (error, database) {
+          var user = database.collection('user');
+          user.drop(function () {
+            done();
+          });
+        });
+      });
+    });
+
+    describe('plz.allow.user()', function () {
+      var user;
+
+      before(function (done) {
+        plz = require('../app/core.hub.js')(_validConfig);
+
+        plz.create.user(document, function (error, result) {
+          user = result.ops[0];
+          done();
+        });
+      });
+
+      it('should return true if a user has access', function (done) {
+        var options = {
+          user: user,
+          roles: ['admin']
+        };
+
+        plz.allow.user(options, function (error, access) {
+          error.should.be.false;
+          access.should.be.true;
+          done();
+        });
+      });
+
+      it('should return false if a user does not have access', function (done) {
+        var options = {
+          user: user,
+          roles: ['super-admin']
+        };
+
+        plz.allow.user(options, function (error, access) {
+          error.should.be.false;
+          access.should.be.false;
+          done();
+        });
+      });
+
+      after(function (done) {
+        plz.get.database(function (error, database) {
+          var user = database.collection('user');
+          user.drop(function () {
+            done();
+          });
+        });
+      });
+    });
   });
 }());
 
