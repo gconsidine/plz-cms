@@ -1,3 +1,7 @@
+/**
+* @memberof admin
+* @namespace admin.user
+*/
 var AdminUser = function (plz) {
   'use strict';
 
@@ -11,6 +15,10 @@ var AdminUser = function (plz) {
   * Creates a user only if the required fields specified in the configuration 
   * are present and if the user doesn't already exist.  The user's email must
   * be unique.
+  *
+  * @memberof admin.user
+  * @param {object} options - Containing required fields for user creation
+  * @param {user} callback
   */
   plz.create.user = function (options, callback) {
     prepareUserCreation(options, function (error, result) {
@@ -54,6 +62,10 @@ var AdminUser = function (plz) {
   /**
   * Returns a single user matching the query options passed as the first
   * argument.
+  *
+  * @memberof admin.user
+  * @param {object} options - The query constraints for your search.
+  * @param {user} callback
   */
   plz.get.user = function (options, callback) {
     plz.get.database(function(error, database) {
@@ -83,6 +95,10 @@ var AdminUser = function (plz) {
   /**
   * Deletes a user if it exists based on the criteria options passed as the
   * first argument.
+  *
+  * @memberof admin.user
+  * @param {object} options - The query constraints for your search.
+  * @param {user} callback
   */
   plz.remove.user = function (options, callback) {
     plz.get.database(function(error, database) {
@@ -108,6 +124,10 @@ var AdminUser = function (plz) {
   * Updates a user if it exists by matching against options.criteria property, 
   * then updating with the options.update property passed in the options 
   * object as the first argument.
+  *
+  * @memberof admin.user
+  * @param {object} options - The query constraints for your search.
+  * @param {user} callback
   */
   plz.edit.user = function (options, callback) {
     plz.get.database(function(error, database) {
@@ -165,3 +185,10 @@ var AdminUser = function (plz) {
 };
 
 module.exports = AdminUser;
+
+/**
+* @callback user
+* @param {boolean} error - Indicating success/failure of the call
+* @param {string|object} result - A concise String message is returned on 
+* error. A result object from Mongo is returned on success. 
+*/
