@@ -5,10 +5,10 @@
 var AdminUser = function (plz) {
   'use strict';
 
-  plz = plz || {},
-  plz.create = plz.create || {},
-  plz.get = plz.get || {},
-  plz.edit = plz.edit || {},
+  plz = plz || {};
+  plz.create = plz.create || {};
+  plz.get = plz.get || {};
+  plz.edit = plz.edit || {};
   plz.remove = plz.remove || {};
   plz.restrict = plz.restrict || {};
   plz.allow = plz.allow || {};
