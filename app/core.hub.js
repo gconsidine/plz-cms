@@ -42,6 +42,24 @@ var CoreHub = function (config) {
         }
         break;
       case 'author':
+        if(typeof options.author !== 'object' ||
+           !options.author.modules instanceof Array ||
+           options.author.modules.length <= 0) {
+
+          return false;
+        }
+        for(module in options.author.modules) {
+          if(options.author.modules.hasOwnProperty(module) &&
+             options.author.modules[module] === true)
+          {
+            var c = options.author[module].collection;
+            if (typeof c !== 'string')
+            {
+              return false;
+            }
+          }
+        }
+
 
         break;
       case 'merchant':

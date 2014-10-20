@@ -6,8 +6,24 @@
 var AuthorApi = function (plz) {
   'use strict'; 
   
-  require('./author.page')(plz);
-  require('./author.article')(plz);
+  plz = plz || {};
+  var modules = plz.config.author.modules;
+  for(var name in modules) {
+    if(modules.hasOwnProperty(name)) {
+      if(modules[name] === false) {
+        continue;
+      }
+
+      switch(name) {
+        case 'page':
+          require('./author.page')(plz);
+          break;
+        case 'article':
+          require('./author.article')(plz);
+          break;
+      }
+    }
+  }
 
 // TODO: implement other content types
 //  var comment = require('./author.comment')(_plz);
