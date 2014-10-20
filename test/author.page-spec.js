@@ -171,6 +171,7 @@
         });
       });
     });
+
     describe('plz.publish.page()', function () {
       before(function (done) {
         plz = require('../app/core.hub')(_validConfig);
@@ -194,6 +195,7 @@
           done();
         });
       });
+
       it('should publish a page with public visibility', function(done) {
         var request = {
           userName: 'chahm',
@@ -209,6 +211,7 @@
           });
         });
       });
+
       it('should return error if page does not exist', function(done) {
         var request = {
           userName: 'chahm',
@@ -220,6 +223,7 @@
           done();
         });
       });
+
       after(function (done) {
         pageTable.drop(function () {
           done();
@@ -250,6 +254,7 @@
           done();
         });
       });
+
       it('should fetch a page with required fields present', function(done) {
         var request = {
           userName: 'chahm',
@@ -261,6 +266,7 @@
           done();
         });
       });
+
       it('should return error if page does not exist', function(done) {
         var request = {
           userName: 'chahm',
@@ -272,6 +278,7 @@
           done();
         });
       });
+
       after(function (done) {
         pageTable.drop(function () {
           done();
@@ -302,6 +309,7 @@
           done();
         });
       });
+
       it('should modify a page with new content', function(done) {
         var request = {
           userName: 'chahm',
@@ -318,6 +326,7 @@
           });
         });
       });
+
       it('should return error if page does not exist', function(done) {
         var request = {
           userName: 'chahm',
@@ -329,6 +338,7 @@
           done();
         });
       });
+
       after(function (done) {
         pageTable.drop(function () {
           done();
@@ -359,11 +369,13 @@
           done();
         });
       });
+
       it('should remove a page matching the given criteria', function(done) {
         var request = {
           userName: 'chahm',
           pageTitle: 'Simple plz-cms page'
         };
+
         plz.remove.page(request, function (error, result) {
           error.should.be.false;
           result.should.not.be.empty;
@@ -374,6 +386,7 @@
           });
         });
       });
+
       it('should return error if page does not exist', function(done) {
         var request = {
           userName: 'chahm',
@@ -382,6 +395,12 @@
         plz.get.page(request, function (error, result) {
           error.should.be.true;
           result.should.not.be.empty;
+          done();
+        });
+      });
+
+      after(function (done) {
+        pageTable.drop(function () {
           done();
         });
       });

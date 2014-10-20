@@ -1,11 +1,10 @@
 /**
  * Contains CRUD actions that can be performed on a page from the author 
- * component
-
+ * component.
+ *
  * @memberof author
  * @namespace author.page
  */
-
 var AuthorPage = function (plz) {
   'use strict';
   
@@ -22,7 +21,8 @@ var AuthorPage = function (plz) {
 
   /**
   * Creates a page with given options and inserts it into the database, 
-  * if allowed
+  * if allowed.
+  *
   * @memberof author.page
   * @param {object} options
   * @param {string} options.userName - Used to check permissions
@@ -32,14 +32,11 @@ var AuthorPage = function (plz) {
   * @param {string} options.contentType - plain test / HTML / markdown
   * @param {string} options.content - String containing actual contents of page
   * @param {string} options.createdAt - Current timestamp upon successful 
-  *                                     insertion into database
+  * insertion into database
   * @param {string} options.modifiedAt - Current timestamp upon successful 
-  *                                      insertion into database
+  * insertion into database
   * @param {string} options.status -- draft/pending review/published
-  * @param {access} callback
-  * callback parameters: errorFlag -- true/false
-  *                      result -- result from DB insert upon success or 
-  *                                description string upon error
+  * @param {page} callback
   *  (perhaps this should be simply errorDescription || null)
   */
   plz.create.page = function (options, callback) {
@@ -70,16 +67,14 @@ var AuthorPage = function (plz) {
   /**
   * Publishes a page matching title in options, making it publicly
   * available for reading/routing
+  *
   * @memberof author.page
   * @param {object} options
   * @param {string} options.userName - Used to check permissions
   * @param {string} options.pageTitle - Unique id used in page lookup
-  * callback parameters: errorFlag -- true/false
-  *                      result -- result from DB insert upon success or 
-  *                                description string upon error
+  * @param {page} callback
   */
   plz.publish.page = function (options, callback) {
-    //TODO: check permissions via plz.restritct.user
     if(typeof options.userName !== 'string' ||
        typeof options.pageTitle !== 'string') {
       callback(true, 'Required field not present in options');
@@ -100,16 +95,14 @@ var AuthorPage = function (plz) {
 
   /**
   * Fetches a page object matching the title specified in options
+  *
   * @memberof author.page
   * @param {object} options
   * @param {string} options.userName - Used to check permissions
   * @param {string} options.pageTitle - Unique id used in page lookup
-  * callback parameters: errorFlag -- true/false
-  *                      result -- result from DB fetch upon success or 
-  *                                description string upon error
+  * @param {page} callback
   */
   plz.get.page = function (options, callback) {
-    //TODO: check permissions via plz.restritct.user
     if(typeof options.pageTitle !== 'string') {
       callback(true, 'Required field not present in options');
       return;
@@ -129,17 +122,15 @@ var AuthorPage = function (plz) {
   /**
   * Modifies the content of a page if it exists based on the criteria options 
   * passed as the first argument.
+  *
   * @memberof author.page
   * @param {object} options
   * @param {string} options.userName - Used to check permissions
   * @param {string} options.pageTitle - Unique id used in page lookup
   * @param {string} options.content - Replacement content for page
-  * callback parameters: errorFlag -- true/false
-  *                      result -- result from DB edit upon success or 
-  *                                description string upon error
+  * @param {page} callback
   */
   plz.edit.page = function (options, callback) {
-    //  check required fields
     if(typeof options.userName !== 'string' ||
        typeof options.pageTitle !== 'string' ||
        typeof options.content !== 'string') {
@@ -165,16 +156,14 @@ var AuthorPage = function (plz) {
   /**
   * Deletes a page if it exists based on the criteria options passed as the
   * first argument.
+  *
   * @memberof author.page
   * @param {object} options
   * @param {string} options.userName - Used to check permissions
   * @param {string} options.pageTitle - Unique id used in page lookup
-  * callback parameters: errorFlag -- true/false
-  *                      result -- result from DB remove upon success or 
-  *                                description string upon error
+  * @param {page} callback
   */
   plz.remove.page = function (options, callback) {
-    //  check required fields
     if(typeof options.userName !== 'string' ||
        typeof options.pageTitle !== 'string') {
       callback(true, 'Required field not present in options');
@@ -211,3 +200,10 @@ var AuthorPage = function (plz) {
 };
 
 module.exports = AuthorPage;
+
+/**
+* @callback page
+* @param {boolean} error - Indicating success/failure of the call
+* @param {string|object} result - result from DB call upon success or a
+* description string upon error
+*/
