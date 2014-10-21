@@ -31,11 +31,11 @@ var AdminUser = function (plz) {
       
       var query = {
         collectionName: plz.config.admin.collection,
-        entry: options,
+        document: options,
         uniqueFields: {email: options.email}
-      }
+      };
 
-      plz.create.dbentry(query, function(error, result){
+      plz.create.document(query, function(error, result){
         callback(error, result);
       });
     });
@@ -53,8 +53,8 @@ var AdminUser = function (plz) {
     var query = {
       collectionName: plz.config.admin.collection,
       criteria: options
-    }
-    plz.get.dbentry(query, function (error, result) {
+    };
+    plz.get.document(query, function (error, result) {
       callback(error, result);
     });
   };
@@ -72,7 +72,7 @@ var AdminUser = function (plz) {
       collectionName: plz.config.admin.collection,
       criteria: options
     };
-    plz.remove.dbentry(query, function(error, result) {
+    plz.remove.document(query, function(error, result) {
       callback(error, result);
     });
   };
@@ -92,7 +92,7 @@ var AdminUser = function (plz) {
       criteria: options.criteria,
       update: options.update
     };
-    plz.edit.dbentry(query, function(error, result){
+    plz.edit.document(query, function(error, result){
       callback(error, result);
     });
   };

@@ -16,8 +16,7 @@ var AuthorPage = function (plz) {
   plz.remove = plz.remove || {};
 
   var _required = plz.config.author.page.required,
-      _collectionName = plz.config.author.page.collection,
-      _page;
+      _collectionName = plz.config.author.page.collection;
 
   /**
   * Creates a page with given options and inserts it into the database, 
@@ -55,10 +54,10 @@ var AuthorPage = function (plz) {
 
       var query = {
         collectionName: _collectionName,
-        entry: options,
+        document: options,
         uniqueFields: {pageTitle: options.pageTitle}
-      }
-      plz.create.dbentry(query, function(error, result){
+      };
+      plz.create.document(query, function(error, result){
         callback(error, result);
 	  });
     });
@@ -87,8 +86,8 @@ var AuthorPage = function (plz) {
       collectionName: _collectionName,
       criteria: {pageTitle: options.pageTitle},
       update:  {$set:{visibility: "public", status: "published"}}
-    }
-    plz.edit.dbentry(query, function(error, result){
+    };
+    plz.edit.document(query, function(error, result){
       callback(error, result);
     });
   };
@@ -113,8 +112,8 @@ var AuthorPage = function (plz) {
     var query = {
       collectionName: _collectionName,
       criteria: {pageTitle: options.pageTitle}
-    }
-    plz.get.dbentry(query, function (error, result) {
+    };
+    plz.get.document(query, function (error, result) {
       callback(error, result);
     });
   };
@@ -147,8 +146,8 @@ var AuthorPage = function (plz) {
           modifiedAt: currentTimestamp
         }
       }
-    }
-    plz.edit.dbentry(query, function(error, result){
+    };
+    plz.edit.document(query, function(error, result){
       callback(error, result);
     });
   };
@@ -173,7 +172,7 @@ var AuthorPage = function (plz) {
       collectionName: _collectionName,
       criteria: {pageTitle: options.pageTitle}
     };
-    plz.remove.dbentry(query, function(error, result) {
+    plz.remove.document(query, function(error, result) {
       callback(error, result);
     });
   };
@@ -183,7 +182,7 @@ var AuthorPage = function (plz) {
     for(var field in _required) {
       if(_required.hasOwnProperty(field)) {
         if(typeof options[field] === 'undefined') {
-          callback(true, 'Required field not present in options');
+          callback(true, 'Required field ' + field + ' not present in options');
           return;
         }
 
