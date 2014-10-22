@@ -1,4 +1,4 @@
-# plz-cms
+# plz-cms [![Build Status](https://travis-ci.org/gconsidine/plz-cms.svg)](https://travis-ci.org/gconsidine/plz-cms)
 
 A Node.js module built as a hub for the following plz-cms components:
 
