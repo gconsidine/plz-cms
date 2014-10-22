@@ -6,3 +6,6 @@ node_js:
 
 services:
   - mongodb
+
+before_script:
+  - npm cache clean
