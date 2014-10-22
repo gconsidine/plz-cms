@@ -7,7 +7,7 @@
     config: {
       database: {
         default: {
-          uri: process.env.PLZ_DB_DEFAULT + '/test'
+          uri: 'mongodb://127.0.0.1:27017/test'
         }
       }
     }

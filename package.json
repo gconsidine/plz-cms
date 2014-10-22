@@ -4,7 +4,6 @@
   "description": "plz-cms, a Node.js CMS library",
   "author": "greg considine <greg@caprahorn.com>",
   "main": "index.js",
-  "private": true,
   "scripts": {
     "test": "mocha"
   },
@@ -31,7 +30,6 @@
     "grunt-shell": "^1.0.1",
     "jsdoc": "^3.3.0-alpha9",
     "mocha": "^1.21.4",
-    "nodemailer": "^1.2.1",
     "should": "^4.0.4"
   }
 }
