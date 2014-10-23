@@ -29,34 +29,14 @@ var AdminUser = function (plz) {
         return;
       }
       
-      plz.get.database(function(error, database) {
-        if(error) {
-          callback(true, 'Cannot establish database connection');
-          return;
-        }
+      var query = {
+        collectionName: plz.config.admin.collection,
+        document: options,
+        uniqueFields: {email: options.email}
+      };
 
-        var user = database.collection(plz.config.admin.collection);
-
-        user.findOne({email: options.email}, function (error, result) {
-          if(error) {
-            callback(true, 'Lookup failed');
-            return;
-          }
-
-          if(result) {
-            callback(true, 'User already exists');
-            return;
-          }
-
-          user.insertOne(options, function (error, result) {
-            if(error) {
-              callback(true, 'Insert failed');
-              return;
-            }
-
-            callback(false, result);
-          });
-        });
+      plz.create.document(query, function(error, result){
+        callback(error, result);
       });
     });
   };
@@ -70,27 +50,12 @@ var AdminUser = function (plz) {
   * @param {user} callback
   */
   plz.get.user = function (options, callback) {
-    plz.get.database(function(error, database) {
-      if(error) {
-        callback(true, 'Cannot establish database connection');
-        return;
-      }
-
-      var user = database.collection(plz.config.admin.collection);
-
-      user.findOne(options, function (error, result) {
-        if(error) {
-          callback(true, 'Lookup failed');
-          return;
-        }
-
-        if(!result) {
-          callback(true, 'User does not exist');
-          return;
-        }
-
-        callback(false, result);
-      });
+    var query = {
+      collectionName: plz.config.admin.collection,
+      criteria: options
+    };
+    plz.get.document(query, function (error, result) {
+      callback(error, result);
     });
   };
 
@@ -103,22 +68,12 @@ var AdminUser = function (plz) {
   * @param {user} callback
   */
   plz.remove.user = function (options, callback) {
-    plz.get.database(function(error, database) {
-      if(error) {
-        callback(true, 'Cannot establish database connection');
-        return;
-      }
-
-      var user = database.collection(plz.config.admin.collection);
-
-      user.findOneAndRemove(options, function (error, result) {
-        if(error) {
-          callback(true, 'Remove failed');
-          return;
-        }
-
-        callback(false, result);
-      });
+    var query = {
+      collectionName: plz.config.admin.collection,
+      criteria: options
+    };
+    plz.remove.document(query, function(error, result) {
+      callback(error, result);
     });
   };
 
@@ -132,28 +87,13 @@ var AdminUser = function (plz) {
   * @param {user} callback
   */
   plz.edit.user = function (options, callback) {
-    plz.get.database(function(error, database) {
-      if(error) {
-        callback(true, 'Cannot establish database connection');
-        return;
-      }
-
-      var user = database.collection(plz.config.admin.collection);
-
-      user.findOneAndUpdate(options.criteria, options.update, 
-        function (error, result) {
-        if(error) {
-          callback(true, 'Edit failed');
-          return;
-        }
-
-        if(!result) {
-          callback(true, 'User does not exist');
-          return;
-        }
-
-        callback(false, result);
-      });
+    var query = {
+      collectionName: plz.config.admin.collection,
+      criteria: options.criteria,
+      update: options.update
+    };
+    plz.edit.document(query, function(error, result){
+      callback(error, result);
     });
   };
 
