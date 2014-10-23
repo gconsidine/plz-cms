@@ -16,8 +16,7 @@ var AuthorPage = function (plz) {
   plz.remove = plz.remove || {};
 
   var _required = plz.config.author.page.required,
-      _collectionName = plz.config.author.page.collection,
-      _page;
+      _collectionName = plz.config.author.page.collection;
 
   /**
   * Creates a page with given options and inserts it into the database, 
@@ -46,46 +45,21 @@ var AuthorPage = function (plz) {
         return;
       }
 
-      // check database for entry with duplicate title
-      // note to self: move common db CRUD operations inside plz.db module
-      // var query = {collection:plz.config.admin.collection,
-      //              searchKey:email}
-      //              entry:options}
-      // plz.create.dbentry(query, function(error, result){});
-      plz.get.database(function (error, database) {
-        _page = database.collection(_collectionName);
+      var currentTimestamp = new Date().getTime() / 1000;
 
-        var query = {pageTitle: options.pageTitle};
+      options.revisionNumber = 0;
+      options.createdAt = currentTimestamp;
+      options.modifiedAt = currentTimestamp;
+      options.status = 'created';
 
-        _page.findOne(query, function (error, result) {
-          if(error) {
-            callback(true, 'Lookup Failed');
-            return;
-          }
-
-          if(result) {
-            callback(true, 'Page already exists');
-            return;
-          }
-
-          // update timestamps and status due to creation event
-          var currentTimestamp = new Date().getTime() / 1000;
-
-          options.revisionNumber = 0;
-          options.createdAt = currentTimestamp;
-          options.modifiedAt = currentTimestamp;
-          options.status = 'created';
-
-          _page.insertOne(options, function (error, result) {
-            if(error) {
-              callback(true, 'Insert failed');
-              return;
-            }
-
-            callback(false, result);
-          });
-        });
-  	  });
+      var query = {
+        collectionName: _collectionName,
+        document: options,
+        uniqueFields: {pageTitle: options.pageTitle}
+      };
+      plz.create.document(query, function(error, result){
+        callback(error, result);
+	  });
     });
   };
 
@@ -106,28 +80,15 @@ var AuthorPage = function (plz) {
       return;
     }
 
-    plz.get.database(function (error, database) {
-      _page = database.collection(_collectionName);
-
-      // TODO: support search by _id
-      // If saving multiple revisions, get latest or check revisionNumber
-      var criteria = {pageTitle: options.pageTitle};
-      var update = {$set:{visibility: "public", status: "published"}};
-
-      _page.updateOne(criteria, update, function(error, result){
-
-        if(error) {
-          callback(true, 'Edit failed: ' + error);
-          return;
-        }
-
-        if(!result || result.matchedCount === 0 || result.modifiedCount === 0) {
-          callback(true, 'Could not find page with title ' + options.pageTitle);
-          return;
-        }
-
-        callback(false, result);
-      });
+    // TODO: support search by _id
+    //       If saving multiple revisions, get latest or check revisionNumber
+    var query = {
+      collectionName: _collectionName,
+      criteria: {pageTitle: options.pageTitle},
+      update:  {$set:{visibility: "public", status: "published"}}
+    };
+    plz.edit.document(query, function(error, result){
+      callback(error, result);
     });
   };
 
@@ -146,30 +107,14 @@ var AuthorPage = function (plz) {
       return;
     }
 
-    plz.get.database(function (error, database) {
-      _page = database.collection(_collectionName);
-
-      _page.findOne({pageTitle: options.pageTitle}, function(error, result) {
-        var message;
-
-        if (error) {
-          message = 'Failed to find entry matching ' + options.pageTitle;
-          message += ' in ' + plz.config.author.page.collection;
-
-          callback(true, message);
-          return;
-        } else {
-          if (!result || result.matchedCount === 0 || 
-              result.modifiedCount === 0){
-            message = 'Could not find page with title ' + options.pageTitle;
-
-            callback(true, message);
-            return;
-          }
-
-          callback(false, result);
-        }
-      });
+    // TODO: support search by _id
+    //       If saving multiple revisions, get latest or check revisionNumber
+    var query = {
+      collectionName: _collectionName,
+      criteria: {pageTitle: options.pageTitle}
+    };
+    plz.get.document(query, function (error, result) {
+      callback(error, result);
     });
   };
 
@@ -191,36 +136,19 @@ var AuthorPage = function (plz) {
       callback(true, 'Required field not present in options');
       return;
     }
-    plz.get.database(function(error, database) {
-      if(error) {
-        callback(true, 'Cannot establish database connection');
-        return;
-      }
-
-      _page = database.collection(_collectionName);
-
-      var currentTimestamp = new Date().getTime() / 1000;
-      var criteria = {pageTitle: options.pageTitle};
-      var update = {
+    var currentTimestamp = new Date().getTime() / 1000;
+    var query = {
+      collectionName: _collectionName,
+      criteria: {pageTitle: options.pageTitle},
+      update: {
         $set:{
           content: options.content, 
           modifiedAt: currentTimestamp
         }
-      };
-
-      _page.findOneAndUpdate(criteria, update, function (error, result) {
-        if(error) {
-          callback(true, 'Edit failed');
-          return;
-        }
-
-        if(!result) {
-          callback(true, 'Page does not exist');
-          return;
-        }
-
-        callback(false, result);
-      });
+      }
+    };
+    plz.edit.document(query, function(error, result){
+      callback(error, result);
     });
   };
 
@@ -240,22 +168,12 @@ var AuthorPage = function (plz) {
       callback(true, 'Required field not present in options');
       return;
     }
-    plz.get.database(function(error, database) {
-      if(error) {
-        callback(true, 'Cannot establish database connection');
-        return;
-      }
-
-      _page = database.collection(_collectionName);
-
-      _page.findOneAndDelete(options, function (error, result) {
-        if(error) {
-          callback(true, 'Remove failed');
-          return;
-        }
-
-        callback(false, result);
-      });
+    var query = {
+      collectionName: _collectionName,
+      criteria: {pageTitle: options.pageTitle}
+    };
+    plz.remove.document(query, function(error, result) {
+      callback(error, result);
     });
   };
 
@@ -264,7 +182,7 @@ var AuthorPage = function (plz) {
     for(var field in _required) {
       if(_required.hasOwnProperty(field)) {
         if(typeof options[field] === 'undefined') {
-          callback(true, 'Required field not present in options');
+          callback(true, 'Required field ' + field + ' not present in options');
           return;
         }
 
