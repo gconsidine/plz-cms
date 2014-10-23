@@ -1,4 +1,5 @@
-# plz-cms [![Build Status](https://travis-ci.org/gconsidine/plz-cms.svg)](https://travis-ci.org/gconsidine/plz-cms) [![Coverage Status](https://img.shields.io/coveralls/gconsidine/plz-cms.svg)](https://coveralls.io/r/gconsidine/plz-cms)[![npm Dependencies](https://david-dm.org/gconsidine/plz-cms.png)]
+# plz-cms[![Build Status](https://travis-ci.org/gconsidine/plz-cms.svg)](https://travis-ci.org/gconsidine/plz-cms) [![Coverage Status](https://img.shields.io/coveralls/gconsidine/plz-cms.svg)](https://coveralls.io/r/gconsidine/plz-cms) [![Dependency Status](https://david-dm.org/gconsidine/plz-cms.svg)](https://david-dm.org/gconsidine/plz-cms)
+
 
 A Node.js module built as a hub for the following plz-cms components:
 
