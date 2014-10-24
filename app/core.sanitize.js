@@ -1,3 +1,6 @@
+/**
+* @namespace core
+*/
 var CoreSanitize = function (plz) {
   'use strict';
 

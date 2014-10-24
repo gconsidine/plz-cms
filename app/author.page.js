@@ -2,12 +2,14 @@
  * Contains CRUD actions that can be performed on a page from the author 
  * component.
  *
- * @memberof author
- * @namespace author.page
+ * @namespace author
  */
 var AuthorPage = function (plz) {
   'use strict';
-  
+
+  var Utility = require('./utility.api')(plz),
+      database = Utility.db;
+ 
   plz = plz || {},
   plz.get = plz.get || {};
   plz.create = plz.create || {};
@@ -22,7 +24,7 @@ var AuthorPage = function (plz) {
   * Creates a page with given options and inserts it into the database, 
   * if allowed.
   *
-  * @memberof author.page
+  * @memberof author
   * @param {object} options
   * @param {string} options.userName - Used to check permissions
   * @param {string} options.pageTitle - Unique id used in page lookup
@@ -57,9 +59,10 @@ var AuthorPage = function (plz) {
         document: options,
         uniqueFields: {pageTitle: options.pageTitle}
       };
-      plz.create.document(query, function(error, result){
+
+      database.createDocument(query, function(error, result){
         callback(error, result);
-	  });
+	    });
     });
   };
 
@@ -67,7 +70,7 @@ var AuthorPage = function (plz) {
   * Publishes a page matching title in options, making it publicly
   * available for reading/routing
   *
-  * @memberof author.page
+  * @memberof author
   * @param {object} options
   * @param {string} options.userName - Used to check permissions
   * @param {string} options.pageTitle - Unique id used in page lookup
@@ -87,7 +90,8 @@ var AuthorPage = function (plz) {
       criteria: {pageTitle: options.pageTitle},
       update:  {$set:{visibility: "public", status: "published"}}
     };
-    plz.edit.document(query, function(error, result){
+
+    database.editDocument(query, function(error, result){
       callback(error, result);
     });
   };
@@ -95,7 +99,7 @@ var AuthorPage = function (plz) {
   /**
   * Fetches a page object matching the title specified in options
   *
-  * @memberof author.page
+  * @memberof author
   * @param {object} options
   * @param {string} options.userName - Used to check permissions
   * @param {string} options.pageTitle - Unique id used in page lookup
@@ -113,7 +117,8 @@ var AuthorPage = function (plz) {
       collectionName: _collectionName,
       criteria: {pageTitle: options.pageTitle}
     };
-    plz.get.document(query, function (error, result) {
+
+    database.getDocument(query, function (error, result) {
       callback(error, result);
     });
   };
@@ -122,7 +127,7 @@ var AuthorPage = function (plz) {
   * Modifies the content of a page if it exists based on the criteria options 
   * passed as the first argument.
   *
-  * @memberof author.page
+  * @memberof author
   * @param {object} options
   * @param {string} options.userName - Used to check permissions
   * @param {string} options.pageTitle - Unique id used in page lookup
@@ -136,7 +141,9 @@ var AuthorPage = function (plz) {
       callback(true, 'Required field not present in options');
       return;
     }
+
     var currentTimestamp = new Date().getTime() / 1000;
+
     var query = {
       collectionName: _collectionName,
       criteria: {pageTitle: options.pageTitle},
@@ -147,7 +154,8 @@ var AuthorPage = function (plz) {
         }
       }
     };
-    plz.edit.document(query, function(error, result){
+
+    database.editDocument(query, function(error, result) {
       callback(error, result);
     });
   };
@@ -156,7 +164,7 @@ var AuthorPage = function (plz) {
   * Deletes a page if it exists based on the criteria options passed as the
   * first argument.
   *
-  * @memberof author.page
+  * @memberof author
   * @param {object} options
   * @param {string} options.userName - Used to check permissions
   * @param {string} options.pageTitle - Unique id used in page lookup
@@ -168,11 +176,13 @@ var AuthorPage = function (plz) {
       callback(true, 'Required field not present in options');
       return;
     }
+
     var query = {
       collectionName: _collectionName,
       criteria: {pageTitle: options.pageTitle}
     };
-    plz.remove.document(query, function(error, result) {
+
+    database.removeDocument(query, function(error, result) {
       callback(error, result);
     });
   };
@@ -192,6 +202,7 @@ var AuthorPage = function (plz) {
         }
       }
     }
+
     callback(false);
   }
 

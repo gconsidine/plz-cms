@@ -1,25 +1,21 @@
 /**
-* @memberof core
-* @namespace core.mailer
+* @namespace utility
 */
-var CoreMailer = function (plz) {
+var UtilityMailer = function (plz) {
   'use strict';
 
   var Mailer = require('nodemailer');
-
-  plz = plz || {};
-  plz.get = plz.get || {};
 
   /**
   * Gets a transporter used to send mail based on the default mailer
   * configuration options sepcified.  A second parameter 'name' can optionally
   * be passed to specify a different mailer from the configuration.
   *
-  * @memberof core.mailer
+  * @memberof utility
   * @param {mailer} callback
   * @param {string=} - The name of a mailer from the configuration options.
   */
-  plz.get.mailer = function (callback, name) {
+  function getMailer (callback, name) {
     var mailer = plz.config.mailer.default;
 
     if(name) {
@@ -39,12 +35,14 @@ var CoreMailer = function (plz) {
     });
 
     callback(false, transporter);
-  };
+  }
   
-  return plz;
+  return {
+    getMailer: getMailer
+  };
 };
 
-module.exports = CoreMailer;
+module.exports = UtilityMailer;
 
 /**
 * @callback mailer
