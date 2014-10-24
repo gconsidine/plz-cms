@@ -35,19 +35,19 @@
 
     it('should not accpet undefined options', function () {
       (function () {
-        plz = require('../app/core.hub.js')();
+        plz = require('../app/core.hub')();
       }).should.throw();
     });
 
     it('should not accept malformed options', function () {
       (function () {
-        plz = require('../app/core.hub.js')(_invalidConfig);
+        plz = require('../app/core.hub')(_invalidConfig);
       }).should.throw();
     });
 
     it('should accept valid options', function () {
       (function () {
-        plz = require('../app/core.hub.js')(_validConfig);
+        plz = require('../app/core.hub')(_validConfig);
       }).should.not.throw();
     });
   });

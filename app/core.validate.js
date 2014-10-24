@@ -1,3 +1,6 @@
+/**
+* @namespace core
+*/
 var CoreValidate = function (plz) {
   'use strict';
 

@@ -1,9 +1,11 @@
 /**
-* @memberof admin
-* @namespace admin.user
+* @namespace admin
 */
 var AdminUser = function (plz) {
   'use strict';
+  
+  var Utility = require('./utility.api')(plz),
+      database = Utility.db;
 
   plz = plz || {};
   plz.create = plz.create || {};
@@ -18,7 +20,7 @@ var AdminUser = function (plz) {
   * are present and if the user doesn't already exist.  The user's email must
   * be unique.
   *
-  * @memberof admin.user
+  * @memberof admin
   * @param {object} options - Containing required fields for user creation
   * @param {user} callback
   */
@@ -35,7 +37,7 @@ var AdminUser = function (plz) {
         uniqueFields: {email: options.email}
       };
 
-      plz.create.document(query, function(error, result){
+      database.createDocument(query, function(error, result){
         callback(error, result);
       });
     });
@@ -45,7 +47,7 @@ var AdminUser = function (plz) {
   * Returns a single user matching the query options passed as the first
   * argument.
   *
-  * @memberof admin.user
+  * @memberof admin
   * @param {object} options - The query constraints for your search.
   * @param {user} callback
   */
@@ -54,7 +56,8 @@ var AdminUser = function (plz) {
       collectionName: plz.config.admin.collection,
       criteria: options
     };
-    plz.get.document(query, function (error, result) {
+
+    database.getDocument(query, function (error, result) {
       callback(error, result);
     });
   };
@@ -63,7 +66,7 @@ var AdminUser = function (plz) {
   * Deletes a user if it exists based on the criteria options passed as the
   * first argument.
   *
-  * @memberof admin.user
+  * @memberof admin
   * @param {object} options - The query constraints for your search.
   * @param {user} callback
   */
@@ -72,7 +75,8 @@ var AdminUser = function (plz) {
       collectionName: plz.config.admin.collection,
       criteria: options
     };
-    plz.remove.document(query, function(error, result) {
+
+    database.removeDocument(query, function(error, result) {
       callback(error, result);
     });
   };
@@ -82,7 +86,7 @@ var AdminUser = function (plz) {
   * then updating with the options.update property passed in the options 
   * object as the first argument.
   *
-  * @memberof admin.user
+  * @memberof admin
   * @param {object} options - The query constraints for your search.
   * @param {user} callback
   */
@@ -92,7 +96,8 @@ var AdminUser = function (plz) {
       criteria: options.criteria,
       update: options.update
     };
-    plz.edit.document(query, function(error, result){
+
+    database.editDocument(query, function(error, result){
       callback(error, result);
     });
   };
@@ -101,7 +106,7 @@ var AdminUser = function (plz) {
   * Returns a true result if a user's role is included in the roles provided in
   * the options object (whitelist).
   *
-  * @memberof admin.user
+  * @memberof admin
   * @param {object} options
   * @param {object} options.user - The user given via plz.login.user
   * @param {array} options.roles - An array of roles that are allowed
@@ -120,7 +125,7 @@ var AdminUser = function (plz) {
   * Returns a true result if a user's role is **not** included in the roles 
   * provided in the options object (blacklist).
   *
-  * @memberof admin.user
+  * @memberof admin
   * @param {object} options
   * @param {object} options.user - The user given via plz.login.user
   * @param {array} options.roles - An array of roles that are not allowed

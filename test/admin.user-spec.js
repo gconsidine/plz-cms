@@ -69,26 +69,27 @@
   describe('admin | Configuration', function () {
     it('should not accept undefined admin options', function () {
       (function () {
-        require('../app/core.hub.js')(_invalidConfig);
+        require('../app/core.hub')(_invalidConfig);
       }).should.throw();
     });
 
     it('should accept properly defined admin options', function () {
       (function () {
-        require('../app/core.hub.js')(_validConfig);
+        require('../app/core.hub')(_validConfig);
       }).should.not.throw();
     });
   });
 
   describe('admin.user | Public API', function () {
-    var plz, user;
+    var plz, user, Utility, db;
+
+    plz = require('../app/core.hub')(_validConfig);
+    Utility = require('../app/utility.api')(plz);
+    db = Utility.db;
 
     describe('plz.create.user()', function () {
-
       before(function (done) {
-        plz = require('../app/core.hub.js')(_validConfig);
-
-        plz.get.database(function (error, database) {
+        db.getDatabase(function (error, database) {
           user = database.collection('user');
           user.count(function(error, count) {
             if(count >= 1) {
@@ -132,7 +133,7 @@
       });
 
       after(function (done) {
-        plz.get.database(function (error, database) {
+        db.getDatabase(function (error, database) {
           user = database.collection('user');
           user.drop(function () {
             done();
@@ -143,7 +144,7 @@
 
     describe('plz.get.user()', function () {
       before(function (done) {
-        plz = require('../app/core.hub.js')(_validConfig);
+        plz = require('../app/core.hub')(_validConfig);
 
         plz.create.user(document, function () {
           done();
@@ -166,7 +167,7 @@
       });
 
       after(function (done) {
-        plz.get.database(function (error, database) {
+        db.getDatabase(function (error, database) {
           var user = database.collection('user');
           user.drop(function () {
             done();
@@ -177,7 +178,7 @@
 
     describe('plz.remove.user()', function () {
       before(function (done) {
-        plz = require('../app/core.hub.js')(_validConfig);
+        plz = require('../app/core.hub')(_validConfig);
 
         plz.create.user(document, function () {
           done();
@@ -200,7 +201,7 @@
       });
 
       after(function (done) {
-        plz.get.database(function (error, database) {
+        db.getDatabase(function (error, database) {
           var user = database.collection('user');
           user.drop(function () {
             done();
@@ -211,7 +212,7 @@
 
     describe('plz.edit.user()', function () {
       before(function (done) {
-        plz = require('../app/core.hub.js')(_validConfig);
+        plz = require('../app/core.hub')(_validConfig);
 
         plz.create.user(document, function () {
           done();
@@ -252,7 +253,7 @@
       });
 
       after(function (done) {
-        plz.get.database(function (error, database) {
+        db.getDatabase(function (error, database) {
           var user = database.collection('user');
           user.drop(function () {
             done();
@@ -265,7 +266,7 @@
       var user;
 
       before(function (done) {
-        plz = require('../app/core.hub.js')(_validConfig);
+        plz = require('../app/core.hub')(_validConfig);
 
         plz.create.user(document, function (error, result) {
           user = result.ops[0];
@@ -300,7 +301,7 @@
       });
 
       after(function (done) {
-        plz.get.database(function (error, database) {
+        db.getDatabase(function (error, database) {
           var user = database.collection('user');
           user.drop(function () {
             done();
@@ -313,7 +314,7 @@
       var user;
 
       before(function (done) {
-        plz = require('../app/core.hub.js')(_validConfig);
+        plz = require('../app/core.hub')(_validConfig);
 
         plz.create.user(document, function (error, result) {
           user = result.ops[0];
@@ -348,7 +349,7 @@
       });
 
       after(function (done) {
-        plz.get.database(function (error, database) {
+        db.getDatabase(function (error, database) {
           var user = database.collection('user');
           user.drop(function () {
             done();

@@ -98,17 +98,16 @@
   });
 
   describe('author.page | Public API', function () {
-    var plz,
-        pageTable;
+    var plz, pageTable, Utility, db;
+
+    plz = require('../app/core.hub')(_validConfig);
+    Utility = require('../app/utility.api')(plz);
+    db = Utility.db;
 
     describe('plz.create.page()', function () {
-
       before(function (done) {
-        plz = require('../app/core.hub')(_validConfig);
-
-        plz.get.database(function (error, database) {
+        db.getDatabase(function (error, database) {
           pageTable = database.collection(_validConfig.author.page.collection);
-
           pageTable.count(function(error, count) {
             if(count >= 1) {
               pageTable.drop(function () {
@@ -176,7 +175,7 @@
       before(function (done) {
         plz = require('../app/core.hub')(_validConfig);
 
-        plz.get.database(function (error, database) {
+        db.getDatabase(function (error, database) {
           pageTable = database.collection(_validConfig.author.page.collection);
           plz.create.page(_pageOptions, function (error) {
             error.should.be.false;
@@ -235,7 +234,7 @@
       before(function (done) {
         plz = require('../app/core.hub')(_validConfig);
 
-        plz.get.database(function (error, database) {
+        db.getDatabase(function (error, database) {
           pageTable = database.collection(_validConfig.author.page.collection);
           plz.create.page(_pageOptions, function (error) {
             error.should.be.false;
@@ -290,7 +289,7 @@
       before(function (done) {
         plz = require('../app/core.hub')(_validConfig);
 
-        plz.get.database(function (error, database) {
+        db.getDatabase(function (error, database) {
           pageTable = database.collection(_validConfig.author.page.collection);
           plz.create.page(_pageOptions, function (error) {
             error.should.be.false;
@@ -350,7 +349,7 @@
       before(function (done) {
         plz = require('../app/core.hub')(_validConfig);
 
-        plz.get.database(function (error, database) {
+        db.getDatabase(function (error, database) {
           pageTable = database.collection(_validConfig.author.page.collection);
           plz.create.page(_pageOptions, function (error) {
             error.should.be.false;

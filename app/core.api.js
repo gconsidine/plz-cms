@@ -7,8 +7,6 @@ var CoreApi = function (config) {
 
   require('./core.validate')(plz),
   require('./core.sanitize')(plz);
-  require('./core.database')(plz);
-  require('./core.mailer')(plz);
 
   if(plz.config.modules.admin) {
     require('./admin.api')(plz);
@@ -25,7 +23,11 @@ var CoreApi = function (config) {
   if(plz.config.modules.scout) {
     require('./scout.api')(plz);
   }
-  
+
+  if(plz.config.modules.socialite) {
+    require('./sociallite.api')(plz);
+  }
+ 
   return plz;
 };
 

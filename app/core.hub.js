@@ -48,6 +48,7 @@ var CoreHub = function (config) {
 
           return false;
         }
+
         for(module in options.author.modules) {
           if(options.author.modules.hasOwnProperty(module) &&
              options.author.modules[module] === true)
@@ -60,13 +61,12 @@ var CoreHub = function (config) {
           }
         }
 
-
         break;
       case 'merchant':
-        
         break;
       case 'scout':
-
+        break;
+      case 'socialite':
         break;
     }
 
