@@ -36,9 +36,39 @@ var UtilityMailer = function (plz) {
 
     callback(false, transporter);
   }
+
+  function sendMail(options, callback) {
+    getMailer(function (error, transporter) {
+      var from;
+
+      if(options.name) {
+        from = '<' + plz.config.mailer[options.name].user + '>';
+      } else {
+        from = '<' + plz.config.mailer.default.user + '>';
+      }
+
+      var mailOptions = {
+        from: from,
+        to: options.to,
+        subject: options.subject,
+        body: options.body
+      };
+
+      transporter.sendMail(mailOptions, function (error, result) {
+        if(error) {
+          callback(true, 'Email not sent');
+          return;
+        }
+
+        callback(false, result);
+      });
+
+    }, options.name);
+  }
   
   return {
-    getMailer: getMailer
+    getMailer: getMailer,
+    sendMail: sendMail
   };
 };
 
