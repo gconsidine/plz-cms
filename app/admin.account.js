@@ -17,15 +17,27 @@ var AdminAccount = function (plz) {
   plz.allow = plz.allow || {};
 
   plz.login.user = function (options, callback) {
+    var query = {
+      collectionName: plz.config.admin.collection,
+      criteria: options
+    };
 
+    database.getDocument(query, function (error, user) {
+      if(error) {
+        callback(true, user);
+        return;
+      }
+
+      callback(false, user);
+    });
   };
 
   plz.reset.password = function (options, callback) {
-
+    console.log(options, callback, mailer);
   };
 
   plz.activate.user = function (options, callback) {
-
+    console.log(options, callback, mailer);
   };
 
   /**

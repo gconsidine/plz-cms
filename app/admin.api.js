@@ -2,7 +2,7 @@ var AdminApi = function (plz) {
   'use strict'; 
   
   require('./admin.user')(plz);
-  require('./admin.article')(plz);
+  require('./admin.account')(plz);
 
   return plz;
 };

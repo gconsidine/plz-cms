@@ -16,9 +16,9 @@ included in a configuration.
  
 ### Configuration
 
-  When plz-cms is require()'d for use, a single member function is exposed: 
-  `configure(options, callback);` Configuration options are supplied in the 
-  following form:
+  When plz-cms is require()'d for use, a configuration object should be passed
+  to the module, as in `var plz = require('plz-cms')(config);` -- Here are 
+  basic configuration options for the core component of plz-cms:
 
     {
       components: {
@@ -46,7 +46,7 @@ included in a configuration.
 
   Here's a basic configuration including just the *Admin* component:
 
-    var options = {
+    var config = {
       modules: {
         admin: true
       },
@@ -80,7 +80,7 @@ included in a configuration.
       }
     };
 
-    var plz = require('plz-cms');
+    var plz = require('plz-cms')(config);
     
     plz.validate.typeAs('string', 'success'); // true
 
