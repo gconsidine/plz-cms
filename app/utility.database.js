@@ -208,14 +208,69 @@ var UtilityDatabase = function (plz) {
 
       var collection = database.collection(options.collectionName);
 
-      collection.findOneAndDelete(options.criteria, function (error, result) {
-        if(error) {
-          callback(true, 'Remove failed: ' + error);
-          return;
-        }
+      // Default: find and delete only one document
+      if (!options.hasOwnProperty('limit') || options.limit === 1) {
+        collection.findOneAndDelete(options.criteria, function (error, result) {
+          if(error) {
+            callback(true, 'Remove failed: ' + error);
+            return;
+          }
 
-        callback(false, result);
-      });
+          callback(false, result);
+        });
+      }
+      else if (options.limit === '*' || options.limit > 0){
+        // find and remove all matching entries
+        // I couldn't find an atomic bulk find and delete
+        collection.find(options.criteria).toArray(function(error, docs) {
+          if(error) {
+            callback(true, 'Remove failed: ' + error);
+            return;
+          }
+          if(docs.length === 0){
+            var message = [
+              'Failed to find document matching',
+              JSON.stringify(options.criteria),
+              'in ' + options.collectionName
+            ].join(' ');
+            callback(true, message);
+            return;
+          }
+
+          var limit = options.limit;
+          if (limit === '*'){
+            limit = docs.length;
+          }
+          var removedDocs = [];
+          var removedCallback = function(error, result){
+            if(error) {
+              if (removedDocs.length === 0) {
+                callback(true, 'Remove failed: ' + error);
+                return;
+              }
+              else{
+                callback(false, removedDocs);
+                return;
+              }
+            }
+            else{
+              removedDocs.push(result);
+              if (removedDocs.length >= limit) {
+                callback(false, removedDocs);
+                return;
+              }
+            }
+          };
+          for (var findIndex = 0; findIndex < limit; findIndex++)
+          {
+            var criteria = { _id: docs[findIndex]._id };
+            collection.findOneAndDelete(criteria, removedCallback);
+          }
+        });
+      }
+      else{
+        callback(true, 'Invalid value for limit: ' + options.limit);
+      }
     });
   }
 
