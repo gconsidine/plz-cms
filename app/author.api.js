@@ -18,8 +18,8 @@ var AuthorApi = function (plz) {
         case 'page':
           require('./author.page')(plz);
           break;
-        case 'article':
-          require('./author.article')(plz);
+        case 'post':
+          require('./author.post')(plz);
           break;
       }
     }
