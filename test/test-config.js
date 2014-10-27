@@ -102,7 +102,7 @@ var TestConfig = function () {
     author: {
       modules: {
         page: true,
-        article: true
+        post: true
       },
       page: {
         collection: 'page',
@@ -117,11 +117,11 @@ var TestConfig = function () {
           status: 'string'
         }
       },
-      article: {
-        collection: 'article',
+      post: {
+        collection: 'post',
         required: {
           userName: 'string',
-          parentPage: 'string',
+          postTitle: 'string',
           visibility: 'string',
           contentType: 'string',
           content: 'string',
@@ -169,6 +169,24 @@ var TestConfig = function () {
     status: 'draft'
   };
 
+  var validPost = {
+    userName: 'chahm',
+    postTitle: 'Simple post',
+    visibility: 'public',
+    createdAt: 3135000000,
+    modifiedAt: 3135000000,
+    status: 'draft',
+    contentType: 'text/plain',
+    content: ''
+  };
+
+  var invalidPost = {
+    postTitle: 'invalid options',
+    createdAt: 3134999944,
+    modifiedAt: 3134999944,
+    status: 'draft'
+  };
+
   var validUser = {
     name: 'greg',
     email: 'name@domain.com',
@@ -198,6 +216,8 @@ var TestConfig = function () {
     invalidAuthorConfig: invalidAuthorConfig,
     validPage: validPage,
     invalidPage: invalidPage,
+    validPost: validPost,
+    invalidPost: invalidPost,
     validUser: validUser,
     invalidUser: invalidUser
   };
