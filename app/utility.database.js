@@ -1,5 +1,6 @@
 /**
-* @namespace utility
+* @memberof utility
+* @namespace utility.database
 */
 var UtilityDatabase = function (plz) {
   'use strict';
@@ -13,7 +14,7 @@ var UtilityDatabase = function (plz) {
   * according to 'uniqueFields', and inserts the document into the specified
   * collection.
   *
-  * @memberof utility
+  * @memberof utility.database
   * @param {object} options
   * @param {string} options.collectionName
   * @param {object} options.document
@@ -69,7 +70,7 @@ var UtilityDatabase = function (plz) {
   * Opens a database connection, checks for an existing document matching 
   * criteria, and modifies the matching document with the update command.
   *
-  * @memberof utility
+  * @memberof utility.database
   * @param {object} options
   * @param {string} options.collectionName
   * @param {object} options.criteria
@@ -125,7 +126,7 @@ var UtilityDatabase = function (plz) {
   * Opens a database connection, checks for an existing document matching 
   * criteria, and passes the matching document to the given callback
   *
-  * @memberof utility
+  * @memberof utility.database
   * @param {object} options
   * @param {string} options.collectionName
   * @param {object} options.criteria
@@ -179,7 +180,7 @@ var UtilityDatabase = function (plz) {
   * Opens a database connection, checks for an existing document matching 
   * criteria, and removes the matching document from the specified collection
   *
-  * @memberof utility
+  * @memberof utility.database
   * @param {object} options
   * @param {string} options.collectionName
   * @param {object} options.criteria

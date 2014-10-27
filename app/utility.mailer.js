@@ -1,5 +1,6 @@
 /**
-* @namespace utility
+* @memberof utility
+* @namespace utility.mailer
 */
 var UtilityMailer = function (plz) {
   'use strict';
@@ -11,7 +12,7 @@ var UtilityMailer = function (plz) {
   * configuration options sepcified.  A second parameter 'name' can optionally
   * be passed to specify a different mailer from the configuration.
   *
-  * @memberof utility
+  * @memberof utility.mailer
   * @param {mailer} callback
   * @param {string=} - The name of a mailer from the configuration options.
   */

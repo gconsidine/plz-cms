@@ -2,7 +2,8 @@
  * Contains CRUD actions that can be performed on a page from the author 
  * component.
  *
- * @namespace author
+ * @memberof author
+ * @namespace author.page
  */
 var AuthorPage = function (plz) {
   'use strict';
@@ -24,7 +25,7 @@ var AuthorPage = function (plz) {
   * Creates a page with given options and inserts it into the database, 
   * if allowed.
   *
-  * @memberof author
+  * @memberof author.page
   * @param {object} options
   * @param {string} options.userName - Used to check permissions
   * @param {string} options.pageTitle - Unique id used in page lookup
@@ -70,7 +71,7 @@ var AuthorPage = function (plz) {
   * Publishes a page matching title in options, making it publicly
   * available for reading/routing
   *
-  * @memberof author
+  * @memberof author.page
   * @param {object} options
   * @param {string} options.userName - Used to check permissions
   * @param {string} options.pageTitle - Unique id used in page lookup
@@ -99,7 +100,7 @@ var AuthorPage = function (plz) {
   /**
   * Fetches a page object matching the title specified in options
   *
-  * @memberof author
+  * @memberof author.page
   * @param {object} options
   * @param {string} options.userName - Used to check permissions
   * @param {string} options.pageTitle - Unique id used in page lookup
@@ -127,7 +128,7 @@ var AuthorPage = function (plz) {
   * Modifies the content of a page if it exists based on the criteria options 
   * passed as the first argument.
   *
-  * @memberof author
+  * @memberof author.page
   * @param {object} options
   * @param {string} options.userName - Used to check permissions
   * @param {string} options.pageTitle - Unique id used in page lookup
@@ -164,7 +165,7 @@ var AuthorPage = function (plz) {
   * Deletes a page if it exists based on the criteria options passed as the
   * first argument.
   *
-  * @memberof author
+  * @memberof author.page
   * @param {object} options
   * @param {string} options.userName - Used to check permissions
   * @param {string} options.pageTitle - Unique id used in page lookup
