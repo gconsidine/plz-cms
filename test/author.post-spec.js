@@ -211,7 +211,7 @@ describe('author.post | Public API', function () {
     it('should fetch multiple posts using label', function(done) {
       Tc.anotherValidPost.postTitle = 'post 3';
       Tc.anotherValidPost._id = undefined;
-      plz.create.post(Tc.anotherValidPost, function (error, result) {
+      plz.create.post(Tc.anotherValidPost, function (error) {
         error.should.be.false;
         var request = {
           label: 'news',
@@ -246,7 +246,7 @@ describe('author.post | Public API', function () {
         content: 'new content'
       };
 
-      plz.edit.post(editRequest, function (error, result) {
+      plz.edit.post(editRequest, function (error) {
         error.should.be.false;
         var getRequest = {
           label: 'news',
