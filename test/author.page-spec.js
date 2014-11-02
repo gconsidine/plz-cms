@@ -63,7 +63,13 @@ describe('author.page | Public API', function () {
           pageCollection.findOne(findOptions, function (error, result) {
             for(var field in Tc.validPage) {
               if(Tc.validPage.hasOwnProperty(field) && field !== "_id") {
-                result[field].should.equal(Tc.validPage[field]);
+                if(result[field] instanceof Array){
+                  var arrayString = result[field].toString();
+                  arrayString.should.equal(Tc.validPage[field].toString());
+                }
+                else{
+                  result[field].should.equal(Tc.validPage[field]);
+                }
               }
             }
             done();
@@ -187,6 +193,73 @@ describe('author.page | Public API', function () {
         done();
       });
     });
+
+    it('should fetch a page using _id', function(done) {
+      plz.create.page(Tc.anotherValidPage, function (error, result) {
+        error.should.be.false;
+        var request = {
+          _id: result.insertedId
+        };
+        plz.get.page(request, function (error, result) {
+          error.should.be.false;
+          result.should.not.be.empty;
+          done();
+        });
+      });
+    });
+
+    it('should fetch multiple pages using label', function(done) {
+      Tc.anotherValidPage.pageTitle = 'page 3';
+      Tc.anotherValidPage._id = undefined;
+      plz.create.page(Tc.anotherValidPage, function (error, result) {
+        error.should.be.false;
+        var request = {
+          label: 'mainmenu',
+          limit: '*'
+        };
+        plz.get.page(request, function (error, result) {
+          error.should.be.false;
+          result.should.not.be.empty;
+          result.length.should.equal(3);
+          done();
+        });
+      });
+    });
+
+    it('should not fetch more pages than specified limit', function(done) {
+      var request = {
+        label: 'mainmenu',
+        limit: 2
+      };
+      plz.get.page(request, function (error, result) {
+        error.should.be.false;
+        result.should.not.be.empty;
+        result.length.should.equal(request.limit);
+        done();
+      });
+    });
+
+    it('should not fetch previous revisions using label', function(done) {
+      var editRequest = {
+        userName: 'chahm',
+        pageTitle: 'Simple plz-cms page',
+        content: 'new content'
+      }
+      plz.edit.page(editRequest, function (error, result) {
+        error.should.be.false;
+        var getRequest = {
+          label: 'mainmenu',
+          limit: '*'
+        };
+        plz.get.page(getRequest, function (error, result) {
+          error.should.be.false;
+          result.should.not.be.empty;
+          result.length.should.equal(3);
+          done();
+        });
+      });
+    });
+
 
     it('should return error if page does not exist', function(done) {
       var request = {

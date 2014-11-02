@@ -63,7 +63,13 @@ describe('author.post | Public API', function () {
           postCollection.findOne(findOptions, function (error, result) {
             for(var field in Tc.validPost) {
               if(Tc.validPost.hasOwnProperty(field) && field !== "_id") {
-                result[field].should.equal(Tc.validPost[field]);
+                if(result[field] instanceof Array){
+                  var arrayString = result[field].toString();
+                  arrayString.should.equal(Tc.validPost[field].toString());
+                }
+                else{
+                  result[field].should.equal(Tc.validPost[field]);
+                }
               }
             }
             done();
@@ -175,7 +181,7 @@ describe('author.post | Public API', function () {
       });
     });
 
-    it('should fetch a post with required fields present', function(done) {
+    it('should fetch a post using postTitle', function(done) {
       var request = {
         userName: 'chahm',
         postTitle: 'Simple post',
@@ -185,6 +191,73 @@ describe('author.post | Public API', function () {
         error.should.be.false;
         result.should.not.be.empty;
         done();
+      });
+    });
+
+    it('should fetch a post using _id', function(done) {
+      plz.create.post(Tc.anotherValidPost, function (error, result) {
+        error.should.be.false;
+        var request = {
+          _id: result.insertedId
+        };
+        plz.get.post(request, function (error, result) {
+          error.should.be.false;
+          result.should.not.be.empty;
+          done();
+        });
+      });
+    });
+
+    it('should fetch multiple posts using label', function(done) {
+      Tc.anotherValidPost.postTitle = 'post 3';
+      Tc.anotherValidPost._id = undefined;
+      plz.create.post(Tc.anotherValidPost, function (error, result) {
+        error.should.be.false;
+        var request = {
+          label: 'news',
+          limit: '*'
+        };
+        plz.get.post(request, function (error, result) {
+          error.should.be.false;
+          result.should.not.be.empty;
+          result.length.should.equal(3);
+          done();
+        });
+      });
+    });
+
+    it('should not fetch more posts than specified limit', function(done) {
+      var request = {
+        label: 'news',
+        limit: 2
+      };
+      plz.get.post(request, function (error, result) {
+        error.should.be.false;
+        result.should.not.be.empty;
+        result.length.should.equal(request.limit);
+        done();
+      });
+    });
+
+    it('should not fetch previous revisions using label', function(done) {
+      var editRequest = {
+        userName: 'chahm',
+        postTitle: 'Simple post',
+        content: 'new content'
+      };
+
+      plz.edit.post(editRequest, function (error, result) {
+        error.should.be.false;
+        var getRequest = {
+          label: 'news',
+          limit: '*'
+        };
+        plz.get.post(getRequest, function (error, result) {
+          error.should.be.false;
+          result.should.not.be.empty;
+          result.length.should.equal(3);
+          done();
+        });
       });
     });
 

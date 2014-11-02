@@ -129,7 +129,7 @@ var UtilityDatabase = function (plz) {
   * @param {object} options
   * @param {string} options.collectionName
   * @param {object} options.criteria
-  * @param {object} options.update
+  * @param {object} options.limit
   * @param {database} callback
   */
   function getDocument(options, callback) {
@@ -153,25 +153,58 @@ var UtilityDatabase = function (plz) {
 
       var collection = database.collection(options.collectionName);
 
-      collection.findOne(options.criteria, function (error, result) {
-        if(error) {
-          callback(true, 'Database findOne error: ' + error);
-          return;
+      if (!options.hasOwnProperty('limit') || options.limit === 1) {
+        collection.findOne(options.criteria, function (error, result) {
+          if(error) {
+            callback(true, 'Database findOne error: ' + error);
+            return;
+          }
+
+          if(!result || result.matchedCount === 0) {
+            var message = [
+              'Failed to find document matching',
+               JSON.stringify(options.criteria),
+               'in ' + options.collectionName
+            ].join(' ');
+
+            callback(true, message);
+            return;
+          }
+
+          callback(false, result);
+        });
+      }
+      else if (options.limit === '*' || options.limit > 0){
+        var findCursor;
+        if (options.limit === '*') {
+          findCursor = collection.find(options.criteria);
         }
-
-        if(!result || result.matchedCount === 0) {
-          var message = [
-            'Failed to find document matching',
-             JSON.stringify(options.criteria),
-             'in ' + options.collectionName
-          ].join(' ');
-
-          callback(true, message);
-          return;
+        else {
+          findCursor = collection.find(options.criteria).limit(options.limit);
         }
+        findCursor.toArray(function(error, docs) {
+          if(error) {
+            callback(true, 'Database find error: ' + error);
+            return;
+          }
+          if(docs.length === 0){
+            var message = [
+              'Failed to find document matching',
+               JSON.stringify(options.criteria),
+               'in ' + options.collectionName
+            ].join(' ');
 
-        callback(false, result);
-      });
+            callback(true, message);
+            return;
+          }
+          else if (options.limit === '*' || options.limit > docs.length){
+            callback(false, docs);
+          }
+          else{
+            callback(false, docs.slice(0, options.limit));
+          }
+        });
+      }
     });
   }
 
@@ -183,7 +216,7 @@ var UtilityDatabase = function (plz) {
   * @param {object} options
   * @param {string} options.collectionName
   * @param {object} options.criteria
-  * @param {object} options.update
+  * @param {object} options.limit
   * @param {database} callback
   */
   function removeDocument(options, callback) {
