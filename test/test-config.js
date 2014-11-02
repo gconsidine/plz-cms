@@ -154,12 +154,25 @@ var TestConfig = function () {
   var validPage = {
     userName: 'chahm',
     pageTitle: 'Simple plz-cms page',
+    labels: ['mainmenu'],
     visibility: 'public',
     createdAt: 3134999944,
     modifiedAt: 3134999944,
     status: 'draft',
     contentType: 'text/plain',
-    content: ''
+    content: 'The text content'
+  };
+
+  var anotherValidPage = {
+    userName: 'chahm',
+    pageTitle: 'Another plz-cms page',
+    labels: ['mainmenu'],
+    visibility: 'public',
+    createdAt: 3134999944,
+    modifiedAt: 3134999944,
+    status: 'draft',
+    contentType: 'text/plain',
+    content: 'Some different content'
   };
 
   var invalidPage = {
@@ -172,12 +185,25 @@ var TestConfig = function () {
   var validPost = {
     userName: 'chahm',
     postTitle: 'Simple post',
+    labels: ['news'],
     visibility: 'public',
     createdAt: 3135000000,
     modifiedAt: 3135000000,
     status: 'draft',
     contentType: 'text/plain',
-    content: ''
+    content: 'some text'
+  };
+
+  var anotherValidPost = {
+    userName: 'chahm',
+    postTitle: 'Simple post 2',
+    labels: ['news'],
+    visibility: 'public',
+    createdAt: 3135000000,
+    modifiedAt: 3135000000,
+    status: 'draft',
+    contentType: 'text/plain',
+    content: 'some more text'
   };
 
   var invalidPost = {
@@ -215,8 +241,10 @@ var TestConfig = function () {
     validAuthorConfig: validAuthorConfig,
     invalidAuthorConfig: invalidAuthorConfig,
     validPage: validPage,
+    anotherValidPage: anotherValidPage,
     invalidPage: invalidPage,
     validPost: validPost,
+    anotherValidPost: anotherValidPost,
     invalidPost: invalidPost,
     validUser: validUser,
     invalidUser: invalidUser
