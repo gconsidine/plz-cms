@@ -4,25 +4,36 @@
 */
 var AdminAccount = function (plz) {
   'use strict';
-
+  
   var Utility = require('./utility.api')(plz),
-      database = Utility.db,
-      mailer = Utility.mailer;
+      _database = Utility.db,
+      _mailer = Utility.mailer;
 
   plz = plz || {};
   plz.login = plz.login || {};
-  plz.reset = plz.reset || {};
-  plz.activate = plz.activate || {};
+  plz.send = plz.send || {};
+  plz.authorize = plz.authorize || {};
+  plz.complete = plz.complete || {};
   plz.restrict = plz.restrict || {};
   plz.allow = plz.allow || {};
 
+  /**
+  * Returns the user if the login credentials match, otherwise a error is set 
+  * to true and a string response is returned.
+  * 
+  * @memberof admin.account
+  * @param {object} options
+  * @param {string} options.email - A user's email address 
+  * @param {string} options.password - The user's password as stored in the DB
+  * @param {login} callback
+  */
   plz.login.user = function (options, callback) {
     var query = {
       collectionName: plz.config.admin.collection,
       criteria: options
     };
 
-    database.getDocument(query, function (error, user) {
+    _database.getDocument(query, function (error, user) {
       if(error) {
         callback(true, user);
         return;
@@ -32,13 +43,109 @@ var AdminAccount = function (plz) {
     });
   };
 
-  plz.reset.password = function (options, callback) {
-    console.log(options, callback, mailer);
+  /**
+  * Send a password reset link to the email specified in the options providided 
+  * the user already has an active account.  Email is sent from the default 
+  * mailer set in the plz-cms configuration options.
+  *
+  * @memberof admin.account
+  * @param {object} options
+  * @param {object} options.email - A user's email address 
+  * @param {string} options.subject - The subject of the email
+  * @param {string} options.body - The message body of the email
+  * @param {string} options.hash - The hash used for reset validation
+  * @param {mail} callback
+  */
+  plz.send.reset = function (options, callback) {
+    options.status = 'reset-pending';
+
+    sendLink(options, function (error, result) {
+      if(error) {
+        callback(true, result);
+        return;
+      }
+
+      callback(false, result);
+    });
   };
 
-  plz.activate.user = function (options, callback) {
-    console.log(options, callback, mailer);
+  /**
+  * Send an account activation link to a new user
+  *
+  * @memberof admin.account
+  * @param {object} options
+  * @param {object} options.user - A user object 
+  * @param {string} options.subject - The subject of the email
+  * @param {string} options.body - The message body of the email
+  * @param {string} options.hash - The hash used to validate account activation
+  * @param {mail} callback
+  */
+  plz.send.activation = function (options, callback) {
+    options.status = 'activation-pending';
+
+    sendLink(options, function (error, result) {
+      if(error) {
+        callback(true, result);
+        return;
+      }
+
+      callback(false, result);
+    });
   };
+
+  /**
+  * Returns a user with a matching tempAuth hash, email, and status.  Alias for
+  * authorize()
+  *
+  * @memberof admin.account
+  * @param {object} options
+  * @param {string} options.email - Email address of the user
+  * @param {string} options.hash - The hash used to validate account activation
+  * @param {authorize} callback
+  */
+  plz.authorize.reset =  authorize;
+
+  /**
+  * Returns a user with a matching tempAuth hash, email, and status. Alias for 
+  * authorize().
+  *
+  * @memberof admin.account
+  * @param {object} options
+  * @param {string} options.email - Email address of the user
+  * @param {string} options.hash - The hash used to validate account activation
+  * @param {authorize} callback
+  */
+  plz.authorize.activation = authorize;
+
+  /**
+  * Finds the user with matching tempAuth hash, email, and status, and updates 
+  * the user's password and status.  Passwords are validated for complexity and
+  * status is set to 'active' when successful.
+  *
+  * @memberof admin.account
+  * @param {object} options
+  * @param {string} options.email - Email address of the user
+  * @param {string} options.hash - The hash used to validate account activation
+  * @param {string} options.passwordNew - New password set by user 
+  * @param {string} options.passwordConfirm - New password repeated
+  * @param {complete} callback
+  */
+  plz.complete.reset = completeAction; 
+
+  /**
+  * Finds the user with matching tempAuth hash, email, and status, and updates 
+  * the user's password and status.  Passwords are validated for complexity and
+  * status is set to 'active' when successful.
+  *
+  * @memberof admin.account
+  * @param {object} options
+  * @param {string} options.email - Email address of the user
+  * @param {string} options.hash - The hash used to validate account activation
+  * @param {string} options.passwordNew - New password set by user 
+  * @param {string} options.passwordConfirm - New password repeated
+  * @param {complete} callback
+  */
+  plz.complete.activation = completeAction; 
 
   /**
   * Returns a true result if a user's role is included in the roles provided in
@@ -77,11 +184,116 @@ var AdminAccount = function (plz) {
 
     callback(false, true);
   };
-  
+
+  function sendLink(options, callback) {
+    var collectionName = plz.config.admin.collection;
+
+    var query = {
+      collectionName: collectionName, 
+      criteria: { email: options.user.email },
+      update: {
+        $set: {
+          status: options.status,
+          modifiedAt: new Date().getTime() / 1000,
+          tempAuth: options.hash
+        }
+      }
+    };
+
+    _database.editDocument(query, function (error, result) {
+      if(error) {
+        callback(true, result);
+        return;
+      }
+
+      var mailOptions = {
+        to: options.user.email,
+        subject: options.subject,
+        body: options.body
+      };
+      
+      _mailer.sendMail(mailOptions, function (error, result) {
+        if(error) {
+          callback(true, 'Mail not sent');
+          return;
+        }
+
+        callback(false, result);
+      });
+    });
+  }
+
+  function authorize(options, callback) {
+    var collectionName = plz.config.admin.collection;
+
+    var query = {
+      collectionName: collectionName,
+      criteria: { 
+        email: options.email,
+        tempAuth: options.hash
+      }
+    };
+
+    _database.getDocument(query, function (error, result) {
+      if(error) {
+        callback(true, false);
+        return;
+      }
+
+      if(!result) {
+        callback(true, false);
+        return;
+      }
+
+      callback(false, true);
+    });
+  }
+
+  function completeAction(options, callback) {
+    if(!plz.validate.complexity(options.passwordNew)) {
+      callback(true, 'Password does not meet the complexity requirements');
+      return;
+    }
+
+    if(!plz.validate.match(options.passwordNew, options.passwordConfirm)) {
+      callback(true, 'Passwords do not match');
+      return;
+    }
+
+    var collectionName = plz.config.admin.collection;
+
+    var query = {
+      collectionName: collectionName,
+      criteria: { email: options.email },
+      update: {
+        $set: {
+          status: 'active',
+          modifiedAt: new Date().getTime() / 1000
+        }
+      }
+    };
+
+    _database.editDocument(query, function (error, result) {
+      if(error) {
+        callback(true, result);
+        return;
+      }
+
+      callback(false, result);
+    });
+  }
+
   return plz;
 };
 
 module.exports = AdminAccount;
+
+/**
+* @callback login
+* @param {boolean} error - Indicating success/failure of the call
+* @param {object|string} result - User document object if successful, otherwise
+* a string response message.
+*/
 
 /**
 * @callback access

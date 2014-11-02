@@ -211,7 +211,7 @@ describe('author.page | Public API', function () {
     it('should fetch multiple pages using label', function(done) {
       Tc.anotherValidPage.pageTitle = 'page 3';
       Tc.anotherValidPage._id = undefined;
-      plz.create.page(Tc.anotherValidPage, function (error, result) {
+      plz.create.page(Tc.anotherValidPage, function (error) {
         error.should.be.false;
         var request = {
           label: 'mainmenu',
@@ -244,8 +244,8 @@ describe('author.page | Public API', function () {
         userName: 'chahm',
         pageTitle: 'Simple plz-cms page',
         content: 'new content'
-      }
-      plz.edit.page(editRequest, function (error, result) {
+      };
+      plz.edit.page(editRequest, function (error) {
         error.should.be.false;
         var getRequest = {
           label: 'mainmenu',
@@ -259,7 +259,6 @@ describe('author.page | Public API', function () {
         });
       });
     });
-
 
     it('should return error if page does not exist', function(done) {
       var request = {

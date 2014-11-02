@@ -84,25 +84,25 @@ var AuthorPost = function (plz) {
       return;
     }
 
-    // TODO: support search by _id
-    //       If saving multiple revisions, get latest or check revisionNumber
+    /* 
+     * TODO: support search by _id -- If saving multiple revisions, get latest 
+     * or check revisionNumber
+     */
     var query = {
       collectionName: _collectionName,
-      update:  {$set:{visibility: "public", status: "published"}}
+      update: { $set:{ visibility: "public", status: "published" } }
     };
 
-    if ( options.hasOwnProperty('_id') ) {
+    if(options.hasOwnProperty('_id')) {
       query.criteria = { _id: options.id };
-    }
-    else if ( options.hasOwnProperty('postTitle') ) {
-      query.criteria = {postTitle: options.postTitle};
-    }
-    else {
+    } else if(options.hasOwnProperty('postTitle')) {
+      query.criteria = { postTitle: options.postTitle };
+    } else {
       callback(true, 'Valid criteria field not present in options');
       return;
     }
 
-    database.editDocument(query, function(error, result){
+    database.editDocument(query, function(error, result) {
       callback(error, result);
     });
   };
@@ -124,24 +124,21 @@ var AuthorPost = function (plz) {
       collectionName: _collectionName
     };
 
-    if ( options.hasOwnProperty('_id') ) {
+    if(options.hasOwnProperty('_id')) {
       query.criteria = { _id: options._id };
-    }
-    else if ( options.hasOwnProperty('label') ) {
+    } else if(options.hasOwnProperty('label')) {
       query.criteria = {
         labels: { $in: [options.label] },
         status: { $ne: 'archived' }
       };
-    }
-    else if ( options.hasOwnProperty('postTitle') ) {
-      query.criteria = {postTitle: options.postTitle};
-    }
-    else {
+    } else if(options.hasOwnProperty('postTitle')) {
+      query.criteria = { postTitle: options.postTitle };
+    } else {
       callback(true, 'Valid criteria field not present in options');
       return;
     }
 
-    if ( options.hasOwnProperty('limit') ) {
+    if(options.hasOwnProperty('limit')) {
       query.limit = options.limit;
     }
 
@@ -168,36 +165,38 @@ var AuthorPost = function (plz) {
       return;
     }
 
-    var currentTimestamp = new Date().getTime() / 1000;
+    var currentTimestamp = new Date().getTime() / 1000,
+        query,
+        id;
 
-    var query = {
+    query = {
       collectionName: _collectionName,
       criteria: {postTitle: options.postTitle}
     };
 
-    if ( options.hasOwnProperty('_id') ) {
+    if(options.hasOwnProperty('_id')) {
       query.criteria = { _id: options.id };
-    }
-    else if ( options.hasOwnProperty('postTitle') ) {
-      query.criteria = {postTitle: options.postTitle};
-    }
-    else {
+    } else if (options.hasOwnProperty('postTitle')) {
+      query.criteria = { postTitle: options.postTitle };
+    } else {
       callback(true, 'Valid criteria field not present in options');
       return;
     }
 
     database.getDocument(query, function (error, getResult) {
-      if (error)
-      {
+      if(error) {
         callback(true, 'Existing post matching criteria not found');
         return;
       }
-      var orig_id = getResult._id;
+
+      id = getResult._id;
+
       getResult._id = undefined;
       getResult.modifiedAt = currentTimestamp;
       getResult.revisionNumber++;
       getResult.content = options.content;
-      var query = {
+
+      query = {
         collectionName: _collectionName,
         document: getResult,
         uniqueFields: {
@@ -205,18 +204,20 @@ var AuthorPost = function (plz) {
           revisionNumber: getResult.revisionNumber
         }
       };
-      database.createDocument(query, function(error, createResult){
-        if (error)
-        {
+
+      database.createDocument(query, function(error, createResult) {
+        if(error) {
           callback(error, createResult);
           return;
         }
-		var query = {
+
+		    query = {
           collectionName: _collectionName,
-          criteria: {_id: orig_id },
+          criteria: {_id: id },
           update:  {$set:{status: "archived"}}
-        }
-        database.editDocument(query, function(error, editResult){
+        };
+
+        database.editDocument(query, function(error) {
           callback(error, createResult);
         });
       });
@@ -244,13 +245,11 @@ var AuthorPost = function (plz) {
       limit: '*'
     };
 
-    if ( options.hasOwnProperty('_id') ) {
+    if(options.hasOwnProperty('_id')) {
       query.criteria = { _id: options.id };
-    }
-    else if ( options.hasOwnProperty('postTitle') ) {
-      query.criteria = {postTitle: options.postTitle};
-    }
-    else {
+    } else if(options.hasOwnProperty('postTitle')) {
+      query.criteria = { postTitle: options.postTitle };
+    } else {
       callback(true, 'Valid criteria field not present in options');
       return;
     }
@@ -259,7 +258,6 @@ var AuthorPost = function (plz) {
       callback(error, result);
     });
   };
-
 
   function checkRequiredOptions(options, callback) {
     for(var field in _required) {

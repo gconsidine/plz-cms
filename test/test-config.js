@@ -13,9 +13,9 @@ var TestConfig = function () {
     },
     mailer: {
       default: {
-        service: 'Gmail',
-        address: process.env.PLZ_MAIL_DEFAULT_ADDRESS,
-        password: process.env.PLZ_MAIL_DEFAULT_PASSWORD
+        service: '',
+        address: 'sender@example.com',
+        password: '' 
       }
     }
   };
@@ -41,9 +41,9 @@ var TestConfig = function () {
     },
     mailer: {
       default: {
-        service: 'Gmail',
-        address: process.env.PLZ_MAIL_DEFAULT_ADDRESS,
-        password: process.env.PLZ_MAIL_DEFAULT_PASSWORD
+        service: '',
+        address: 'sender@example.com',
+        password: ''
       }
     },
     admin: {
@@ -75,9 +75,9 @@ var TestConfig = function () {
     },
     mailer: {
       default: {
-        service: 'Gmail',
-        address: process.env.PLZ_MAIL_DEFAULT_ADDRESS,
-        password: process.env.PLZ_MAIL_DEFAULT_PASSWORD
+        service: '',
+        address: 'sender@example.com',
+        password: '' 
       }
     }
   };
@@ -94,9 +94,9 @@ var TestConfig = function () {
     },
     mailer: {
       default: {
-        service: 'Gmail',
-        address: process.env.PLZ_MAIL_DEFAULT_ADDRESS,
-        password: process.env.PLZ_MAIL_DEFAULT_PASSWORD
+        service: '',
+        address: 'sender@example.com',
+        password: ''
       }
     },
     author: {
@@ -144,9 +144,9 @@ var TestConfig = function () {
     },
     mailer: {
       default: {
-        service: 'Gmail',
-        address: process.env.PLZ_MAIL_DEFAULT_ADDRESS,
-        password: process.env.PLZ_MAIL_DEFAULT_PASSWORD
+        service: '',
+        address: 'sender@example.com',
+        password: ''
       }
     }
   };
@@ -215,7 +215,7 @@ var TestConfig = function () {
 
   var validUser = {
     name: 'greg',
-    email: 'name@domain.com',
+    email: 'sender@example.com',
     password: 'someFakePass0',
     createdAt: 3134999944,
     modifiedAt: 3134999945,
@@ -226,7 +226,7 @@ var TestConfig = function () {
 
   var invalidUser = {
     name: 'greg',
-    email: 'name@domain.com',
+    email: 'sender@exmaple.com',
     password: 'someFakePass0',
     createdAt: 3134999944,
     modifiedAt: 3134999945,
