@@ -78,19 +78,26 @@ var AuthorPage = function (plz) {
   * @param {page} callback
   */
   plz.publish.page = function (options, callback) {
-    if(typeof options.userName !== 'string' ||
-       typeof options.pageTitle !== 'string') {
+    if(typeof options.userName !== 'string'){ 
       callback(true, 'Required field not present in options');
       return;
     }
 
-    // TODO: support search by _id
-    //       If saving multiple revisions, get latest or check revisionNumber
     var query = {
       collectionName: _collectionName,
-      criteria: {pageTitle: options.pageTitle},
       update:  {$set:{visibility: "public", status: "published"}}
     };
+
+    if ( options.hasOwnProperty('_id') ){
+      query.criteria = { _id: options.id };
+    }
+    else if ( options.hasOwnProperty('pageTitle') ){
+      query.criteria = { pageTitle: options.pageTitle };
+    }
+    else{
+      callback(true, 'Valid criteria field not present in options');
+      return;
+    }
 
     database.editDocument(query, function(error, result){
       callback(error, result);
@@ -107,17 +114,30 @@ var AuthorPage = function (plz) {
   * @param {page} callback
   */
   plz.get.page = function (options, callback) {
-    if(typeof options.pageTitle !== 'string') {
-      callback(true, 'Required field not present in options');
+    var query = {
+      collectionName: _collectionName
+    };
+
+    if ( options.hasOwnProperty('_id') ) {
+      query.criteria = { _id: options._id };
+    }
+    else if ( options.hasOwnProperty('label') ) {
+      query.criteria = {
+        labels: { $in: [options.label] },
+        status: { $ne: 'archived' }
+      };
+    }
+    else if ( options.hasOwnProperty('pageTitle') ) {
+      query.criteria = {pageTitle: options.pageTitle};
+    }
+    else {
+      callback(true, 'Valid criteria field not present in options');
       return;
     }
 
-    // TODO: support search by _id
-    //       If saving multiple revisions, get latest or check revisionNumber
-    var query = {
-      collectionName: _collectionName,
-      criteria: {pageTitle: options.pageTitle}
-    };
+    if ( options.hasOwnProperty('limit') ) {
+      query.limit = options.limit;
+    }
 
     database.getDocument(query, function (error, result) {
       callback(error, result);
@@ -137,7 +157,6 @@ var AuthorPage = function (plz) {
   */
   plz.edit.page = function (options, callback) {
     if(typeof options.userName !== 'string' ||
-       typeof options.pageTitle !== 'string' ||
        typeof options.content !== 'string') {
       callback(true, 'Required field not present in options');
       return;
@@ -147,17 +166,53 @@ var AuthorPage = function (plz) {
 
     var query = {
       collectionName: _collectionName,
-      criteria: {pageTitle: options.pageTitle},
-      update: {
-        $set:{
-          content: options.content, 
-          modifiedAt: currentTimestamp
-        }
-      }
     };
 
-    database.editDocument(query, function(error, result) {
-      callback(error, result);
+    if ( options.hasOwnProperty('_id') ){
+      query.criteria = { _id: options.id };
+    }
+    else if ( options.hasOwnProperty('pageTitle') ){
+      query.criteria = { pageTitle: options.pageTitle };
+    }
+    else{
+      callback(true, 'Valid criteria field not present in options');
+      return;
+    }
+
+    database.getDocument(query, function (error, getResult) {
+      if (error)
+      {
+        callback(true, 'Existing page matching criteria not found');
+        return;
+      }
+      var orig_id = getResult._id;
+      getResult._id = undefined;
+      getResult.modifiedAt = currentTimestamp;
+      getResult.revisionNumber++;
+      getResult.content = options.content;
+      var query = {
+        collectionName: _collectionName,
+        document: getResult,
+        uniqueFields: {
+          postTitle: getResult.postTitle,
+          revisionNumber: getResult.revisionNumber
+        }
+      };
+      database.createDocument(query, function(error, createResult){
+        if (error)
+        {
+          callback(error, createResult);
+          return;
+        }
+        var query = {
+          collectionName: _collectionName,
+          criteria: {_id: orig_id },
+          update:  {$set:{status: "archived"}}
+        }
+        database.editDocument(query, function(error, editResult){
+          callback(error, createResult);
+        });
+      });
     });
   };
 
@@ -172,16 +227,25 @@ var AuthorPage = function (plz) {
   * @param {page} callback
   */
   plz.remove.page = function (options, callback) {
-    if(typeof options.userName !== 'string' ||
-       typeof options.pageTitle !== 'string') {
+    if(typeof options.userName !== 'string'){
       callback(true, 'Required field not present in options');
       return;
     }
 
     var query = {
-      collectionName: _collectionName,
-      criteria: {pageTitle: options.pageTitle}
+      collectionName: _collectionName
     };
+
+    if ( options.hasOwnProperty('_id') ){
+      query.criteria = { _id: options.id };
+    }
+    else if ( options.hasOwnProperty('pageTitle') ){
+      query.criteria = { pageTitle: options.pageTitle };
+    }
+    else{
+      callback(true, 'Valid criteria field not present in options');
+      return;
+    }
 
     database.removeDocument(query, function(error, result) {
       callback(error, result);
