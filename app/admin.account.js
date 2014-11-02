@@ -94,7 +94,8 @@ var AdminAccount = function (plz) {
   };
 
   /**
-  * Returns a user with a matching tempAuth hash, email, and status.
+  * Returns a user with a matching tempAuth hash, email, and status.  Alias for
+  * authorize()
   *
   * @memberof admin.account
   * @param {object} options
@@ -102,21 +103,11 @@ var AdminAccount = function (plz) {
   * @param {string} options.hash - The hash used to validate account activation
   * @param {authorize} callback
   */
-  plz.authorize.reset = function (options, callback) {
-    options.status = 'reset-pending';
-
-    authorize(options, function(error, result) {
-      if(error) {
-        callback(true, result);
-        return;
-      }
-
-      callback(true, result);
-    });
-  };
+  plz.authorize.reset =  authorize;
 
   /**
-  * Returns a user with a matching tempAuth hash, email, and status.
+  * Returns a user with a matching tempAuth hash, email, and status. Alias for 
+  * authorize().
   *
   * @memberof admin.account
   * @param {object} options
@@ -124,18 +115,7 @@ var AdminAccount = function (plz) {
   * @param {string} options.hash - The hash used to validate account activation
   * @param {authorize} callback
   */
-  plz.authorize.activation = function (options, callback) {
-    options.status = 'activation-pending';
-
-    authorize(options, function(error, result) {
-      if(error) {
-        callback(true, result);
-        return;
-      }
-
-      callback(true, result);
-    });
-  };
+  plz.authorize.activation = authorize;
 
   /**
   * Finds the user with matching tempAuth hash, email, and status, and updates 
@@ -150,18 +130,7 @@ var AdminAccount = function (plz) {
   * @param {string} options.passwordConfirm - New password repeated
   * @param {complete} callback
   */
-  plz.complete.reset = function (options, callback) {
-    options.type = 'reset';
-
-    completeAction(options, function(error, result) {
-      if(error) {
-        callback(true, result);
-        return;
-      }
-
-      callback(false, result);
-    });
-  };
+  plz.complete.reset = completeAction; 
 
   /**
   * Finds the user with matching tempAuth hash, email, and status, and updates 
@@ -176,18 +145,7 @@ var AdminAccount = function (plz) {
   * @param {string} options.passwordConfirm - New password repeated
   * @param {complete} callback
   */
-  plz.complete.activation = function (options, callback) {
-    options.type = 'activation';
-
-    completeAction(options, function(error, result) {
-      if(error) {
-        callback(true, result);
-        return;
-      }
-
-      callback(false, result);
-    });
-  };
+  plz.complete.activation = completeAction; 
 
   /**
   * Returns a true result if a user's role is included in the roles provided in
@@ -234,9 +192,11 @@ var AdminAccount = function (plz) {
       collectionName: collectionName, 
       criteria: { email: options.user.email },
       update: {
-        status: options.status,
-        modifiedAt: new Date().getTime() / 1000,
-        tempAuth: options.hash
+        $set: {
+          status: options.status,
+          modifiedAt: new Date().getTime() / 1000,
+          tempAuth: options.hash
+        }
       }
     };
 
@@ -247,14 +207,14 @@ var AdminAccount = function (plz) {
       }
 
       var mailOptions = {
-        to: options.email,
+        to: options.user.email,
         subject: options.subject,
         body: options.body
       };
       
       _mailer.sendMail(mailOptions, function (error, result) {
         if(error) {
-          callback(true, result);
+          callback(true, 'Mail not sent');
           return;
         }
 
@@ -268,14 +228,20 @@ var AdminAccount = function (plz) {
 
     var query = {
       collectionName: collectionName,
-      status: options.status,
-      email: options.email,
-      tempAuth: options.hash
+      criteria: { 
+        email: options.email,
+        tempAuth: options.hash
+      }
     };
 
-    _database.getDocument(query, function (error) {
+    _database.getDocument(query, function (error, result) {
       if(error) {
-        callback(true, 'User is not authorized');
+        callback(true, false);
+        return;
+      }
+
+      if(!result) {
+        callback(true, false);
         return;
       }
 
@@ -298,13 +264,23 @@ var AdminAccount = function (plz) {
 
     var query = {
       collectionName: collectionName,
-      status: options.status,
-      email: options.email,
-      tempAuth: options.hash
+      criteria: { email: options.email },
+      update: {
+        $set: {
+          status: 'active',
+          modifiedAt: new Date().getTime() / 1000
+        }
+      }
     };
 
-    // TODO: Finish
-    console.log(query);
+    _database.editDocument(query, function (error, result) {
+      if(error) {
+        callback(true, result);
+        return;
+      }
+
+      callback(false, result);
+    });
   }
 
   return plz;
