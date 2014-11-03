@@ -33,15 +33,40 @@ module.exports = function (grunt) {
     },
     
     shell: {
-      mocha: {
-        command: 'mocha test'
+      test: {
+        command: 'mocha'
+      },
+      testCoverage: {
+        command: [
+          'node_modules/.bin/jscover app app-cov',
+          'mv app app-orig',
+          'mv app-cov app',
+          'node_modules/.bin/mocha -R mocha-lcov-reporter > coverage-temp.lcov',
+          'rm -rf app',
+          'mv app-orig app'
+        ].join('&&')
+      },
+      fixCoveragePaths: {
+        command: [
+          "sed 's,SF:,SF:app/,' coverage-temp.lcov > coverage.lcov",
+          'rm coverage-temp.lcov',
+        ].join('&&')
+      }
+    },
+
+    coveralls: {
+      options: {
+        force: true
+      },
+      app: {
+        src: 'coverage.lcov'
       }
     },
 
     watch: {
       dev: {
         files: _source.all,
-        tasks: ['jshint', 'shell:mocha']
+        tasks: ['jshint', 'shell:test']
       },
       doc: {
         files: _source.all,
@@ -64,13 +89,21 @@ module.exports = function (grunt) {
 
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-coveralls');
   grunt.loadNpmTasks('grunt-jsdoc');
   grunt.loadNpmTasks('grunt-shell');
   grunt.loadNpmTasks('grunt-bump');
 
   grunt.registerTask('default', [
     'jshint',
-    'shell:mocha'
+    'shell:test'
   ]);
 
+  grunt.registerTask('full-build', [
+    'jshint',
+    'shell:test',
+    'shell:testCoverage',
+    'shell:fixCoveragePaths',
+    'coveralls'
+  ]);
 };

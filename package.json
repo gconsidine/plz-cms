@@ -5,7 +5,7 @@
   "author": "greg considine <greg@caprahorn.com>",
   "main": "index.js",
   "scripts": {
-    "test": "grunt"
+    "test": "grunt full-build"
   },
   "repository": {
     "type": "git",
@@ -26,10 +26,13 @@
     "grunt-cli": "^0.1.13",
     "grunt-contrib-jshint": "^0.10.0",
     "grunt-contrib-watch": "^0.6.1",
+    "grunt-coveralls": "^1.0.0",
     "grunt-jsdoc": "^0.5.7",
     "grunt-shell": "^1.0.1",
+    "jscover": "^0.2.4",
     "jsdoc": "^3.3.0-alpha9",
     "mocha": "^1.21.4",
+    "mocha-lcov-reporter": "0.0.1",
     "should": "^4.0.4"
   }
 }
