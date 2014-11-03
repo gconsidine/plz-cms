@@ -33,15 +33,32 @@ module.exports = function (grunt) {
     },
     
     shell: {
-      mocha: {
+      test: {
         command: 'mocha test'
+      },
+      testCoverage: {
+        command: [
+          'node_modules/.bin/jscover app app-cov',
+          'mv app app-orig',
+          'mv app-cov app',
+          'node_modules/.bin/mocha test -R mocha-lcov-reporter > coverage.lcov',
+          'rm -rf app',
+          'mv app-orig app'
+        ].join('&&')
+      }
+    },
+
+    coveralls: {
+      options: {
+        src: 'coverage.lcov',
+        force: false
       }
     },
 
     watch: {
       dev: {
         files: _source.all,
-        tasks: ['jshint', 'shell:mocha']
+        tasks: ['jshint', 'shell:test']
       },
       doc: {
         files: _source.all,
@@ -64,13 +81,20 @@ module.exports = function (grunt) {
 
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-coveralls');
   grunt.loadNpmTasks('grunt-jsdoc');
   grunt.loadNpmTasks('grunt-shell');
   grunt.loadNpmTasks('grunt-bump');
 
   grunt.registerTask('default', [
     'jshint',
-    'shell:mocha'
+    'shell:test'
   ]);
 
+  grunt.registerTask('full-build', [
+    'jshint',
+    'shell:test',
+    'shell:testCoverage',
+    'coveralls'
+  ]);
 };
