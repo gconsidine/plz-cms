@@ -34,24 +34,32 @@ module.exports = function (grunt) {
     
     shell: {
       test: {
-        command: 'mocha test'
+        command: 'mocha'
       },
       testCoverage: {
         command: [
           'node_modules/.bin/jscover app app-cov',
           'mv app app-orig',
           'mv app-cov app',
-          'node_modules/.bin/mocha test -R mocha-lcov-reporter > coverage.lcov',
+          'node_modules/.bin/mocha -R mocha-lcov-reporter > coverage-temp.lcov',
           'rm -rf app',
           'mv app-orig app'
+        ].join('&&')
+      },
+      fixCoveragePaths: {
+        command: [
+          "sed 's,SF:,SF:app/,' coverage-temp.lcov > coverage.lcov",
+          'rm coverage-temp.lcov',
         ].join('&&')
       }
     },
 
     coveralls: {
       options: {
-        src: 'coverage.lcov',
-        force: false
+        force: true
+      },
+      app: {
+        src: 'coverage.lcov'
       }
     },
 
@@ -95,6 +103,7 @@ module.exports = function (grunt) {
     'jshint',
     'shell:test',
     'shell:testCoverage',
+    'shell:fixCoveragePaths',
     'coveralls'
   ]);
 };
