@@ -8,21 +8,12 @@ var AuthorApi = function (plz) {
   
   plz = plz || {};
   var modules = plz.config.author.modules;
-  for(var name in modules) {
-    if(modules.hasOwnProperty(name)) {
-      if(modules[name] === false) {
-        continue;
-      }
 
-      switch(name) {
-        case 'page':
-          require('./author.page')(plz);
-          break;
-        case 'post':
-          require('./author.post')(plz);
-          break;
-      }
-    }
+  if(modules.page){
+    require('./author.page')(plz);
+  }
+  if(modules.post){
+    require('./author.post')(plz);
   }
 
 // TODO: implement other content types

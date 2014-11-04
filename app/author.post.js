@@ -94,7 +94,7 @@ var AuthorPost = function (plz) {
     };
 
     if(options.hasOwnProperty('_id')) {
-      query.criteria = { _id: options.id };
+      query.criteria = { _id: options._id };
     } else if(options.hasOwnProperty('postTitle')) {
       query.criteria = { postTitle: options.postTitle };
     } else {
@@ -175,7 +175,7 @@ var AuthorPost = function (plz) {
     };
 
     if(options.hasOwnProperty('_id')) {
-      query.criteria = { _id: options.id };
+      query.criteria = { _id: options._id };
     } else if (options.hasOwnProperty('postTitle')) {
       query.criteria = { postTitle: options.postTitle };
     } else {
@@ -191,7 +191,7 @@ var AuthorPost = function (plz) {
 
       id = getResult._id;
 
-      getResult._id = undefined;
+      delete getResult._id;
       getResult.modifiedAt = currentTimestamp;
       getResult.revisionNumber++;
       getResult.content = options.content;
@@ -246,7 +246,7 @@ var AuthorPost = function (plz) {
     };
 
     if(options.hasOwnProperty('_id')) {
-      query.criteria = { _id: options.id };
+      query.criteria = { _id: options._id };
     } else if(options.hasOwnProperty('postTitle')) {
       query.criteria = { postTitle: options.postTitle };
     } else {
