@@ -320,7 +320,7 @@ var UtilityDatabase = function (plz) {
         throw new Error('Database URI does not exist in configuration');
       }
 
-      uri = plz.config.database[name];
+      uri = plz.config.database[name].uri;
     }
 
     Mongo.connect(uri, function (error, database) {
