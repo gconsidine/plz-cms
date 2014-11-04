@@ -89,7 +89,7 @@ var AuthorPage = function (plz) {
     };
 
     if( options.hasOwnProperty('_id')) {
-      query.criteria = { _id: options.id };
+      query.criteria = { _id: options._id };
     } else if(options.hasOwnProperty('pageTitle')) {
       query.criteria = { pageTitle: options.pageTitle };
     } else {
@@ -164,7 +164,7 @@ var AuthorPage = function (plz) {
     };
 
     if (options.hasOwnProperty('_id')) {
-      query.criteria = { _id: options.id };
+      query.criteria = { _id: options._id };
     } else if(options.hasOwnProperty('pageTitle')) {
       query.criteria = { pageTitle: options.pageTitle };
     } else {
@@ -180,7 +180,7 @@ var AuthorPage = function (plz) {
 
       var pageId = getResult._id;
 
-      getResult._id = undefined;
+      delete getResult._id;
       getResult.modifiedAt = currentTimestamp;
       getResult.revisionNumber++;
       getResult.content = options.content;
@@ -189,7 +189,7 @@ var AuthorPage = function (plz) {
         collectionName: _collectionName,
         document: getResult,
         uniqueFields: {
-          postTitle: getResult.postTitle,
+          pageTitle: getResult.pageTitle,
           revisionNumber: getResult.revisionNumber
         }
       };
@@ -234,7 +234,7 @@ var AuthorPage = function (plz) {
     };
 
     if(options.hasOwnProperty('_id')) {
-      query.criteria = { _id: options.id };
+      query.criteria = { _id: options._id };
     } else if(options.hasOwnProperty('pageTitle')) {
       query.criteria = { pageTitle: options.pageTitle };
     } else {

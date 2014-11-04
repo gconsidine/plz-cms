@@ -108,17 +108,24 @@ describe('author.page | Public API', function () {
     });
 
     it('should return error if required fields are missing', function(done) {
-      var request = {
+      var invalidRequest = {
         options: 'invalid options',
       };
 
-      plz.publish.page(request, function (error) {
+      plz.publish.page(invalidRequest, function (error) {
         error.should.be.true;
-        done();
+
+        var requestWithoutCriteria = {
+          userName: 'chahm',
+        };
+        plz.publish.page(requestWithoutCriteria, function (error) {
+          error.should.be.true;
+          done();
+        });
       });
     });
 
-    it('should publish a page with public visibility', function(done) {
+    it('should publish a page by name with public visibility', function(done) {
       var request = {
         userName: 'chahm',
         pageTitle: 'Simple plz-cms page',
@@ -131,6 +138,25 @@ describe('author.page | Public API', function () {
         pageCollection.findOne(request, function (error, result) {
           result.visibility.should.equal("public");
           done();
+        });
+      });
+    });
+
+    it('should publish a page by id with public visibility', function(done) {
+      plz.create.page(Tc.anotherValidPage, function (error, result) {
+        error.should.be.false;
+        var request = {
+          userName: 'chahm',
+          _id: result.insertedId
+        };
+        plz.publish.page(request, function (error, result) {
+          error.should.be.false;
+          result.should.not.be.empty;
+
+          pageCollection.findOne(request, function (error, result) {
+            result.visibility.should.equal("public");
+            done();
+          });
         });
       });
     });
@@ -296,17 +322,23 @@ describe('author.page | Public API', function () {
     });
 
     it('should return error if required fields are missing', function(done) {
-      var request = {
+      var invalidRequest = {
         options: 'invalid options',
       };
 
-      plz.edit.page(request, function (error) {
+      plz.edit.page(invalidRequest, function (error) {
         error.should.be.true;
-        done();
+        var requestWithoutCriteria = {
+          userName: 'chahm',
+        };
+        plz.edit.page(requestWithoutCriteria, function (error) {
+          error.should.be.true;
+          done();
+        });
       });
     });
 
-    it('should modify a page with new content', function(done) {
+    it('should modify a page by name with new content', function(done) {
       var request = {
         userName: 'chahm',
         pageTitle: 'Simple plz-cms page',
@@ -320,6 +352,27 @@ describe('author.page | Public API', function () {
         pageCollection.findOne(request, function (error, result) {
           result.content.should.equal(request.content);
           done();
+        });
+      });
+    });
+
+    it('should modify a page by id with new content', function(done) {
+      plz.create.page(Tc.anotherValidPage, function (error, result) {
+        error.should.be.false;
+        var request = {
+          userName: 'chahm',
+          _id: result.insertedId,
+          content: 'more new content'
+        };
+        plz.edit.page(request, function (error, result) {
+          error.should.be.false;
+          result.should.not.be.empty;
+
+          var findRequest = {_id : result.ops[0]._id};
+          pageCollection.findOne(findRequest, function (error, result) {
+            result.content.should.equal(request.content);
+            done();
+          });
         });
       });
     });
@@ -360,17 +413,23 @@ describe('author.page | Public API', function () {
     });
 
     it('should return error if required fields are missing', function(done) {
-      var request = {
+      var invalidRequest = {
         options: 'invalid options',
       };
 
-      plz.remove.page(request, function (error) {
+      plz.remove.page(invalidRequest, function (error) {
         error.should.be.true;
-        done();
+        var requestWithoutCriteria = {
+          userName: 'chahm',
+        };
+        plz.remove.page(requestWithoutCriteria, function (error) {
+          error.should.be.true;
+          done();
+        });
       });
     });
 
-    it('should remove a page matching the given criteria', function(done) {
+    it('should remove a page matching the given pageTitle', function(done) {
       var request = {
         userName: 'chahm',
         pageTitle: 'Simple plz-cms page'
@@ -383,6 +442,25 @@ describe('author.page | Public API', function () {
         pageCollection.count(function(error, count) {
           count.should.equal(0);
           done();
+        });
+      });
+    });
+
+    it('should remove a page matching the given _id', function(done) {
+      plz.create.page(Tc.anotherValidPage, function (error, result) {
+        error.should.be.false;
+        var request = {
+          userName: 'chahm',
+          _id: result.insertedId
+        };
+        plz.remove.page(request, function (error, result) {
+          error.should.be.false;
+          result.should.not.be.empty;
+
+          pageCollection.count(function(error, count) {
+            count.should.equal(0);
+            done();
+          });
         });
       });
     });

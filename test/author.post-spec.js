@@ -108,17 +108,24 @@ describe('author.post | Public API', function () {
     });
 
     it('should return error if required fields are missing', function(done) {
-      var request = {
+      var invalidRequest = {
         options: 'invalid options',
       };
 
-      plz.publish.post(request, function (error) {
+      plz.publish.post(invalidRequest, function (error) {
         error.should.be.true;
-        done();
+
+        var requestWithoutCriteria = {
+          userName: 'chahm',
+        };
+        plz.publish.post(requestWithoutCriteria, function (error) {
+          error.should.be.true;
+          done();
+        });
       });
     });
 
-    it('should publish a post with public visibility', function(done) {
+    it('should publish a post by namewith public visibility', function(done) {
       var request = {
         userName: 'chahm',
         postTitle: 'Simple post',
@@ -131,6 +138,25 @@ describe('author.post | Public API', function () {
         postCollection.findOne(request, function (error, result) {
           result.visibility.should.equal("public");
           done();
+        });
+      });
+    });
+
+    it('should publish a post by id with public visibility', function(done) {
+      plz.create.post(Tc.anotherValidPost, function (error, result) {
+        error.should.be.false;
+        var request = {
+          userName: 'chahm',
+          _id: result.insertedId
+        };
+        plz.publish.post(request, function (error, result) {
+          error.should.be.false;
+          result.should.not.be.empty;
+
+          postCollection.findOne(request, function (error, result) {
+            result.visibility.should.equal("public");
+            done();
+          });
         });
       });
     });
@@ -297,17 +323,23 @@ describe('author.post | Public API', function () {
     });
 
     it('should return error if required fields are missing', function(done) {
-      var request = {
+      var invalidRequest = {
         options: 'invalid options',
       };
 
-      plz.edit.post(request, function (error) {
+      plz.edit.post(invalidRequest, function (error) {
         error.should.be.true;
-        done();
+        var requestWithoutCriteria = {
+          userName: 'chahm',
+        };
+        plz.edit.post(requestWithoutCriteria, function (error) {
+          error.should.be.true;
+          done();
+        });
       });
     });
 
-    it('should modify a post with new content', function(done) {
+    it('should modify a post by name with new content', function(done) {
       var request = {
         userName: 'chahm',
         postTitle: 'Simple post',
@@ -321,6 +353,27 @@ describe('author.post | Public API', function () {
         postCollection.findOne(request, function (error, result) {
           result.content.should.equal(request.content);
           done();
+        });
+      });
+    });
+
+    it('should modify a post by id with new content', function(done) {
+      plz.create.post(Tc.anotherValidPost, function (error, result) {
+        error.should.be.false;
+        var request = {
+          userName: 'chahm',
+          _id: result.insertedId,
+          content: 'more new content'
+        };
+        plz.edit.post(request, function (error, result) {
+          error.should.be.false;
+          result.should.not.be.empty;
+
+          var findRequest = {_id : result.ops[0]._id};
+          postCollection.findOne(findRequest, function (error, result) {
+            result.content.should.equal(request.content);
+            done();
+          });
         });
       });
     });
@@ -361,17 +414,23 @@ describe('author.post | Public API', function () {
     });
 
     it('should return error if required fields are missing', function(done) {
-      var request = {
+      var invalidRequest = {
         options: 'invalid options',
       };
 
-      plz.remove.post(request, function (error) {
+      plz.remove.post(invalidRequest, function (error) {
         error.should.be.true;
-        done();
+        var requestWithoutCriteria = {
+          userName: 'chahm',
+        };
+        plz.remove.post(requestWithoutCriteria, function (error) {
+          error.should.be.true;
+          done();
+        });
       });
     });
 
-    it('should remove a post matching the given criteria', function(done) {
+    it('should remove a post matching the given postTitle', function(done) {
       var request = {
         userName: 'chahm',
         postTitle: 'Simple post'
@@ -384,6 +443,25 @@ describe('author.post | Public API', function () {
         postCollection.count(function(error, count) {
           count.should.equal(0);
           done();
+        });
+      });
+    });
+
+    it('should remove a post matching the given _id', function(done) {
+      plz.create.post(Tc.anotherValidPost, function (error, result) {
+        error.should.be.false;
+        var request = {
+          userName: 'chahm',
+          _id: result.insertedId
+        };
+        plz.remove.post(request, function (error, result) {
+          error.should.be.false;
+          result.should.not.be.empty;
+
+          postCollection.count(function(error, count) {
+            count.should.equal(0);
+            done();
+          });
         });
       });
     });
