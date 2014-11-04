@@ -1,6 +1,10 @@
 node_modules
 npm-debug.log
+
+coverage
 app-cov
 coverage.lcov
+
 doc
+
 *.*.swp
