@@ -9,6 +9,9 @@ var TestConfig = function () {
     database: {
       default: {
         uri: MONGO_URI
+      },
+      other: {
+        uri: MONGO_URI
       }
     },
     mailer: {

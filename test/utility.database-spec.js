@@ -115,8 +115,8 @@ describe('utility.database | Private API', function () {
 
       var options = {
         collectionName: 'test',
-        document: { testField: 'testValue' },
-        uniqueFields: { zanzibar: true }
+        criteria: { testField: 'testValue' },
+        update: { zanzibar: true }
       };
 
       db.editDocument(options, function (error, result) {
@@ -182,8 +182,7 @@ describe('utility.database | Private API', function () {
 
       var options = {
         collectionName: 'test',
-        document: { testField: 'testValue' },
-        uniqueFields: { zanzibar: true }
+        criteria: { testField: 'testValue' },
       };
 
       db.getDocument(options, function (error, result) {
@@ -267,8 +266,7 @@ describe('utility.database | Private API', function () {
 
       var options = {
         collectionName: 'test',
-        document: { testField: 'testValue' },
-        uniqueFields: { zanzibar: true }
+        criteria: { testField: 'testValue' }
       };
 
       db.removeDocument(options, function (error, result) {
@@ -300,6 +298,14 @@ describe('utility.database | Private API', function () {
       (function () {
         db.getDatabase(function () {}, 'banana');
       }).should.throw();
+    });
+
+    it('should be able to get other databases from the config', function(done) {
+      db.getDatabase(function (error, db) {
+        error.should.be.false; 
+        db.should.be.type('object');
+        done();
+      }, 'other');
     });
 
     it('should fail when database cannot connect', function(done) {
