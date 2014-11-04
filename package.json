@@ -29,6 +29,7 @@
     "grunt-coveralls": "^1.0.0",
     "grunt-jsdoc": "^0.5.7",
     "grunt-shell": "^1.0.1",
+    "istanbul": "^0.3.2",
     "jscover": "^0.2.4",
     "jsdoc": "^3.3.0-alpha9",
     "mocha": "^1.21.4",

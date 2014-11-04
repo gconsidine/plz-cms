@@ -30,6 +30,23 @@ var TestConfig = function () {
     }
   };
 
+  var invalidDatabase = {
+    modules: {
+    },
+    database: {
+      default: {
+        uri: 'mongodb://127.1.1.1:1111/test'
+      }
+    },
+    mailer: {
+      default: {
+        service: '',
+        address: 'sender@example.com',
+        password: ''
+      }
+    }
+  };
+
   var validAdminConfig = {
     modules: {
       admin: true
@@ -247,7 +264,8 @@ var TestConfig = function () {
     anotherValidPost: anotherValidPost,
     invalidPost: invalidPost,
     validUser: validUser,
-    invalidUser: invalidUser
+    invalidUser: invalidUser,
+    invalidDatabase: invalidDatabase
   };
 };
 
