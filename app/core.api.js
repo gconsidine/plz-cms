@@ -16,18 +16,6 @@ var CoreApi = function (config) {
     require('./author.api')(plz);
   }
 
-  if(plz.config.modules.merchant) {
-    require('./merchant.api')(plz);
-  }
-
-  if(plz.config.modules.scout) {
-    require('./scout.api')(plz);
-  }
-
-  if(plz.config.modules.socialite) {
-    require('./sociallite.api')(plz);
-  }
- 
   return plz;
 };
 
