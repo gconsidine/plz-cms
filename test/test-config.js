@@ -19,6 +19,11 @@ var TestConfig = function () {
         service: '',
         address: 'sender@example.com',
         password: '' 
+      },
+      other: {
+        service: '',
+        address: 'other@example.com',
+        password: '' 
       }
     }
   };

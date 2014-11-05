@@ -62,12 +62,6 @@ var CoreHub = function (config) {
         }
 
         break;
-      case 'merchant':
-        break;
-      case 'scout':
-        break;
-      case 'socialite':
-        break;
     }
 
     return true;
