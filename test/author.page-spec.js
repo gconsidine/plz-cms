@@ -31,7 +31,7 @@ describe('author.page | Public API', function () {
       db.getDatabase(function (error, database) {
         page = Tc.validAuthorConfig.author.page.collection;
         pageCollection = database.collection(page);
-
+        
         pageCollection.count(function(error, count) {
           if(count >= 1) {
             pageCollection.drop(function () {
@@ -57,7 +57,6 @@ describe('author.page | Public API', function () {
 
         pageCollection.count(function(error, count) {
           count.should.equal(1);
-
           var findOptions = {pageTitle: Tc.validPage.pageTitle};
 
           pageCollection.findOne(findOptions, function (error, result) {

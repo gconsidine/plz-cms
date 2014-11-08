@@ -177,31 +177,30 @@ var UtilityDatabase = function (plz) {
       }
       else if (options.limit === '*' || options.limit > 0){
         var findCursor;
+
         if (options.limit === '*') {
           findCursor = collection.find(options.criteria);
-        }
-        else {
+        } else {
           findCursor = collection.find(options.criteria).limit(options.limit);
         }
+
         findCursor.toArray(function(error, docs) {
           if(error) {
             callback(true, 'Database find error: ' + error);
             return;
           }
-          if(docs.length === 0){
+
+          if(docs.length === 0) {
             var message = [
-              'Failed to find document matching',
+              'Failed to find document matching ',
                JSON.stringify(options.criteria),
-               'in ' + options.collectionName
+               ' in ' + options.collectionName
             ].join(' ');
 
             callback(true, message);
-            return;
-          }
-          else if (options.limit === '*' || options.limit > docs.length){
+          } else if(options.limit === '*' || options.limit > docs.length){
             callback(false, docs);
-          }
-          else{
+          } else {
             callback(false, docs.slice(0, options.limit));
           }
         });
@@ -241,7 +240,6 @@ var UtilityDatabase = function (plz) {
 
       var collection = database.collection(options.collectionName);
 
-      // Default: find and delete only one document
       if (!options.hasOwnProperty('limit') || options.limit === 1) {
         collection.findOneAndDelete(options.criteria, function (error, result) {
           if(error) {
@@ -251,57 +249,53 @@ var UtilityDatabase = function (plz) {
 
           callback(false, result);
         });
-      }
-      else if (options.limit === '*' || options.limit > 0){
-        // find and remove all matching entries
-        // I couldn't find an atomic bulk find and delete
+      } else if (options.limit === '*' || options.limit > 0){
         collection.find(options.criteria).toArray(function(error, docs) {
           if(error) {
             callback(true, 'Remove failed: ' + error);
             return;
           }
+
           if(docs.length === 0){
             var message = [
               'Failed to find document matching',
               JSON.stringify(options.criteria),
               'in ' + options.collectionName
             ].join(' ');
+
             callback(true, message);
             return;
           }
 
-          var limit = options.limit;
-          if (limit === '*'){
-            limit = docs.length;
+          if (options.limit === '*'){
+            options.limit = docs.length;
           }
+
           var removedDocs = [];
           var removedCallback = function(error, result){
             if(error) {
-              if (removedDocs.length === 0) {
+              if(removedDocs.length === 0) {
                 callback(true, 'Remove failed: ' + error);
                 return;
-              }
-              else{
+              } else {
                 callback(false, removedDocs);
                 return;
               }
-            }
-            else{
+            } else {
               removedDocs.push(result);
-              if (removedDocs.length >= limit) {
+              if (removedDocs.length >= options.limit) {
                 callback(false, removedDocs);
                 return;
               }
             }
           };
-          for (var findIndex = 0; findIndex < limit; findIndex++)
-          {
+
+          for (var findIndex = 0; findIndex < options.limit; findIndex++) {
             var criteria = { _id: docs[findIndex]._id };
             collection.findOneAndDelete(criteria, removedCallback);
           }
         });
-      }
-      else{
+      } else {
         callback(true, 'Invalid value for limit: ' + options.limit);
       }
     });
