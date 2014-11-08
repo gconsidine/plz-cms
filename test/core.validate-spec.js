@@ -146,11 +146,12 @@ describe('core.validate | Public API', function () {
           plz.validate.typeAs(type, cases[type]).should.be.true;
         }
       }
+    });
 
+    it('should throw an error if type isn\'t supported', function () {
       (function () {
-        plz.validate.typeAs('sith', '?');
-      }).should.throw.error;
-
+        plz.validate.typeAs('cat', 'siamese');
+      }).should.throw;
     });
   });
 

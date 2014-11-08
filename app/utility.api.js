@@ -1,6 +1,8 @@
 var UtilityApi = function (plz) {
   'use strict'; 
   
+  plz = plz || {};
+
   var db = require('./utility.database')(plz),
       mailer = require('./utility.mailer')(plz);
 

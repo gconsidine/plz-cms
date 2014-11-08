@@ -125,10 +125,6 @@ var TestConfig = function () {
       }
     },
     author: {
-      modules: {
-        page: true,
-        post: true
-      },
       page: {
         collection: 'page',
         required: {

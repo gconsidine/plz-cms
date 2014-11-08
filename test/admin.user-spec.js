@@ -119,7 +119,7 @@ describe('admin.user | Public API', function () {
     });
 
     it('should remove a user that exists', function (done) {
-      plz.get.user({name: 'greg'}, function (error, result) {
+      plz.remove.user({name: 'greg'}, function (error, result) {
         error.should.be.false;
         result.should.not.be.empty;
         done();
@@ -127,8 +127,10 @@ describe('admin.user | Public API', function () {
     });
 
     it('should return error if user does not exist', function (done) {
-      plz.get.user({name: 'doppio'}, function (error) {
-        error.should.be.true;
+      plz.remove.user({name: 'doppio'}, function (error, result) {
+        error.should.be.false;
+        result.should.be.type('object');
+        (result.value === null).should.be.true;
         done();
       });
     });
