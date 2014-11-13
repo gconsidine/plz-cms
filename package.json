@@ -16,9 +16,9 @@
   },
   "homepage": "https://github.com/gconsidine/plz-cms",
   "dependencies": {
+    "mongodb": "^2.0.5",
     "nodemailer": "^1.2.1",
-    "validator": "^3.18.1",
-    "mongodb": "^2.0.2"
+    "validator": "^3.22.1"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
@@ -32,7 +32,7 @@
     "istanbul": "^0.3.2",
     "jscover": "^0.2.4",
     "jsdoc": "^3.3.0-alpha9",
-    "mocha": "^1.21.4",
+    "mocha": "^1.21.5",
     "mocha-lcov-reporter": "0.0.1",
     "should": "^4.0.4"
   }
