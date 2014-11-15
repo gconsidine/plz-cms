@@ -129,7 +129,7 @@ var TestConfig = function () {
         collection: 'page',
         required: {
           userName: 'string',
-          pageTitle: 'string',
+          title: 'string',
           visibility: 'string',
           contentType: 'string',
           content: 'string',
@@ -142,7 +142,7 @@ var TestConfig = function () {
         collection: 'post',
         required: {
           userName: 'string',
-          postTitle: 'string',
+          title: 'string',
           visibility: 'string',
           contentType: 'string',
           content: 'string',
@@ -174,7 +174,7 @@ var TestConfig = function () {
 
   var validPage = {
     userName: 'chahm',
-    pageTitle: 'Simple plz-cms page',
+    title: 'Simple plz-cms page',
     labels: ['mainmenu'],
     visibility: 'public',
     createdAt: 3134999944,
@@ -186,7 +186,7 @@ var TestConfig = function () {
 
   var anotherValidPage = {
     userName: 'chahm',
-    pageTitle: 'Another plz-cms page',
+    title: 'Another plz-cms page',
     labels: ['mainmenu'],
     visibility: 'public',
     createdAt: 3134999944,
@@ -197,7 +197,7 @@ var TestConfig = function () {
   };
 
   var invalidPage = {
-    pageTitle: 'invalid options',
+    title: 'invalid options',
     createdAt: 3134999944,
     modifiedAt: 3134999944,
     status: 'draft'
@@ -205,7 +205,7 @@ var TestConfig = function () {
 
   var validPost = {
     userName: 'chahm',
-    postTitle: 'Simple post',
+    title: 'Simple post',
     labels: ['news'],
     visibility: 'public',
     createdAt: 3135000000,
@@ -217,7 +217,7 @@ var TestConfig = function () {
 
   var anotherValidPost = {
     userName: 'chahm',
-    postTitle: 'Simple post 2',
+    title: 'Simple post 2',
     labels: ['news'],
     visibility: 'public',
     createdAt: 3135000000,
@@ -228,7 +228,7 @@ var TestConfig = function () {
   };
 
   var invalidPost = {
-    postTitle: 'invalid options',
+    title: 'invalid options',
     createdAt: 3134999944,
     modifiedAt: 3134999944,
     status: 'draft'

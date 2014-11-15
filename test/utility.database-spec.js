@@ -59,6 +59,46 @@ describe('utility.database | Private API', function () {
       });
     });
 
+    it('should fail when uniqueFields is invalid', function(done) {
+      var plz = require('../app/core.hub')(Tc.validCoreConfig),
+          Utility = require('../app/utility.api')(plz),
+          db = Utility.db;
+
+      var options = {
+        collectionName: 'test',
+        document: { testField: 'testValue' },
+        uniqueFields: [ {$blah:''} ]
+      };
+
+      db.createDocument(options, function (error, result) {
+        error.should.be.true; 
+        result.should.be.type('string');
+        done();
+      });
+    });
+
+    it('should fail when creating a document with existing _id', function(done) {
+      var plz = require('../app/core.hub')(Tc.validCoreConfig),
+          Utility = require('../app/utility.api')(plz),
+          db = Utility.db;
+
+      var options = {
+        collectionName: 'test',
+        document: { testField: 'testValue' },
+        uniqueFields: { zanzibar: true }
+      };
+
+      db.createDocument(options, function (error, result) {
+        error.should.be.false; 
+        options.document._id = result.insertedId;
+        db.createDocument(options, function (error, result) {
+          error.should.be.true; 
+          result.should.be.type('string');
+          done();
+        });
+      });
+    });
+
     after(function (done) {
       var plz = require('../app/core.hub')(Tc.validCoreConfig),
           Utility = require('../app/utility.api')(plz),
@@ -126,6 +166,24 @@ describe('utility.database | Private API', function () {
       });
     });
 
+    it('should fail with invalid criteria', function(done) {
+      var plz = require('../app/core.hub')(Tc.validCoreConfig),
+          Utility = require('../app/utility.api')(plz),
+          db = Utility.db;
+
+      var options = {
+        collectionName: 'test',
+        criteria: [ {$blah:''} ],
+        update: { zanzibar: true }
+      };
+
+      db.editDocument(options, function (error, result) {
+        error.should.be.true; 
+        result.should.be.type('string');
+        done();
+      });
+    });
+
     after(function (done) {
       var plz = require('../app/core.hub')(Tc.validCoreConfig),
           Utility = require('../app/utility.api')(plz),
@@ -183,6 +241,40 @@ describe('utility.database | Private API', function () {
       var options = {
         collectionName: 'test',
         criteria: { testField: 'testValue' },
+      };
+
+      db.getDocument(options, function (error, result) {
+        error.should.be.true; 
+        result.should.be.type('string');
+        done();
+      });
+    });
+
+    it('should fail when no documents match criterai', function(done) {
+      var plz = require('../app/core.hub')(Tc.validCoreConfig),
+          Utility = require('../app/utility.api')(plz),
+          db = Utility.db;
+
+      var options = {
+        collectionName: 'test',
+        criteria: { testField: 'testValue' },
+      };
+
+      db.getDocument(options, function (error, result) {
+        error.should.be.true; 
+        result.should.be.type('string');
+        done();
+      });
+    });
+
+    it('should fail with invalid criteria', function(done) {
+      var plz = require('../app/core.hub')(Tc.validCoreConfig),
+          Utility = require('../app/utility.api')(plz),
+          db = Utility.db;
+
+      var options = {
+        collectionName: 'test',
+        criteria: [ {$blah:''} ],
       };
 
       db.getDocument(options, function (error, result) {
@@ -267,6 +359,23 @@ describe('utility.database | Private API', function () {
       var options = {
         collectionName: 'test',
         criteria: { testField: 'testValue' }
+      };
+
+      db.removeDocument(options, function (error, result) {
+        error.should.be.true; 
+        result.should.be.type('string');
+        done();
+      });
+    });
+
+    it('should fail with invalid criteria', function(done) {
+      var plz = require('../app/core.hub')(Tc.validCoreConfig),
+          Utility = require('../app/utility.api')(plz),
+          db = Utility.db;
+
+      var options = {
+        collectionName: 'test',
+        criteria: [ {$blah:''} ]
       };
 
       db.removeDocument(options, function (error, result) {
