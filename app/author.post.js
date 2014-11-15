@@ -27,7 +27,7 @@ var AuthorPost = function (plz) {
   * @memberof author
   * @param {object} options
   * @param {string} options.userName - Used to check permissions
-  * @param {string} options.postTitle - Unique id used in post lookup
+  * @param {string} options.title - Unique id used in post lookup
   * @param {string} options.revisionNumber - To keep track of version info
   * @param {array} options.labels - One or more searchable tags or categories
   * @param {string} options.visibility - public / private / privileged
@@ -57,7 +57,7 @@ var AuthorPost = function (plz) {
       var query = {
         collectionName: _collectionName,
         document: options,
-        uniqueFields: {postTitle: options.postTitle}
+        uniqueFields: {title: options.title}
       };
 
       database.createDocument(query, function(error, result){
@@ -74,7 +74,7 @@ var AuthorPost = function (plz) {
   * @param {object} options
   * @param {string} options.userName - Used to check permissions
   * @param {string} options._id - Unique id from db used in post lookup
-  * @param {string} options.postTitle - Optional string used for post lookup
+  * @param {string} options.title - Optional string used for post lookup
   * in case _id is not provided
   * @param {post} callback
   */
@@ -95,8 +95,8 @@ var AuthorPost = function (plz) {
 
     if(options.hasOwnProperty('_id')) {
       query.criteria = { _id: options._id };
-    } else if(options.hasOwnProperty('postTitle')) {
-      query.criteria = { postTitle: options.postTitle };
+    } else if(options.hasOwnProperty('title')) {
+      query.criteria = { title: options.title };
     } else {
       callback(true, 'Valid criteria field not present in options');
       return;
@@ -115,7 +115,7 @@ var AuthorPost = function (plz) {
   * @param {string} options.userName - Used to check permissions
   * @param {string} options._id - Unique id from db used in post lookup
   * @param {string} options.label - Shared string used in aggregate post lookup
-  * @param {string} options.postTitle - Optional string used for post lookup
+  * @param {string} options.title - Optional string used for post lookup
   * in case _id is not provided
   * @param {post} callback
   */
@@ -131,8 +131,8 @@ var AuthorPost = function (plz) {
         labels: { $in: [options.label] },
         status: { $ne: 'archived' }
       };
-    } else if(options.hasOwnProperty('postTitle')) {
-      query.criteria = { postTitle: options.postTitle };
+    } else if(options.hasOwnProperty('title')) {
+      query.criteria = { title: options.title };
     } else {
       callback(true, 'Valid criteria field not present in options');
       return;
@@ -154,7 +154,7 @@ var AuthorPost = function (plz) {
   * @memberof author
   * @param {object} options
   * @param {string} options.userName - Used to check permissions
-  * @param {string} options.postTitle - Unique id used in post lookup
+  * @param {string} options.title - Unique id used in post lookup
   * @param {string} options.content - Replacement content for post
   * @param {post} callback
   */
@@ -167,17 +167,18 @@ var AuthorPost = function (plz) {
 
     var currentTimestamp = new Date().getTime() / 1000,
         query,
+        oldPost,
         id;
 
     query = {
       collectionName: _collectionName,
-      criteria: {postTitle: options.postTitle}
+      criteria: {title: options.title}
     };
 
     if(options.hasOwnProperty('_id')) {
       query.criteria = { _id: options._id };
-    } else if (options.hasOwnProperty('postTitle')) {
-      query.criteria = { postTitle: options.postTitle };
+    } else if (options.hasOwnProperty('title')) {
+      query.criteria = { title: options.title };
     } else {
       callback(true, 'Valid criteria field not present in options');
       return;
@@ -191,33 +192,38 @@ var AuthorPost = function (plz) {
 
       id = getResult._id;
 
-      delete getResult._id;
-      getResult.modifiedAt = currentTimestamp;
-      getResult.revisionNumber++;
-      getResult.content = options.content;
+      oldPost = getResult;
+      oldPost.status = "archived";
+      delete oldPost._id;
 
       query = {
         collectionName: _collectionName,
-        document: getResult,
-        uniqueFields: {
-          postTitle: getResult.postTitle,
-          revisionNumber: getResult.revisionNumber
+        criteria: { _id: id },
+        update: {
+          $set:{
+            modifiedAt: currentTimestamp,
+            revisionNumber: oldPost.revisionNumber+1,
+            content: options.content
+          }
         }
       };
 
-      database.createDocument(query, function(error, createResult) {
-        if(error) {
-          callback(error, createResult);
+      database.editDocument(query, function(error) {
+        if (error) {
+          callback(error, getResult);
           return;
         }
 
-		    query = {
+        query = {
           collectionName: _collectionName,
-          criteria: {_id: id },
-          update:  {$set:{status: "archived"}}
+          document: oldPost,
+          uniqueFields: {
+            title: oldPost.title,
+            revisionNumber: oldPost.revisionNumber
+          }
         };
 
-        database.editDocument(query, function(error) {
+        database.createDocument(query, function(error, createResult){
           callback(error, createResult);
         });
       });
@@ -231,7 +237,7 @@ var AuthorPost = function (plz) {
   * @memberof author
   * @param {object} options
   * @param {string} options.userName - Used to check permissions
-  * @param {string} options.postTitle - Unique id used in post lookup
+  * @param {string} options.title - Unique id used in post lookup
   * @param {post} callback
   */
   plz.remove.post = function (options, callback) {
@@ -247,8 +253,8 @@ var AuthorPost = function (plz) {
 
     if(options.hasOwnProperty('_id')) {
       query.criteria = { _id: options._id };
-    } else if(options.hasOwnProperty('postTitle')) {
-      query.criteria = { postTitle: options.postTitle };
+    } else if(options.hasOwnProperty('title')) {
+      query.criteria = { title: options.title };
     } else {
       callback(true, 'Valid criteria field not present in options');
       return;

@@ -28,7 +28,7 @@ var AuthorPage = function (plz) {
   * @memberof author.page
   * @param {object} options
   * @param {string} options.userName - Used to check permissions
-  * @param {string} options.pageTitle - Unique id used in page lookup
+  * @param {string} options.title - Unique id used in page lookup
   * @param {string} options.revisionNumber - To keep track of version info
   * @param {string} options.visibility - public / private / privileged
   * @param {string} options.contentType - plain test / HTML / markdown
@@ -58,7 +58,7 @@ var AuthorPage = function (plz) {
       var query = {
         collectionName: _collectionName,
         document: options,
-        uniqueFields: {pageTitle: options.pageTitle}
+        uniqueFields: {title: options.title}
       };
 
       database.createDocument(query, function(error, result){
@@ -74,7 +74,7 @@ var AuthorPage = function (plz) {
   * @memberof author.page
   * @param {object} options
   * @param {string} options.userName - Used to check permissions
-  * @param {string} options.pageTitle - Unique id used in page lookup
+  * @param {string} options.title - Unique id used in page lookup
   * @param {page} callback
   */
   plz.publish.page = function (options, callback) {
@@ -90,8 +90,8 @@ var AuthorPage = function (plz) {
 
     if( options.hasOwnProperty('_id')) {
       query.criteria = { _id: options._id };
-    } else if(options.hasOwnProperty('pageTitle')) {
-      query.criteria = { pageTitle: options.pageTitle };
+    } else if(options.hasOwnProperty('title')) {
+      query.criteria = { title: options.title };
     } else {
       callback(true, 'Valid criteria field not present in options');
       return;
@@ -108,7 +108,7 @@ var AuthorPage = function (plz) {
   * @memberof author.page
   * @param {object} options
   * @param {string} options.userName - Used to check permissions
-  * @param {string} options.pageTitle - Unique id used in page lookup
+  * @param {string} options.title - Unique id used in page lookup
   * @param {page} callback
   */
   plz.get.page = function (options, callback) {
@@ -123,8 +123,8 @@ var AuthorPage = function (plz) {
         labels: { $in: [options.label] },
         status: { $ne: 'archived' }
       };
-    } else if(options.hasOwnProperty('pageTitle')) {
-      query.criteria = {pageTitle: options.pageTitle};
+    } else if(options.hasOwnProperty('title')) {
+      query.criteria = {title: options.title};
     } else {
       callback(true, 'Valid criteria field not present in options');
       return;
@@ -146,7 +146,7 @@ var AuthorPage = function (plz) {
   * @memberof author.page
   * @param {object} options
   * @param {string} options.userName - Used to check permissions
-  * @param {string} options.pageTitle - Unique id used in page lookup
+  * @param {string} options.title - Unique id used in page lookup
   * @param {string} options.content - Replacement content for page
   * @param {page} callback
   */
@@ -165,8 +165,8 @@ var AuthorPage = function (plz) {
 
     if (options.hasOwnProperty('_id')) {
       query.criteria = { _id: options._id };
-    } else if(options.hasOwnProperty('pageTitle')) {
-      query.criteria = { pageTitle: options.pageTitle };
+    } else if(options.hasOwnProperty('title')) {
+      query.criteria = { title: options.title };
     } else {
       callback(true, 'Valid criteria field not present in options');
       return;
@@ -180,33 +180,38 @@ var AuthorPage = function (plz) {
 
       var pageId = getResult._id;
 
-      delete getResult._id;
-      getResult.modifiedAt = currentTimestamp;
-      getResult.revisionNumber++;
-      getResult.content = options.content;
+      var oldPage = getResult;
+      oldPage.status = "archived";
+      delete oldPage._id;
 
-      var query = {
+      var editQuery = {
         collectionName: _collectionName,
-        document: getResult,
-        uniqueFields: {
-          pageTitle: getResult.pageTitle,
-          revisionNumber: getResult.revisionNumber
+        criteria: { _id: pageId },
+        update: {
+          $set:{
+            modifiedAt: currentTimestamp,
+            revisionNumber: oldPage.revisionNumber+1,
+            content: options.content
+          }
         }
       };
 
-      database.createDocument(query, function(error, createResult){
+      database.editDocument(editQuery, function(error) {
         if (error) {
-          callback(error, createResult);
+          callback(error, getResult);
           return;
         }
 
-        var query = {
+        var createQuery = {
           collectionName: _collectionName,
-          criteria: { _id: pageId },
-          update: { $set:{ status: "archived" } }
+          document: oldPage,
+          uniqueFields: {
+            title: oldPage.title,
+            revisionNumber: oldPage.revisionNumber
+          }
         };
 
-        database.editDocument(query, function(error) {
+        database.createDocument(createQuery, function(error, createResult){
           callback(error, createResult);
         });
       });
@@ -220,7 +225,7 @@ var AuthorPage = function (plz) {
   * @memberof author.page
   * @param {object} options
   * @param {string} options.userName - Used to check permissions
-  * @param {string} options.pageTitle - Unique id used in page lookup
+  * @param {string} options.title - Unique id used in page lookup
   * @param {page} callback
   */
   plz.remove.page = function (options, callback) {
@@ -235,8 +240,8 @@ var AuthorPage = function (plz) {
 
     if(options.hasOwnProperty('_id')) {
       query.criteria = { _id: options._id };
-    } else if(options.hasOwnProperty('pageTitle')) {
-      query.criteria = { pageTitle: options.pageTitle };
+    } else if(options.hasOwnProperty('title')) {
+      query.criteria = { title: options.title };
     } else {
       callback(true, 'Valid criteria field not present in options');
       return;

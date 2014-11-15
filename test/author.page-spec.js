@@ -57,7 +57,7 @@ describe('author.page | Public API', function () {
 
         pageCollection.count(function(error, count) {
           count.should.equal(1);
-          var findOptions = {pageTitle: Tc.validPage.pageTitle};
+          var findOptions = {title: Tc.validPage.title};
 
           pageCollection.findOne(findOptions, function (error, result) {
             for(var field in Tc.validPage) {
@@ -127,7 +127,7 @@ describe('author.page | Public API', function () {
     it('should publish a page by name with public visibility', function(done) {
       var request = {
         userName: 'chahm',
-        pageTitle: 'Simple plz-cms page',
+        title: 'Simple plz-cms page',
       };
 
       plz.publish.page(request, function (error, result) {
@@ -163,7 +163,7 @@ describe('author.page | Public API', function () {
     it('should return error if page does not exist', function(done) {
       var request = {
         userName: 'chahm',
-        pageTitle: 'nonexistent page',
+        title: 'nonexistent page',
       };
 
       plz.publish.page(request, function (error, result) {
@@ -209,7 +209,7 @@ describe('author.page | Public API', function () {
     it('should fetch a page with required fields present', function(done) {
       var request = {
         userName: 'chahm',
-        pageTitle: 'Simple plz-cms page',
+        title: 'Simple plz-cms page',
       };
 
       plz.get.page(request, function (error, result) {
@@ -234,7 +234,7 @@ describe('author.page | Public API', function () {
     });
 
     it('should fetch multiple pages using label', function(done) {
-      Tc.anotherValidPage.pageTitle = 'page 3';
+      Tc.anotherValidPage.title = 'page 3';
       Tc.anotherValidPage._id = undefined;
       plz.create.page(Tc.anotherValidPage, function (error) {
         error.should.be.false;
@@ -267,7 +267,7 @@ describe('author.page | Public API', function () {
     it('should not fetch previous revisions using label', function(done) {
       var editRequest = {
         userName: 'chahm',
-        pageTitle: 'Simple plz-cms page',
+        title: 'Simple plz-cms page',
         content: 'new content'
       };
       plz.edit.page(editRequest, function (error) {
@@ -288,7 +288,7 @@ describe('author.page | Public API', function () {
     it('should return error if page does not exist', function(done) {
       var request = {
         userName: 'chahm',
-        pageTitle: 'nonexistent page',
+        title: 'nonexistent page',
       };
 
       plz.get.page(request, function (error, result) {
@@ -340,7 +340,7 @@ describe('author.page | Public API', function () {
     it('should modify a page by name with new content', function(done) {
       var request = {
         userName: 'chahm',
-        pageTitle: 'Simple plz-cms page',
+        title: 'Simple plz-cms page',
         content: 'new content'
       };
 
@@ -367,7 +367,7 @@ describe('author.page | Public API', function () {
           error.should.be.false;
           result.should.not.be.empty;
 
-          var findRequest = {_id : result.ops[0]._id};
+          var findRequest = {_id : request._id};
           pageCollection.findOne(findRequest, function (error, result) {
             result.content.should.equal(request.content);
             done();
@@ -379,7 +379,7 @@ describe('author.page | Public API', function () {
     it('should return error if page does not exist', function(done) {
       var request = {
         userName: 'chahm',
-        pageTitle: 'nonexistent page',
+        title: 'nonexistent page',
       };
 
       plz.get.page(request, function (error, result) {
@@ -428,10 +428,10 @@ describe('author.page | Public API', function () {
       });
     });
 
-    it('should remove a page matching the given pageTitle', function(done) {
+    it('should remove a page matching the given title', function(done) {
       var request = {
         userName: 'chahm',
-        pageTitle: 'Simple plz-cms page'
+        title: 'Simple plz-cms page'
       };
 
       plz.remove.page(request, function (error, result) {
@@ -467,7 +467,7 @@ describe('author.page | Public API', function () {
     it('should return error if page does not exist', function(done) {
       var request = {
         userName: 'chahm',
-        pageTitle: 'nonexistent page',
+        title: 'nonexistent page',
       };
 
       plz.get.page(request, function (error, result) {

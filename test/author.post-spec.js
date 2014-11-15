@@ -58,7 +58,7 @@ describe('author.post | Public API', function () {
         postCollection.count(function(error, count) {
           count.should.equal(1);
 
-          var findOptions = {postTitle: Tc.validPost.postTitle};
+          var findOptions = {title: Tc.validPost.title};
 
           postCollection.findOne(findOptions, function (error, result) {
             for(var field in Tc.validPost) {
@@ -128,7 +128,7 @@ describe('author.post | Public API', function () {
     it('should publish a post by namewith public visibility', function(done) {
       var request = {
         userName: 'chahm',
-        postTitle: 'Simple post',
+        title: 'Simple post',
       };
 
       plz.publish.post(request, function (error, result) {
@@ -164,7 +164,7 @@ describe('author.post | Public API', function () {
     it('should return error if post does not exist', function(done) {
       var request = {
         userName: 'chahm',
-        postTitle: 'nonexistent post',
+        title: 'nonexistent post',
       };
 
       plz.publish.post(request, function (error, result) {
@@ -207,10 +207,10 @@ describe('author.post | Public API', function () {
       });
     });
 
-    it('should fetch a post using postTitle', function(done) {
+    it('should fetch a post using title', function(done) {
       var request = {
         userName: 'chahm',
-        postTitle: 'Simple post',
+        title: 'Simple post',
       };
 
       plz.get.post(request, function (error, result) {
@@ -235,7 +235,7 @@ describe('author.post | Public API', function () {
     });
 
     it('should fetch multiple posts using label', function(done) {
-      Tc.anotherValidPost.postTitle = 'post 3';
+      Tc.anotherValidPost.title = 'post 3';
       Tc.anotherValidPost._id = undefined;
       plz.create.post(Tc.anotherValidPost, function (error) {
         error.should.be.false;
@@ -268,7 +268,7 @@ describe('author.post | Public API', function () {
     it('should not fetch previous revisions using label', function(done) {
       var editRequest = {
         userName: 'chahm',
-        postTitle: 'Simple post',
+        title: 'Simple post',
         content: 'new content'
       };
 
@@ -290,7 +290,7 @@ describe('author.post | Public API', function () {
     it('should return error if post does not exist', function(done) {
       var request = {
         userName: 'chahm',
-        postTitle: 'nonexistent post',
+        title: 'nonexistent post',
       };
 
       plz.get.post(request, function (error, result) {
@@ -342,7 +342,7 @@ describe('author.post | Public API', function () {
     it('should modify a post by name with new content', function(done) {
       var request = {
         userName: 'chahm',
-        postTitle: 'Simple post',
+        title: 'Simple post',
         content: 'new content'
       };
 
@@ -369,7 +369,7 @@ describe('author.post | Public API', function () {
           error.should.be.false;
           result.should.not.be.empty;
 
-          var findRequest = {_id : result.ops[0]._id};
+          var findRequest = {_id : request._id};
           postCollection.findOne(findRequest, function (error, result) {
             result.content.should.equal(request.content);
             done();
@@ -381,7 +381,7 @@ describe('author.post | Public API', function () {
     it('should return error if post does not exist', function(done) {
       var request = {
         userName: 'chahm',
-        postTitle: 'nonexistent post',
+        title: 'nonexistent post',
       };
 
       plz.get.post(request, function (error, result) {
@@ -430,10 +430,10 @@ describe('author.post | Public API', function () {
       });
     });
 
-    it('should remove a post matching the given postTitle', function(done) {
+    it('should remove a post matching the given title', function(done) {
       var request = {
         userName: 'chahm',
-        postTitle: 'Simple post'
+        title: 'Simple post'
       };
 
       plz.remove.post(request, function (error, result) {
@@ -471,14 +471,14 @@ describe('author.post | Public API', function () {
         error.should.be.false;
         var editRequest = {
           userName: 'chahm',
-          postTitle: 'Simple post',
+          title: 'Simple post',
           content: 'new content'
         };
         plz.edit.post(editRequest, function (error) {
           error.should.be.false;
           var removeRequest = {
             userName: 'chahm',
-            postTitle: 'Simple post'
+            title: 'Simple post'
           };
 
           plz.remove.post(removeRequest, function (error, result) {
@@ -497,7 +497,7 @@ describe('author.post | Public API', function () {
     it('should return error if post does not exist', function(done) {
       var request = {
         userName: 'chahm',
-        postTitle: 'nonexistent post',
+        title: 'nonexistent post',
       };
 
       plz.remove.post(request, function (error, result) {
