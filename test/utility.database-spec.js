@@ -77,7 +77,7 @@ describe('utility.database | Private API', function () {
       });
     });
 
-    it('should fail when creating a document with existing _id', function(done) {
+    it('should fail when document has existing _id', function(done) {
       var plz = require('../app/core.hub')(Tc.validCoreConfig),
           Utility = require('../app/utility.api')(plz),
           db = Utility.db;
