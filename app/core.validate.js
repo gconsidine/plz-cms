@@ -82,7 +82,24 @@ var CoreValidate = function (plz) {
   * @return {boolean} true if input is a string
   */
   plz.validate.string = function (value) {
-    return typeof value === 'string' ? true : false;
+    return typeof value === 'string' ? true : false;  
+  };
+
+  /**
+  * Verifies the type of the value as a valid currency amount
+  * 
+  * @memberof core.validate
+  * @param {number} value - Value to check the type of 
+  * @return {boolean} true if input is a string
+  */
+  plz.validate.currency = function (value) {
+    if (typeof value === 'string') {
+      var currency_regex = /^\$?\d+(?:\.\d{0,2})$/;
+      return currency_regex.test(value);
+    }
+    else {
+      return false;
+    }
   };
 
   /**
@@ -103,6 +120,8 @@ var CoreValidate = function (plz) {
         return plz.validate.complexity(data);
       case 'string':
         return plz.validate.string(data);
+      case 'currency':
+        return plz.validate.currency(data);
       default:
         throw new Error('Unsupported validation type');
     }

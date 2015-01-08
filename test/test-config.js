@@ -172,6 +172,59 @@ var TestConfig = function () {
     }
   };
 
+  var validMerchantConfig = {
+    modules: {
+      admin: false,
+      author: false,
+      merchant: true
+    },
+    database: {
+      default: {
+        uri: MONGO_URI
+      }
+    },
+    mailer: {
+      default: {
+        service: '',
+        address: 'sender@example.com',
+        password: ''
+      }
+    },
+    merchant: {
+      product: {
+        collection: 'product',
+        required: {
+          userName: 'string',
+          name: 'string',
+          price: 'currency',
+          imageFile: 'string',
+          description: 'string',
+          visibility: 'string',
+          createdAt: 'number',
+          modifiedAt: 'number',
+          status: 'string'
+        }
+      },
+    }
+  };
+
+  var invalidMerchantConfig = {
+    modules: {
+      merchant: true
+    },
+    database: {
+      default: {
+        uri: MONGO_URI
+      }
+    },
+    mailer: {
+      default: {
+        service: '',
+        address: 'sender@example.com',
+        password: ''
+      }
+    }
+  }
   var validPage = {
     userName: 'chahm',
     title: 'Simple plz-cms page',
@@ -254,6 +307,25 @@ var TestConfig = function () {
     role: 'admin'
   };
   
+  var validProduct = {
+    userName: 'chahm',
+    name: 'Acme 16-oz Claw Hammer',
+    labels: ['tools'],
+    price: '$9.99',
+    imageFile: 'images/acme/claw_hammer.png',
+    description: '* Acme\'s most popular hammer\n' +
+      '* Excellent durability\n' +
+      '* Comfortable grip',
+    visibility: 'public',
+    createdAt: 3134999944,
+    modifiedAt: 3134999944,
+    status: 'draft'
+  };
+
+  var invalidProduct = {
+    name: 'invalid product'
+  }
+
   return {
     validCoreConfig: validCoreConfig,
     invalidCoreConfig: invalidCoreConfig,
@@ -261,6 +333,8 @@ var TestConfig = function () {
     invalidAdminConfig: invalidAdminConfig,
     validAuthorConfig: validAuthorConfig,
     invalidAuthorConfig: invalidAuthorConfig,
+    validMerchantConfig: validMerchantConfig,
+    invalidMerchantConfig: invalidMerchantConfig,
     validPage: validPage,
     anotherValidPage: anotherValidPage,
     invalidPage: invalidPage,
@@ -269,6 +343,8 @@ var TestConfig = function () {
     invalidPost: invalidPost,
     validUser: validUser,
     invalidUser: invalidUser,
+    validProduct: validProduct,
+    invalidProduct: invalidProduct,
     invalidDatabase: invalidDatabase
   };
 };
