@@ -116,7 +116,7 @@ var MerchantProduct = function (plz) {
   */
   plz.edit.product = function (options, callback) {
     if(typeof options.userName !== 'string' ||
-       typeof options.content !== 'object') {
+       typeof options.modifications !== 'object') {
       callback(true, 'Required field not present in options');
       return;
     }
@@ -131,7 +131,7 @@ var MerchantProduct = function (plz) {
 
     if (options.hasOwnProperty('_id')) {
       query.criteria = { _id: options._id };
-    } else if(options.hasOwnProperty('title')) {
+    } else if(options.hasOwnProperty('name')) {
       query.criteria = { name: options.name };
     } else {
       callback(true, 'Valid criteria field not present in options');
@@ -169,7 +169,7 @@ var MerchantProduct = function (plz) {
           collectionName: _collectionName,
           document: oldProduct,
           uniqueFields: {
-            title: oldProduct.title,
+            name: oldProduct.name,
             revisionNumber: oldProduct.revisionNumber
           }
         };
@@ -198,7 +198,8 @@ var MerchantProduct = function (plz) {
     }
 
     var query = {
-      collectionName: _collectionName
+      collectionName: _collectionName,
+      limit: '*'
     };
 
     if(options.hasOwnProperty('_id')) {

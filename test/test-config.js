@@ -322,6 +322,20 @@ var TestConfig = function () {
     status: 'draft'
   };
 
+  var anotherValidProduct = {
+    userName: 'chahm',
+    name: 'Acme Phillips Screwdriver',
+    labels: ['tools'],
+    price: '$8.99',
+    imageFile: 'images/acme/phillips_screwdriver.png',
+    description: '* Acme\'s most popular screwdriver\n' +
+      '* Comfortable grip allows maximum torque',
+    visibility: 'public',
+    createdAt: 3134999944,
+    modifiedAt: 3134999944,
+    status: 'draft'
+  };
+
   var invalidProduct = {
     name: 'invalid product'
   }
@@ -344,6 +358,7 @@ var TestConfig = function () {
     validUser: validUser,
     invalidUser: invalidUser,
     validProduct: validProduct,
+    anotherValidProduct: anotherValidProduct,
     invalidProduct: invalidProduct,
     invalidDatabase: invalidDatabase
   };
