@@ -2,10 +2,10 @@
 * @memberof utility
 * @namespace utility.mailer
 */
-var UtilityMailer = function (plz) {
+var UtilityMailer = function (plz, NodeMailer) {
   'use strict';
 
-  var Mailer = require('nodemailer');
+  var nodeMailer = NodeMailer || require('nodemailer');
 
   /**
   * Gets a transporter used to send mail based on the default mailer
@@ -17,7 +17,7 @@ var UtilityMailer = function (plz) {
   * @param {string=} - The name of a mailer from the configuration options.
   */
   function getMailer (callback, name) {
-    var mailer = plz.config.mailer.default;
+    var mailer;
 
     if(name) {
       if(!plz.config.mailer[name]) {
@@ -25,9 +25,11 @@ var UtilityMailer = function (plz) {
       }
       
       mailer = plz.config.mailer[name];
+    } else {
+      mailer = plz.config.mailer.default;
     }
 
-    var transporter = Mailer.createTransport({
+    var transporter = nodeMailer.createTransport({
         service: mailer.service,
         auth: {
             user: mailer.address,

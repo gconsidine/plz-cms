@@ -2,14 +2,29 @@
 
 require('should');
 
-var Tc = require('./test-config');
-
 describe('utility.mailer | Private API', function () {
+  var mailer, plz;
+
+  // Mock configuration
+  plz = {
+    config: {
+      mailer: {
+        default: {
+          service: 'fake',
+          address: 'name@example.com',
+          password: 'fakePassword'
+        },
+        other: {
+          service: 'fake',
+          address: 'name2@example.com',
+          password: 'fakePassword'
+        }
+      }
+    }
+  };
 
   describe('getMailer()', function () {
-    var plz = require('../app/core.hub')(Tc.validCoreConfig),
-        Utility = require('../app/utility.api')(plz),
-        mailer = Utility.mailer;
+    mailer = require('../app/utility.mailer')(plz);
 
     it('should throw an error when undefined mailer is used', function() {
       (function () {
@@ -27,11 +42,21 @@ describe('utility.mailer | Private API', function () {
   });
 
   describe('sendMail()', function () {
-    var plz = require('../app/core.hub')(Tc.validCoreConfig),
-        Utility = require('../app/utility.api')(plz),
-        mailer = Utility.mailer;
+    var nodeMailer = require('nodemailer');
 
-    it('should be able to reference non-default mailer', function(done) {
+    it('should be able to reference mailer and fail', function(done) {
+      nodeMailer.createTransport = function () {
+        function sendMail(options, callback) {
+          callback(true, 'mocked failure'); 
+        }
+
+        return {
+          sendMail: sendMail
+        };
+      };
+
+      mailer = require('../app/utility.mailer')(plz, nodeMailer);
+
       var options = {
         name: 'other'
       };
@@ -42,6 +67,32 @@ describe('utility.mailer | Private API', function () {
         done();
       });
     });
+
+    it('should be able to reference mailer and send', function(done) {
+      nodeMailer.createTransport = function () {
+        function sendMail(options, callback) {
+          callback(false, 'mocked success'); 
+        }
+
+        return {
+          sendMail: sendMail
+        };
+      };
+
+      mailer = require('../app/utility.mailer')(plz, nodeMailer);
+
+      var options = {
+        name: 'other'
+      };
+
+      mailer.sendMail(options, function (error, result) {
+        error.should.be.false;
+        result.should.be.type('string');
+        result.should.equal('mocked success');
+        done();
+      });
+    });
+
   });
 
 });
