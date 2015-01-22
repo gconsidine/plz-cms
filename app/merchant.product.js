@@ -16,6 +16,7 @@ var MerchantProduct = function (plz) {
   plz.create = plz.create || {};
   plz.edit = plz.edit || {};
   plz.remove = plz.remove || {};
+  plz.add = plz.add || {};
 
   var _required = plz.config.merchant.product.required,
       _collectionName = plz.config.merchant.product.collection;
@@ -213,6 +214,47 @@ var MerchantProduct = function (plz) {
 
     database.removeDocument(query, function(error, result) {
       callback(error, result);
+    });
+  };
+
+  /**
+  * Adds a product to the given target (e.g. cart) with the given quantity
+  *
+  * @memberof merchant.product
+  * @param {object} options
+  * @param {array} options.target - Container that product is added to
+  * @param {string} options.name - Unique id used in product lookup
+  * @param {number} options.quantity - Integer multiplier for product
+  * @param {product} callback
+  */
+  plz.add.product = function (options, callback) {
+    if(!plz.validate.typeAs('string', options.name)) {
+      callback(true, 'Required fields\' types not valid in options');
+      return;
+    }
+    if(typeof options.to !== 'object') {
+      callback(true, 'Required fields\' types not valid in options');
+      return;
+    }
+    var query = {
+      collectionName: _collectionName,
+      criteria: { name: options.name }
+    };
+
+    database.getDocument(query, function (error, result) {
+      if (error)
+      {
+        callback(true, error);
+        return;
+      }
+      if (options.to.hasOwnProperty(options.name)){
+        options.to[options.name].quantity += options.quantity;
+      }
+      else{
+        result.quantity = options.quantity;
+        options.to[options.name] = result;
+      }
+      callback(false, options.to);
     });
   };
 
