@@ -4,6 +4,7 @@ var MerchantApi = function (plz) {
   plz = plz || {};
 
   require('./merchant.product')(plz);
+  require('./merchant.cart')(plz);
 
   return plz;
 };

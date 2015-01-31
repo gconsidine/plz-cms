@@ -205,6 +205,13 @@ var TestConfig = function () {
           status: 'string'
         }
       },
+      cart: {
+        collection: 'cart',
+        required: {
+          customerId: 'string',
+          productName: 'string'
+        }
+      },
     }
   };
 
@@ -340,6 +347,8 @@ var TestConfig = function () {
     name: 'invalid product'
   }
 
+  var validCustomerId = 'chahm@caprahorn.com';
+
   return {
     validCoreConfig: validCoreConfig,
     invalidCoreConfig: invalidCoreConfig,
@@ -360,6 +369,7 @@ var TestConfig = function () {
     validProduct: validProduct,
     anotherValidProduct: anotherValidProduct,
     invalidProduct: invalidProduct,
+    validCustomerId: validCustomerId,
     invalidDatabase: invalidDatabase
   };
 };
