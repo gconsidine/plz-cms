@@ -139,8 +139,8 @@ var UtilityDatabase = function (plz) {
       criteria: 'object'
     }; 
 
-	  for(var field in requiredOptions){
-      if(typeof options[field] !== requiredOptions[field]){
+	  for(var field in requiredOptions) {
+      if(typeof options[field] !== requiredOptions[field]) {
         callback(true, 'Required field ' + field + ' not present in options');
         return;
       }
@@ -174,8 +174,7 @@ var UtilityDatabase = function (plz) {
 
           callback(false, result);
         });
-      }
-      else if (options.limit === '*' || options.limit > 0){
+      } else if (options.limit === '*' || options.limit > 0) {
         var findCursor;
 
         if (options.limit === '*') {
@@ -190,19 +189,12 @@ var UtilityDatabase = function (plz) {
             return;
           }
 
-          if(docs.length === 0) {
-            var message = [
-              'Failed to find document matching ',
-               JSON.stringify(options.criteria),
-               ' in ' + options.collectionName
-            ].join(' ');
-
-            callback(true, message);
-          } else if(options.limit === '*' || options.limit > docs.length){
+          if(options.limit === '*' || options.limit > docs.length) {
             callback(false, docs);
-          } else {
-            callback(false, docs.slice(0, options.limit));
+            return;
           }
+          
+          callback(false, docs.slice(0, options.limit));
         });
       }
     });
