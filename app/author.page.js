@@ -151,21 +151,20 @@ var AuthorPage = function (plz) {
   * @param {page} callback
   */
   plz.edit.page = function (options, callback) {
-    if(typeof options.userName !== 'string' ||
-       typeof options.content !== 'string') {
+    if(typeof options.userName !== 'string' || typeof options.content !== 'string') {
       callback(true, 'Required field not present in options');
       return;
     }
 
-    var currentTimestamp = new Date().getTime() / 1000;
+    var currentTimestamp = new Date();
 
     var query = {
       collectionName: _collectionName
     };
 
-    if (options.hasOwnProperty('_id')) {
+    if(options._id) {
       query.criteria = { _id: options._id };
-    } else if(options.hasOwnProperty('title')) {
+    } else if(options.title) {
       query.criteria = { title: options.title };
     } else {
       callback(true, 'Valid criteria field not present in options');
@@ -178,10 +177,11 @@ var AuthorPage = function (plz) {
         return;
       }
 
-      var pageId = getResult._id;
+      var pageId = getResult[0]._id;
+      var oldPage = getResult[0];
 
-      var oldPage = getResult;
       oldPage.status = "archived";
+
       delete oldPage._id;
 
       var editQuery = {

@@ -160,15 +160,15 @@ describe('author.page | Public API', function () {
       });
     });
 
-    it('should return error if page does not exist', function(done) {
+    it('should return a null result if page does not exist', function(done) {
       var request = {
         userName: 'chahm',
         title: 'nonexistent page',
       };
 
       plz.publish.page(request, function (error, result) {
-        error.should.be.true;
-        result.should.not.be.empty;
+        error.should.be.false;
+        (result.value === null).should.be.true;
         done();
       });
     });
@@ -239,8 +239,7 @@ describe('author.page | Public API', function () {
       plz.create.page(Tc.anotherValidPage, function (error) {
         error.should.be.false;
         var request = {
-          label: 'mainmenu',
-          limit: '*'
+          label: 'mainmenu'
         };
         plz.get.page(request, function (error, result) {
           error.should.be.false;
@@ -270,12 +269,13 @@ describe('author.page | Public API', function () {
         title: 'Simple plz-cms page',
         content: 'new content'
       };
-      plz.edit.page(editRequest, function (error) {
+
+      plz.edit.page(editRequest, function (error, result) {
         error.should.be.false;
-        var getRequest = {
-          label: 'mainmenu',
-          limit: '*'
-        };
+        result.should.not.be.empty;
+
+        var getRequest = { label: 'mainmenu' };
+
         plz.get.page(getRequest, function (error, result) {
           error.should.be.false;
           result.should.not.be.empty;
@@ -285,15 +285,15 @@ describe('author.page | Public API', function () {
       });
     });
 
-    it('should return error if page does not exist', function(done) {
+    it('should return empty array if page does not exist', function(done) {
       var request = {
         userName: 'chahm',
         title: 'nonexistent page',
       };
 
       plz.get.page(request, function (error, result) {
-        error.should.be.true;
-        result.should.not.be.empty;
+        error.should.be.false;
+        result.should.eql([]);
         done();
       });
     });
@@ -376,15 +376,15 @@ describe('author.page | Public API', function () {
       });
     });
 
-    it('should return error if page does not exist', function(done) {
+    it('should return empty array if page does not exist', function(done) {
       var request = {
         userName: 'chahm',
         title: 'nonexistent page',
       };
 
       plz.get.page(request, function (error, result) {
-        error.should.be.true;
-        result.should.not.be.empty;
+        error.should.be.false;
+        result.should.eql([]);
         done();
       });
     });
@@ -464,15 +464,15 @@ describe('author.page | Public API', function () {
       });
     });
 
-    it('should return error if page does not exist', function(done) {
+    it('should return empty array if page does not exist', function(done) {
       var request = {
         userName: 'chahm',
         title: 'nonexistent page',
       };
 
       plz.get.page(request, function (error, result) {
-        error.should.be.true;
-        result.should.not.be.empty;
+        error.should.be.false;
+        result.should.eql([]);
         done();
       });
     });

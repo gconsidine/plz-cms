@@ -91,9 +91,10 @@ describe('admin.user | Public API', function () {
       });
     });
 
-    it('should return error if user does not exist', function (done) {
-      plz.get.user({name: 'zanzabar'}, function (error) {
-        error.should.be.true;
+    it('should return an empty array if user does not exist', function (done) {
+      plz.get.user({name: 'zanzabar'}, function (error, result) {
+        error.should.be.false;
+        result.should.be.eql([]);
         done();
       });
     });
@@ -119,18 +120,17 @@ describe('admin.user | Public API', function () {
     });
 
     it('should remove a user that exists', function (done) {
-      plz.remove.user({name: 'greg'}, function (error, result) {
+      plz.remove.user({name: 'greg'}, function (error, res) {
         error.should.be.false;
-        result.should.not.be.empty;
+        res.result.n.should.equal(1);
         done();
       });
     });
 
     it('should return error if user does not exist', function (done) {
-      plz.remove.user({name: 'doppio'}, function (error, result) {
+      plz.remove.user({name: 'doppio'}, function (error, res) {
         error.should.be.false;
-        result.should.be.type('object');
-        (result.value === null).should.be.true;
+        res.result.n.should.equal(0);
         done();
       });
     });
@@ -167,23 +167,24 @@ describe('admin.user | Public API', function () {
 
       plz.get.user({name: 'greg'}, function (error, result) {
         error.should.be.false;
-        result.name.should.equal('greg');
+        result[0].name.should.equal('greg');
 
         plz.edit.user(options, function (error, result) {
           error.should.be.false;
-          result.should.not.be.empty;
+          result.lastErrorObject.updatedExisting.should.be.true;
 
           plz.get.user({name: 'doppio'}, function (error, result) {
-            result.name.should.equal('doppio');
+            result[0].name.should.equal('doppio');
             done();
           });
         });
       });
     });
 
-    it('should return error if user does not exist', function (done) {
-      plz.get.user({name: 'greg'}, function (error) {
-        error.should.be.true;
+    it('should return an empty result if user does not exist', function (done) {
+      plz.get.user({name: 'greg'}, function (error, result) {
+        error.should.be.false;
+        result.should.eql([]);
         done();
       });
     });

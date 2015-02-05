@@ -159,13 +159,12 @@ var AuthorPost = function (plz) {
   * @param {post} callback
   */
   plz.edit.post = function (options, callback) {
-    if(typeof options.userName !== 'string' ||
-       typeof options.content !== 'string') {
+    if(typeof options.userName !== 'string' || typeof options.content !== 'string') {
       callback(true, 'Required field not present in options');
       return;
     }
 
-    var currentTimestamp = new Date().getTime() / 1000,
+    var currentTimestamp = new Date(),
         query,
         oldPost,
         id;
@@ -175,9 +174,9 @@ var AuthorPost = function (plz) {
       criteria: {title: options.title}
     };
 
-    if(options.hasOwnProperty('_id')) {
+    if(options._id) {
       query.criteria = { _id: options._id };
-    } else if (options.hasOwnProperty('title')) {
+    } else if (options.title) {
       query.criteria = { title: options.title };
     } else {
       callback(true, 'Valid criteria field not present in options');
@@ -190,9 +189,9 @@ var AuthorPost = function (plz) {
         return;
       }
 
-      id = getResult._id;
+      id = getResult[0]._id;
 
-      oldPost = getResult;
+      oldPost = getResult[0];
       oldPost.status = "archived";
       delete oldPost._id;
 

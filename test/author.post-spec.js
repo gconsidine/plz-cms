@@ -161,15 +161,15 @@ describe('author.post | Public API', function () {
       });
     });
 
-    it('should return error if post does not exist', function(done) {
+    it('should return null if post does not exist', function(done) {
       var request = {
         userName: 'chahm',
         title: 'nonexistent post',
       };
 
       plz.publish.post(request, function (error, result) {
-        error.should.be.true;
-        result.should.not.be.empty;
+        error.should.be.false;
+        (result.value === null).should.be.true;
         done();
       });
     });
@@ -239,10 +239,8 @@ describe('author.post | Public API', function () {
       Tc.anotherValidPost._id = undefined;
       plz.create.post(Tc.anotherValidPost, function (error) {
         error.should.be.false;
-        var request = {
-          label: 'news',
-          limit: '*'
-        };
+        var request = { label: 'news' };
+
         plz.get.post(request, function (error, result) {
           error.should.be.false;
           result.should.not.be.empty;
@@ -257,10 +255,10 @@ describe('author.post | Public API', function () {
         label: 'news',
         limit: 2
       };
+
       plz.get.post(request, function (error, result) {
         error.should.be.false;
-        result.should.not.be.empty;
-        result.length.should.equal(request.limit);
+        result.length.should.equal(2);
         done();
       });
     });
@@ -274,10 +272,8 @@ describe('author.post | Public API', function () {
 
       plz.edit.post(editRequest, function (error) {
         error.should.be.false;
-        var getRequest = {
-          label: 'news',
-          limit: '*'
-        };
+        var getRequest = { label: 'news' };
+
         plz.get.post(getRequest, function (error, result) {
           error.should.be.false;
           result.should.not.be.empty;
@@ -287,15 +283,15 @@ describe('author.post | Public API', function () {
       });
     });
 
-    it('should return error if post does not exist', function(done) {
+    it('should return empty array if post does not exist', function(done) {
       var request = {
         userName: 'chahm',
         title: 'nonexistent post',
       };
 
       plz.get.post(request, function (error, result) {
-        error.should.be.true;
-        result.should.not.be.empty;
+        error.should.be.false;
+        result.should.eql([]);
         done();
       });
     });
@@ -378,15 +374,15 @@ describe('author.post | Public API', function () {
       });
     });
 
-    it('should return error if post does not exist', function(done) {
+    it('should return empty array if post does not exist', function(done) {
       var request = {
         userName: 'chahm',
         title: 'nonexistent post',
       };
 
       plz.get.post(request, function (error, result) {
-        error.should.be.true;
-        result.should.not.be.empty;
+        error.should.be.false;
+        result.should.eql([]);
         done();
       });
     });
@@ -494,15 +490,15 @@ describe('author.post | Public API', function () {
       });
     });
 
-    it('should return error if post does not exist', function(done) {
+    it('should affect nothing if post does not exist', function(done) {
       var request = {
         userName: 'chahm',
         title: 'nonexistent post',
       };
 
-      plz.remove.post(request, function (error, result) {
-        error.should.be.true;
-        result.should.not.be.empty;
+      plz.remove.post(request, function (error, response) {
+        error.should.be.false;
+        response.result.n.should.equal(0);
         done();
       });
     });

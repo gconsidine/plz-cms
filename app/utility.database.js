@@ -22,19 +22,6 @@ var UtilityDatabase = function (plz) {
   * @param {database} callback
   */
   function createDocument(options, callback) {
-    var requiredOptions = {
-      collectionName: 'string',
-      document: 'object',
-      uniqueFields: 'object'
-    }; 
-
-	  for(var field in requiredOptions){
-      if(typeof options[field] !== requiredOptions[field]){
-        callback(true, 'Required field ' + field + ' not present in options');
-        return;
-      }
-    } 
-
     getDatabase(function (error, database) {
       if(error) {
         callback(true, 'Cannot establish database connection');
@@ -78,19 +65,6 @@ var UtilityDatabase = function (plz) {
   * @param {database} callback
   */
   function editDocument(options, callback) {
-    var requiredOptions = {
-      collectionName: 'string',
-      criteria: 'object',
-      update: 'object'
-    }; 
-
-	  for(var field in requiredOptions){
-      if(typeof options[field] !== requiredOptions[field]){
-        callback(true, 'Required field ' + field + ' not present in options');
-        return;
-      }
-    } 
-
     getDatabase(function (error, database) {
       if(error) {
         callback(true, 'Cannot establish database connection');
@@ -99,21 +73,9 @@ var UtilityDatabase = function (plz) {
 
       var collection = database.collection(options.collectionName);
 
-      collection.findOneAndUpdate(options.criteria, options.update, 
-        function (error, result) {
+      collection.findOneAndUpdate(options.criteria, options.update, function (error, result) {
         if(error) {
           callback(true, 'Database findOneAndUpdate error: ' + error);
-          return;
-        }
-
-        if(!result || result.value === null) {
-          var message = [
-            'Failed to find document matching',
-            JSON.stringify(options.criteria),
-            'in ' + options.collectionName
-          ].join(' ');
-
-          callback(true, message);
           return;
         }
 
@@ -134,18 +96,6 @@ var UtilityDatabase = function (plz) {
   * @param {database} callback
   */
   function getDocument(options, callback) {
-    var requiredOptions = {
-      collectionName: 'string',
-      criteria: 'object'
-    }; 
-
-	  for(var field in requiredOptions) {
-      if(typeof options[field] !== requiredOptions[field]) {
-        callback(true, 'Required field ' + field + ' not present in options');
-        return;
-      }
-    } 
-
     getDatabase(function (error, database) {
       if(error) {
         callback(true, 'Cannot establish database connection');
@@ -153,50 +103,26 @@ var UtilityDatabase = function (plz) {
       }
 
       var collection = database.collection(options.collectionName);
+      var findCursor;
 
-      if (!options.hasOwnProperty('limit') || options.limit === 1) {
-        collection.findOne(options.criteria, function (error, result) {
-          if(error) {
-            callback(true, 'Database findOne error: ' + error);
-            return;
-          }
-
-          if(!result || result.matchedCount === 0) {
-            var message = [
-              'Failed to find document matching',
-               JSON.stringify(options.criteria),
-               'in ' + options.collectionName
-            ].join(' ');
-
-            callback(true, message);
-            return;
-          }
-
-          callback(false, result);
-        });
-      } else if (options.limit === '*' || options.limit > 0) {
-        var findCursor;
-
-        if (options.limit === '*') {
-          findCursor = collection.find(options.criteria);
-        } else {
-          findCursor = collection.find(options.criteria).limit(options.limit);
-        }
-
-        findCursor.toArray(function(error, docs) {
-          if(error) {
-            callback(true, 'Database find error: ' + error);
-            return;
-          }
-
-          if(options.limit === '*' || options.limit > docs.length) {
-            callback(false, docs);
-            return;
-          }
-          
-          callback(false, docs.slice(0, options.limit));
-        });
+      if(!options.criteria && !options.limit) {
+        findCursor = collection.find();
+      } else if(!options.critiera && options.limit) {
+        findCursor = collection.find().limit(options.limit);
+      } else if(!options.limit) {
+        findCursor = collection.find(options.criteria);
+      } else {
+        findCursor = collection.find(options.criteria).limit(options.limit);
       }
+
+      findCursor.toArray(function(error, docs) {
+        if(error) {
+          callback(true, 'Database find error: ' + error);
+          return;
+        }
+        
+        callback(false, docs);
+      });
     });
   }
 
@@ -208,22 +134,9 @@ var UtilityDatabase = function (plz) {
   * @param {object} options
   * @param {string} options.collectionName
   * @param {object} options.criteria
-  * @param {object} options.limit
   * @param {database} callback
   */
   function removeDocument(options, callback) {
-    var requiredOptions = {
-      collectionName: 'string',
-      criteria: 'object'
-    }; 
-
-	  for(var field in requiredOptions){
-      if(typeof options[field] !== requiredOptions[field]){
-        callback(true, 'Required field ' + field + ' not present in options');
-        return;
-      }
-    }
-
     getDatabase(function(error, database) {
       if(error) {
         callback(true, 'Cannot establish database connection');
@@ -231,68 +144,19 @@ var UtilityDatabase = function (plz) {
       }
 
       var collection = database.collection(options.collectionName);
+      
+      collection.remove(options.criteria, {w: 1}, function (error, result) {
+        if(error) {
+          callback(true, result);
+          return;
+        }
 
-      if (!options.hasOwnProperty('limit') || options.limit === 1) {
-        collection.findOneAndDelete(options.criteria, function (error, result) {
-          if(error) {
-            callback(true, 'Remove failed: ' + error);
-            return;
-          }
-
-          callback(false, result);
-        });
-      } else if (options.limit === '*' || options.limit > 0){
-        collection.find(options.criteria).toArray(function(error, docs) {
-          if(error) {
-            callback(true, 'Remove failed: ' + error);
-            return;
-          }
-
-          if(docs.length === 0){
-            var message = [
-              'Failed to find document matching',
-              JSON.stringify(options.criteria),
-              'in ' + options.collectionName
-            ].join(' ');
-
-            callback(true, message);
-            return;
-          }
-
-          if (options.limit === '*'){
-            options.limit = docs.length;
-          }
-
-          var removedDocs = [];
-          var removedCallback = function(error, result){
-            if(error) {
-              if(removedDocs.length === 0) {
-                callback(true, 'Remove failed: ' + error);
-                return;
-              } else {
-                callback(false, removedDocs);
-                return;
-              }
-            } else {
-              removedDocs.push(result);
-              if (removedDocs.length >= options.limit) {
-                callback(false, removedDocs);
-                return;
-              }
-            }
-          };
-
-          for (var findIndex = 0; findIndex < options.limit; findIndex++) {
-            var criteria = { _id: docs[findIndex]._id };
-            collection.findOneAndDelete(criteria, removedCallback);
-          }
-        });
-      } else {
-        callback(true, 'Invalid value for limit: ' + options.limit);
-      }
+        callback(false, result);
+      });
     });
   }
 
+  // TODO: rename to getConnection()
   function getDatabase(callback, name) {
     if (db !== undefined) {
       callback(false, db);
@@ -325,7 +189,8 @@ var UtilityDatabase = function (plz) {
     getDocument: getDocument,
     createDocument: createDocument,
     editDocument: editDocument,
-    removeDocument: removeDocument
+    removeDocument: removeDocument,
+    db: db
   };
 };
 
