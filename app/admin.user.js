@@ -43,7 +43,7 @@ var AdminUser = function (plz) {
   };
 
   /**
-  * Returns a single user matching the query options passed as the first
+  * Returns an array of users matching the query options passed as the first
   * argument.
   *
   * @memberof admin.user

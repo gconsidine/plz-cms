@@ -30,15 +30,15 @@ describe('admin.account | Public API', function () {
       });
     });
 
-    it('should return an error for criteria without a match', function (done) {
+    it('should return an empty array if no match is found', function (done) {
       var login = {
         email: 'sender@example.com',
         password: 'someWrongPass0'
       };
 
       plz.login.user(login, function (error, result) {
-        error.should.be.true;
-        result.should.be.type('string');
+        error.should.be.false;
+        result.should.eql([]);
         done();
       });
     });
@@ -80,11 +80,11 @@ describe('admin.account | Public API', function () {
       plz.send.activation(options, function (error, result) {
         error.should.be.true;
         result.should.eql('Mail not sent');
-       
+
         plz.get.user({email: options.user.email}, function (error, result) {
           error.should.be.false;
-          result.tempAuth.should.eql(hash);
-          result.status.should.eql('activation-pending');
+          result[0].tempAuth.should.eql(hash);
+          result[0].status.should.eql('activation-pending');
 
           done();
         });
@@ -130,8 +130,8 @@ describe('admin.account | Public API', function () {
        
         plz.get.user({email: options.user.email}, function (error, result) {
           error.should.be.false;
-          result.tempAuth.should.eql(hash);
-          result.status.should.eql('reset-pending');
+          result[0].tempAuth.should.eql(hash);
+          result[0].status.should.eql('reset-pending');
 
           done();
         });
@@ -185,19 +185,6 @@ describe('admin.account | Public API', function () {
       });
     });
 
-    it('should return false if activation hash is invalid', function (done) {
-      var options = {
-        email: _user.email,
-        hash: '0000000000000001111abcdef'
-      };
-
-      plz.authorize.activation(options, function (error, result) {
-        error.should.be.true;
-        result.should.be.false;
-        done();
-      });
-    });
-
     after(function (done) {
       database.getDatabase(function (error, db) {
         db.collection('user').drop(function () { done(); });
@@ -244,19 +231,6 @@ describe('admin.account | Public API', function () {
         done();
       });
     });
-
-    it('should return false if activation hash is invalid', function (done) {
-      var options = {
-        email: _user.email,
-        hash: '0000000000000001111abcdef'
-      };
-
-      plz.authorize.activation(options, function (error, result) {
-        error.should.be.true;
-        result.should.be.false;
-        done();
-      });
-    });    
 
     after(function (done) {
       database.getDatabase(function (error, db) {

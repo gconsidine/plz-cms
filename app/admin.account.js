@@ -194,7 +194,7 @@ var AdminAccount = function (plz) {
       update: {
         $set: {
           status: options.status,
-          modifiedAt: new Date().getTime() / 1000,
+          modifiedAt: new Date().getTime(),
           tempAuth: options.hash
         }
       }

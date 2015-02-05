@@ -25,22 +25,6 @@ describe('utility.database | Private API', function () {
       });
     });
 
-    it('should fail when required fields are not present', function(done) {
-      var plz = require('../app/core.hub')(Tc.validCoreConfig),
-          Utility = require('../app/utility.api')(plz),
-          db = Utility.db;
-
-      var options = {
-        collectionName: 'test',
-      };
-
-      db.createDocument(options, function (error, result) {
-        error.should.be.true; 
-        result.should.be.type('string');
-        done();
-      });
-    });
-
     it('should fail when database cannot connect', function(done) {
       var plz = require('../app/core.hub')(Tc.invalidDatabase),
           Utility = require('../app/utility.api')(plz),
@@ -132,22 +116,6 @@ describe('utility.database | Private API', function () {
       });
     });
 
-    it('should fail when required fields are not present', function(done) {
-      var plz = require('../app/core.hub')(Tc.validCoreConfig),
-          Utility = require('../app/utility.api')(plz),
-          db = Utility.db;
-
-      var options = {
-        collectionName: 'test',
-      };
-
-      db.editDocument(options, function (error, result) {
-        error.should.be.true; 
-        result.should.be.type('string');
-        done();
-      });
-    });
-
     it('should fail when database cannot connect', function(done) {
       var plz = require('../app/core.hub')(Tc.invalidDatabase),
           Utility = require('../app/utility.api')(plz),
@@ -217,22 +185,6 @@ describe('utility.database | Private API', function () {
       });
     });
 
-    it('should fail when required fields are not present', function(done) {
-      var plz = require('../app/core.hub')(Tc.validCoreConfig),
-          Utility = require('../app/utility.api')(plz),
-          db = Utility.db;
-
-      var options = {
-        collectionName: 'test',
-      };
-
-      db.getDocument(options, function (error, result) {
-        error.should.be.true; 
-        result.should.be.type('string');
-        done();
-      });
-    });
-
     it('should fail when database cannot connect', function(done) {
       var plz = require('../app/core.hub')(Tc.invalidDatabase),
           Utility = require('../app/utility.api')(plz),
@@ -250,7 +202,7 @@ describe('utility.database | Private API', function () {
       });
     });
 
-    it('should fail when no documents match criterai', function(done) {
+    it('should return empty array when no documents match', function(done) {
       var plz = require('../app/core.hub')(Tc.validCoreConfig),
           Utility = require('../app/utility.api')(plz),
           db = Utility.db;
@@ -261,8 +213,8 @@ describe('utility.database | Private API', function () {
       };
 
       db.getDocument(options, function (error, result) {
-        error.should.be.true; 
-        result.should.be.type('string');
+        error.should.be.false; 
+        result.should.eql([]);
         done();
       });
     });
@@ -317,40 +269,6 @@ describe('utility.database | Private API', function () {
       });
     });
 
-    it('should fail when required fields are not present', function(done) {
-      var plz = require('../app/core.hub')(Tc.validCoreConfig),
-          Utility = require('../app/utility.api')(plz),
-          db = Utility.db;
-
-      var options = {
-        collectionName: 'test',
-      };
-
-      db.removeDocument(options, function (error, result) {
-        error.should.be.true; 
-        result.should.be.type('string');
-        done();
-      });
-    });
-
-    it('should fail when an invalid limit is provided', function(done) {
-      var plz = require('../app/core.hub')(Tc.validCoreConfig),
-          Utility = require('../app/utility.api')(plz),
-          db = Utility.db;
-
-      var options = {
-        collectionName: 'test',
-        criteria: {name: 'zanzibar'},
-        limit: -1000
-      };
-
-      db.removeDocument(options, function (error, result) {
-        error.should.be.true; 
-        result.should.be.type('string');
-        done();
-      });
-    });
-
     it('should fail when database cannot connect', function(done) {
       var plz = require('../app/core.hub')(Tc.invalidDatabase),
           Utility = require('../app/utility.api')(plz),
@@ -359,23 +277,6 @@ describe('utility.database | Private API', function () {
       var options = {
         collectionName: 'test',
         criteria: { testField: 'testValue' }
-      };
-
-      db.removeDocument(options, function (error, result) {
-        error.should.be.true; 
-        result.should.be.type('string');
-        done();
-      });
-    });
-
-    it('should fail with invalid criteria', function(done) {
-      var plz = require('../app/core.hub')(Tc.validCoreConfig),
-          Utility = require('../app/utility.api')(plz),
-          db = Utility.db;
-
-      var options = {
-        collectionName: 'test',
-        criteria: [ {$blah:''} ]
       };
 
       db.removeDocument(options, function (error, result) {
