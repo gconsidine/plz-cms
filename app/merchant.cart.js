@@ -3,7 +3,7 @@
  * from the merchant component.
  *
  * @memberof merchant
- * @namespace merchant.product
+ * @namespace merchant.cart
  */
 var MerchantCart = function (plz) {
   'use strict';
@@ -23,12 +23,12 @@ var MerchantCart = function (plz) {
   * Adds an item to the shopping cart corresonding to the specified
   * userid, with the given quantity
   *
-  * @memberof merchant.product
+  * @memberof merchant.cart
   * @param {object} options
   * @param {array} options.customerId - Uniue id used in customer lookup
   * @param {string} options.productName - Unique id used in product lookup
   * @param {number} options.quantity - Integer multiplier for product
-  * @param {product} callback
+  * @param {cart} callback
   */
   plz.add.cartItem = function (options, callback) {
 
@@ -42,7 +42,7 @@ var MerchantCart = function (plz) {
     }
     var currentTimestamp = new Date().getTime() / 1000;
 
-    //first check to see if it's the product exists
+    //first check to see if the product exists
     var productQuery = {
       collectionName: plz.config.merchant.product.collection,
       criteria: { name: options.productName }
@@ -110,12 +110,12 @@ var MerchantCart = function (plz) {
   * Removes an item to the shopping cart corresonding to the specified
   * userid, with the given quantity
   *
-  * @memberof merchant.product
+  * @memberof merchant.cart
   * @param {object} options
   * @param {array} options.customerId - Uniue id used in customer lookup
   * @param {string} options.productName - Unique id used in product lookup
   * @param {number} options.quantity - Integer multiplier for product
-  * @param {product} callback
+  * @param {cart} callback
   */
   plz.remove.cartItem = function (options, callback) {
 
@@ -166,6 +166,123 @@ var MerchantCart = function (plz) {
     });
   };
 
+  /**
+  * Gets all items in the cart corresonding to the specified userid
+  *
+  * @memberof merchant.cart
+  * @param {object} options
+  * @param {array} options.customerId - Uniue id used in customer lookup
+  * @param {cart} callback
+  */
+  plz.get.cart = function (options, callback) {
+
+    if(!plz.validate.typeAs('string', options.customerId)) {
+      callback(true, 'options.customerId is not a valid string');
+      return;
+    }
+    var query = {
+      collectionName: _collectionName,
+      limit: '*',
+      criteria: {
+        customerId : options.customerId
+      }
+    };
+
+    database.getDocument(query, function(error, getResult) {
+      if (error) {
+        callback(true, error);
+      }
+      else {
+        callback(false, getResult);
+      }
+    });
+  };
+
+  /**
+  * Removes the cart and all cart entries corresponding to the specified userid
+  *
+  * @memberof merchant.cart
+  * @param {object} options
+  * @param {array} options.customerId - Uniue id used in customer lookup
+  * @param {cart} callback
+  */
+  plz.remove.cart = function (options, callback) {
+
+    if(!plz.validate.typeAs('string', options.customerId)) {
+      callback(true, 'options.customerId is not a valid string');
+      return;
+    }
+    var query = {
+      collectionName: _collectionName,
+      limit: '*',
+      criteria: {
+        customerId : options.customerId
+      }
+    };
+    database.removeDocument(query, function(error, getResult) {
+      if (error) {
+        callback(true, error);
+      }
+      else {
+        callback(false, getResult);
+      }
+    });
+  };
+
+  /**
+  * Calculates the subtotal from all items present in the cart
+  *
+  * @memberof merchant.cart
+  * @param {object} options
+  * @param {array} options.customerId - Uniue id used in customer lookup
+  * @param {cart} callback
+  */
+  plz.get.cartSubtotal = function (options, callback) {
+
+    if(!plz.validate.typeAs('string', options.customerId)) {
+      callback(true, 'options.customerId is not a valid string');
+      return;
+    }
+    var query = {
+      collectionName: _collectionName,
+      limit: '*',
+      criteria: {
+        customerId : options.customerId
+      }
+    };
+    database.getDocument(query, function(error, getResult) {
+      if (error) {
+        callback(true, error);
+      }
+      else {
+        var subtotal = 0;
+        var numProductsAdded = 0;
+        var addProductPrice = function(product, callback){
+          var productQuery = {
+            collectionName: plz.config.merchant.product.collection,
+            criteria: { name: product.productName }
+          };
+          database.getDocument(productQuery, function (error, productResult) {
+            if (error) {
+              var errorString = "No product matching " + product.productName;
+              callback(true, errorString);
+            }
+            else {
+              var price = parseFloat(productResult.price.replace(/^\$/,''));
+              subtotal += price * product.quantity;
+              numProductsAdded++;
+              if (numProductsAdded === getResult.length){
+                callback(false, subtotal);
+              }
+            }
+          });
+        };
+		for(var index = 0; index < getResult.length; index++) {
+          addProductPrice(getResult[index], callback);
+        }
+      }
+    });
+  };
 };
 
 module.exports = MerchantCart;

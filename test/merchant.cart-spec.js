@@ -215,6 +215,182 @@ describe('merchant.cart | Public API', function () {
         });
       });
     });
+    after(function (done) {
+      cartCollection.drop(function () {
+        done();
+      });
+    });
   });
 
+  describe('plz.get.cart()', function () {
+
+    before(function (done) {
+      plz.create.product(Tc.validProduct, function(){} );
+      plz.create.product(Tc.anotherValidProduct, function(){} );
+
+      var addRequest = {
+        customerId: Tc.validCustomerId,
+        productName: Tc.validProduct.name,
+        quantity: 1
+      };
+      var anotherAddRequest = {
+        customerId: Tc.validCustomerId,
+        productName: Tc.anotherValidProduct.name,
+        quantity: 2
+      };
+      plz.add.cartItem(addRequest, function (error) {
+        error.should.be.false;
+        plz.add.cartItem(anotherAddRequest, function (error) {
+          error.should.be.false;
+          done();
+        });
+      });
+    });
+
+    it('should return error if required fields are missing', function(done) {
+      var invalidRequest = {
+        options: 'invalid options',
+      };
+      plz.get.cart(invalidRequest, function (error) {
+        error.should.be.true;
+        done();
+      });
+    });
+
+    it('should return an array of added cart items', function(done) {
+      var request = {
+        customerId: Tc.validCustomerId
+      };
+      plz.get.cart(request, function (error, result) {
+        error.should.be.false;
+        result.length.should.equal(2);
+        var productsDictObject = {};
+        for(var index in result) {
+          if (result[index].customerId === Tc.validCustomerId) {
+            if (result[index].productName === Tc.validProduct.name ||
+                result[index].productName === Tc.anotherValidProduct.name ) {
+              productsDictObject[result[index].productName] = 1;
+            }
+          }
+		}
+        Object.keys(productsDictObject).length.should.equal(2);
+        done();
+      });
+    });
+    after(function (done) {
+      cartCollection.drop(function () {
+        done();
+      });
+    });
+  });
+
+  describe('plz.remove.cart()', function () {
+
+    before(function (done) {
+      plz.create.product(Tc.validProduct, function(){} );
+      plz.create.product(Tc.anotherValidProduct, function(){} );
+
+      var addRequest = {
+        customerId: Tc.validCustomerId,
+        productName: Tc.validProduct.name,
+        quantity: 1
+      };
+      var anotherAddRequest = {
+        customerId: Tc.validCustomerId,
+        productName: Tc.anotherValidProduct.name,
+        quantity: 2
+      };
+      plz.add.cartItem(addRequest, function (error) {
+        error.should.be.false;
+        plz.add.cartItem(anotherAddRequest, function (error) {
+          error.should.be.false;
+          done();
+        });
+      });
+    });
+
+    it('should return error if required fields are missing', function(done) {
+      var invalidRequest = {
+        options: 'invalid options',
+      };
+      plz.remove.cart(invalidRequest, function (error) {
+        error.should.be.true;
+        done();
+      });
+    });
+
+    it('should remove all cart items with customerId', function(done) {
+      var request = {
+        customerId: Tc.validCustomerId
+      };
+      plz.remove.cart(request, function (error, result) {
+        error.should.be.false;
+        (result === null).should.be.false;
+        cartCollection.count(function(error, count) {
+          count.should.equal(0);
+          done();
+        });
+      });
+    });
+    after(function (done) {
+      cartCollection.drop(function () {
+        done();
+      });
+    });
+  });
+
+  describe('plz.get.cartSubtotal()', function () {
+
+    before(function (done) {
+      plz.create.product(Tc.validProduct, function(){} );
+      plz.create.product(Tc.anotherValidProduct, function(){} );
+
+      var addRequest = {
+        customerId: Tc.validCustomerId,
+        productName: Tc.validProduct.name,
+        quantity: 1
+      };
+      var anotherAddRequest = {
+        customerId: Tc.validCustomerId,
+        productName: Tc.anotherValidProduct.name,
+        quantity: 2
+      };
+      plz.add.cartItem(addRequest, function (error) {
+        error.should.be.false;
+        plz.add.cartItem(anotherAddRequest, function (error) {
+          error.should.be.false;
+          done();
+        });
+      });
+    });
+
+    it('should return error if required fields are missing', function(done) {
+      var invalidRequest = {
+        options: 'invalid options',
+      };
+      plz.get.cartSubtotal(invalidRequest, function (error) {
+        error.should.be.true;
+        done();
+      });
+    });
+
+    it('should return sum of all products in cart', function(done) {
+      var request = {
+        customerId: Tc.validCustomerId
+      };
+      var expected = parseFloat(Tc.validProduct.price.replace(/^\$/,''));
+      expected += parseFloat(Tc.anotherValidProduct.price.replace(/^\$/,''))*2;
+      plz.get.cartSubtotal(request, function (error, result) {
+        error.should.be.false;
+        result.should.equal(expected);
+        done();
+      });
+    });
+
+    after(function (done) {
+      cartCollection.drop(function () {
+        done();
+      });
+    });
+  });
 });
