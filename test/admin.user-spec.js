@@ -294,6 +294,53 @@ describe('admin.user | Public API', function () {
     });
 
   });
-
 });
 
+describe('admin.user | Private API', function () {
+  var plz = {
+    config: {
+      admin: {
+        roles: {
+          user: true
+        },
+        required: {
+          email: 'string'
+        }
+      }
+    },
+  };
+
+  var adminUser = require('../app/admin.user')(plz);
+
+  describe('prepareUserCreation()', function () {
+    it('should callback an error if required role is not present', function (done) {
+      var options = {
+        role: 'prince-of-amber'
+      };
+
+      adminUser.prepareUserCreation(options, function (error, message) {
+        error.should.be.true;
+        message.should.be.a.String;
+        done();
+      });
+    });
+
+    it('should callback an error if required type is not valid', function (done) {
+      var options = {
+        role: 'user',
+        email: 1000
+      };
+
+      // Mock validation
+      plz.validate = {
+        typeAs: function () { return false; }
+      };
+
+      adminUser.prepareUserCreation(options, function (error, message) {
+        error.should.be.true;
+        message.should.be.a.String;
+        done();
+      });
+    });
+  });
+});

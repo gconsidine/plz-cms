@@ -149,9 +149,8 @@ describe('core.validate | Public API', function () {
     });
 
     it('should throw an error if type isn\'t supported', function () {
-      (function () {
-        plz.validate.typeAs('cat', 'siamese');
-      }).should.throw;
+      var result = plz.validate.typeAs('cat', 'siamese');
+      result.should.be.false;
     });
   });
 

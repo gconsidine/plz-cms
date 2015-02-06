@@ -127,7 +127,9 @@ var AdminUser = function (plz) {
     callback(false);
   }
 
-  return plz;
+  return {
+    prepareUserCreation: prepareUserCreation
+  };
 };
 
 module.exports = AdminUser;
