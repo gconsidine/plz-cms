@@ -9,11 +9,13 @@ var CoreApi = function (config) {
   require('./core.sanitize')(plz);
 
   if(plz.config.modules.admin) {
-    require('./admin.api')(plz);
+    require('./admin.user')(plz);
+    require('./admin.account')(plz);
   }
 
   if(plz.config.modules.author) {
-    require('./author.api')(plz);
+    require('./author.page')(plz);
+    require('./author.post')(plz);
   }
 
   return plz;

@@ -6,8 +6,7 @@ var Tc = require('./test-config');
 var Crypto = require('crypto');
 
 var plz = require('../app/core.hub')(Tc.validAdminConfig),
-    Utility = require('../app/utility.api')(plz),
-    database = Utility.db;
+    database = require('../app/utility.database')(plz);
 
 describe('admin.account | Public API', function () {
   describe('plz.login.user()', function () {

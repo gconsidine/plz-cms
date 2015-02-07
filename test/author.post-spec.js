@@ -19,11 +19,10 @@ describe('author | Configuration', function () {
 });
 
 describe('author.post | Public API', function () {
-  var plz, post, postCollection, Utility, db;
+  var post, postCollection;
 
-  plz = require('../app/core.hub')(Tc.validAuthorConfig);
-  Utility = require('../app/utility.api')(plz);
-  db = Utility.db;
+  var plz = require('../app/core.hub')(Tc.validAuthorConfig),
+      db = require('../app/utility.database')(plz);
 
   describe('plz.create.post()', function () {
 

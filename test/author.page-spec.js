@@ -19,11 +19,10 @@ describe('author | Configuration', function () {
 });
 
 describe('author.page | Public API', function () {
-  var plz, page, pageCollection, Utility, db;
+  var page, pageCollection;
 
-  plz = require('../app/core.hub')(Tc.validAuthorConfig);
-  Utility = require('../app/utility.api')(plz);
-  db = Utility.db;
+  var plz = require('../app/core.hub')(Tc.validAuthorConfig),
+      db = require('../app/utility.database')(plz);
 
   describe('plz.create.page()', function () {
 

@@ -19,11 +19,8 @@ describe('admin | Configuration', function () {
 });
 
 describe('admin.user | Public API', function () {
-  var plz, Utility, db;
-
-  plz = require('../app/core.hub')(Tc.validAdminConfig);
-  Utility = require('../app/utility.api')(plz);
-  db = Utility.db;
+  var plz = require('../app/core.hub')(Tc.validAdminConfig),
+      db = require('../app/utility.database')(plz);
 
   describe('plz.create.user()', function () {
 

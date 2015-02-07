@@ -5,9 +5,8 @@
 var AdminAccount = function (plz) {
   'use strict';
   
-  var Utility = require('./utility.api')(plz),
-      _database = Utility.db,
-      _mailer = Utility.mailer;
+  var database = require('./utility.database')(plz),
+      mailer = require('./utility.mailer')(plz);
 
   plz = plz || {};
   plz.login = plz.login || {};
@@ -33,7 +32,7 @@ var AdminAccount = function (plz) {
       criteria: options
     };
 
-    _database.getDocument(query, function (error, user) {
+    database.getDocument(query, function (error, user) {
       if(error) {
         callback(true, user);
         return;
@@ -200,7 +199,7 @@ var AdminAccount = function (plz) {
       }
     };
 
-    _database.editDocument(query, function (error, result) {
+    database.editDocument(query, function (error, result) {
       if(error) {
         callback(true, result);
         return;
@@ -212,7 +211,7 @@ var AdminAccount = function (plz) {
         body: options.body
       };
       
-      _mailer.sendMail(mailOptions, function (error, result) {
+      mailer.sendMail(mailOptions, function (error, result) {
         if(error) {
           callback(true, 'Mail not sent');
           return;
@@ -234,7 +233,7 @@ var AdminAccount = function (plz) {
       }
     };
 
-    _database.getDocument(query, function (error, result) {
+    database.getDocument(query, function (error, result) {
       if(error) {
         callback(true, false);
         return;
@@ -273,7 +272,7 @@ var AdminAccount = function (plz) {
       }
     };
 
-    _database.editDocument(query, function (error, result) {
+    database.editDocument(query, function (error, result) {
       if(error) {
         callback(true, result);
         return;

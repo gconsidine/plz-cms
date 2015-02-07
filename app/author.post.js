@@ -7,8 +7,7 @@
 var AuthorPost = function (plz) {
   'use strict';
 
-  var Utility = require('./utility.api')(plz),
-      database = Utility.db;
+  var database = require('./utility.database')(plz);
  
   plz = plz || {},
   plz.get = plz.get || {};

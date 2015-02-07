@@ -7,7 +7,8 @@ var UtilityDatabase = function (plz) {
 
   var Mongo = require('mongodb').MongoClient;
 
-  var db;
+  var member = {}; 
+  member.db;
 
   /**
   * Opens a database connection, checks for existing documents with conflicts 
@@ -21,8 +22,8 @@ var UtilityDatabase = function (plz) {
   * @param {object} options.uniqueFields
   * @param {database} callback
   */
-  function createDocument(options, callback) {
-    getDatabase(function (error, database) {
+  member.createDocument = function (options, callback) {
+    member.getDatabase(function (error, database) {
       if(error) {
         callback(true, 'Cannot establish database connection');
         return;
@@ -51,7 +52,7 @@ var UtilityDatabase = function (plz) {
         });
       });
     });
-  }
+  };
 
   /**
   * Opens a database connection, checks for an existing document matching 
@@ -64,8 +65,8 @@ var UtilityDatabase = function (plz) {
   * @param {object} options.update
   * @param {database} callback
   */
-  function editDocument(options, callback) {
-    getDatabase(function (error, database) {
+  member.editDocument = function(options, callback) {
+    member.getDatabase(function (error, database) {
       if(error) {
         callback(true, 'Cannot establish database connection');
         return;
@@ -82,7 +83,7 @@ var UtilityDatabase = function (plz) {
         callback(false, result);
       });
     });
-  }
+  };
 
   /**
   * Opens a database connection, checks for an existing document matching 
@@ -95,8 +96,8 @@ var UtilityDatabase = function (plz) {
   * @param {object} options.limit
   * @param {database} callback
   */
-  function getDocument(options, callback) {
-    getDatabase(function (error, database) {
+  member.getDocument = function (options, callback) {
+    member.getDatabase(function (error, database) {
       if(error) {
         callback(true, 'Cannot establish database connection');
         return;
@@ -124,7 +125,7 @@ var UtilityDatabase = function (plz) {
         callback(false, docs);
       });
     });
-  }
+  };
 
   /**
   * Opens a database connection, checks for an existing document matching 
@@ -136,8 +137,8 @@ var UtilityDatabase = function (plz) {
   * @param {object} options.criteria
   * @param {database} callback
   */
-  function removeDocument(options, callback) {
-    getDatabase(function(error, database) {
+  member.removeDocument = function (options, callback) {
+    member.getDatabase(function(error, database) {
       if(error) {
         callback(true, 'Cannot establish database connection');
         return;
@@ -154,12 +155,12 @@ var UtilityDatabase = function (plz) {
         callback(false, result);
       });
     });
-  }
+  };
 
   // TODO: rename to getConnection()
-  function getDatabase(callback, name) {
-    if (db !== undefined) {
-      callback(false, db);
+  member.getDatabase = function (callback, name) {
+    if (member.db !== undefined) {
+      callback(false, member.db);
       return;
     }
 
@@ -179,19 +180,12 @@ var UtilityDatabase = function (plz) {
         return; 
       }
 
-      db = db || database;
-      callback(false, database);
+      member.db = member.db || database;
+      callback(false, member.db);
     });
-  }
-
-  return {
-    getDatabase: getDatabase,
-    getDocument: getDocument,
-    createDocument: createDocument,
-    editDocument: editDocument,
-    removeDocument: removeDocument,
-    db: db
   };
+
+  return member;
 };
 
 module.exports = UtilityDatabase;
