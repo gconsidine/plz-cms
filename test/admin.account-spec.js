@@ -15,7 +15,22 @@ describe('admin.account | Public API', function () {
         done();
       });
     });
-     
+
+    it('should callback an error if getDocument fails', function (done) {
+      var mockDatabase = {};
+
+      mockDatabase.getDocument = function (query, callback) {
+        callback(true, 'Mock failure');
+      };
+
+      require('../app/admin.account')(plz, mockDatabase);
+
+      plz.login.user({}, function (error) {
+        error.should.be.true;
+        done();
+      });
+    });
+
     it('should return a user with matching email/password', function (done) {
       var login = {
         email: 'sender@example.com',
@@ -42,6 +57,11 @@ describe('admin.account | Public API', function () {
       });
     });
 
+    afterEach(function () {
+      plz = require('../app/core.hub')(Tc.validAdminConfig);
+      database = require('../app/utility.database')(plz);
+    });
+
     after(function (done) {
       database.getDatabase(function (error, db) {
         db.collection('user').drop(function () { done(); });
@@ -50,7 +70,6 @@ describe('admin.account | Public API', function () {
   });
 
   describe('plz.send.activation()', function () {
-    var Crypto = require('crypto');
     var _user;
 
     before(function (done) {
@@ -60,34 +79,42 @@ describe('admin.account | Public API', function () {
       });
     });
 
-    it('should prepare a user for activation via email', function (done) {
-      var hash = Crypto.createHash('sha256');
-      hash.update('#|');
-      hash = hash.digest('hex');
+    it('should callback false on error', function (done) {
+      var adminAccount = require('../app/admin.account')(plz);
 
-      var options = {
-        user: _user,
-        subject: 'Activation Link',
-        body: '<p>activation hash: ' + hash + '</p>',
-        hash: hash
+      adminAccount.sendLink = function (options, callback) {
+        callback(true, 'Mock Failure');
       };
 
-      /*
-      * NOTE: Mailing is not tested, only modifications made to the user in 
-      * preparation for sending.
-      */
+      var options = {};
+
       plz.send.activation(options, function (error, result) {
+        options.status.should.be.ok;
         error.should.be.true;
-        result.should.eql('Mail not sent');
-
-        plz.get.user({email: options.user.email}, function (error, result) {
-          error.should.be.false;
-          result[0].tempAuth.should.eql(hash);
-          result[0].status.should.eql('activation-pending');
-
-          done();
-        });
+        result.should.be.a.String;
+        done();
       });
+    });
+
+    it('should callback true on reset success', function (done) {
+      var adminAccount = require('../app/admin.account')(plz);
+
+      adminAccount.sendLink = function (options, callback) {
+        callback(false, 'Mock Success');
+      };
+
+      var options = {};
+
+      plz.send.reset(options, function (error, result) {
+        options.status.should.be.ok;
+        error.should.be.false;
+        result.should.be.a.String;
+        done();
+      });
+    });
+
+    afterEach(function () {
+      plz = require('../app/core.hub')(Tc.validAdminConfig);
     });
 
     after(function (done) {
@@ -107,34 +134,42 @@ describe('admin.account | Public API', function () {
       });
     });
 
-    it('should prepare a user for password reset via email', function (done) {
-      var hash = Crypto.createHash('sha256');
-      hash.update('#|');
-      hash = hash.digest('hex');
+    it('should callback true on reset success', function (done) {
+      var adminAccount = require('../app/admin.account')(plz);
 
-      var options = {
-        user: _user,
-        subject: 'Activation Link',
-        body: '<p>activation hash: ' + hash + '</p>',
-        hash: hash
+      adminAccount.sendLink = function (options, callback) {
+        callback(true, 'Mock failure');
       };
 
-      /*
-      * Note: Mailing is not tested, only modifications made to the user in 
-      * preparation for sending.
-      */
-      plz.send.reset(options, function (error, result) {
-        error.should.be.true;
-        result.should.eql('Mail not sent');
-       
-        plz.get.user({email: options.user.email}, function (error, result) {
-          error.should.be.false;
-          result[0].tempAuth.should.eql(hash);
-          result[0].status.should.eql('reset-pending');
+      var options = {};
 
-          done();
-        });
+      plz.send.reset(options, function (error, result) {
+        options.status.should.be.ok;
+        error.should.be.true;
+        result.should.be.a.String;
+        done();
       });
+    });
+
+    it('should callback true on reset success', function (done) {
+      var adminAccount = require('../app/admin.account')(plz);
+
+      adminAccount.sendLink = function (options, callback) {
+        callback(false, 'Mock Success');
+      };
+
+      var options = {};
+
+      plz.send.reset(options, function (error, result) {
+        options.status.should.be.ok;
+        error.should.be.false;
+        result.should.be.a.String;
+        done();
+      });
+    });
+
+    afterEach(function () {
+      plz = require('../app/core.hub')(Tc.validAdminConfig);
     });
 
     after(function (done) {

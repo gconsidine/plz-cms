@@ -108,7 +108,7 @@ var UtilityDatabase = function (plz) {
 
       if(!options.criteria && !options.limit) {
         findCursor = collection.find();
-      } else if(!options.critiera && options.limit) {
+      } else if(!options.criteria && options.limit) {
         findCursor = collection.find().limit(options.limit);
       } else if(!options.limit) {
         findCursor = collection.find(options.criteria);
