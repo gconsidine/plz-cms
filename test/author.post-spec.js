@@ -342,7 +342,7 @@ describe('author.post | Public API', function () {
         content: 'Prince of Amber'
       };
 
-      plz.edit.page(options, function (error, result) {
+      plz.edit.post(options, function (error, result) {
         error.should.be.true;
         result.should.be.a.String;
         done();
