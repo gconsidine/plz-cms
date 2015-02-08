@@ -103,9 +103,9 @@ var CoreValidate = function (plz) {
         return plz.validate.complexity(data);
       case 'string':
         return plz.validate.string(data);
-      default:
-        throw new Error('Unsupported validation type');
     }
+
+    return false;
   };
   
   return plz;

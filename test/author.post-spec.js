@@ -19,11 +19,10 @@ describe('author | Configuration', function () {
 });
 
 describe('author.post | Public API', function () {
-  var plz, post, postCollection, Utility, db;
+  var post, postCollection;
 
-  plz = require('../app/core.hub')(Tc.validAuthorConfig);
-  Utility = require('../app/utility.api')(plz);
-  db = Utility.db;
+  var plz = require('../app/core.hub')(Tc.validAuthorConfig),
+      db = require('../app/utility.database')(plz);
 
   describe('plz.create.post()', function () {
 
@@ -304,6 +303,8 @@ describe('author.post | Public API', function () {
   });
 
   describe('plz.edit.post()', function () {
+    var mockDatabase = {};
+
     before(function (done) {
       plz = require('../app/core.hub')(Tc.validAuthorConfig);
 
@@ -332,6 +333,64 @@ describe('author.post | Public API', function () {
           error.should.be.true;
           done();
         });
+      });
+    });
+
+    it('should callback error if no id or title is present', function(done) {
+      var options = {
+        userName: 'Corwin',
+        content: 'Prince of Amber'
+      };
+
+      plz.edit.post(options, function (error, result) {
+        error.should.be.true;
+        result.should.be.a.String;
+        done();
+      });
+    });
+
+    it('should callback error if getDocument fails', function(done) {
+      mockDatabase.getDocument = function (query, callback) {
+        callback(true, 'Mock failure');
+      };
+
+      require('../app/author.post')(plz, mockDatabase);
+
+      var options = {
+        userName: 'Corwin',
+        content: 'Prince of Amber',
+        _id: '0001'
+      };
+
+      plz.edit.post(options, function (error, result) {
+        error.should.be.true;
+        result.should.be.a.String;
+        done();
+      });
+    });
+
+    it('should callback error if editDocument fails', function(done) {
+      mockDatabase.getDocument = function (query, callback) {
+        callback(false, [{_id: '0001', status: 'something', revisionNumber: 1}]);
+      };
+
+      mockDatabase.editDocument = function (query, callback) {
+        callback(true, 'Mock failure');
+      };
+
+      require('../app/author.post')(plz, mockDatabase);
+
+      var options = {
+        userName: 'Corwin',
+        content: 'Prince of Amber',
+        _id: '0001'
+      };
+
+      plz.edit.post(options, function (error, result) {
+        error.should.be.true;
+        result[0].status.should.equal('archived');
+        result[0].revisionNumber.should.equal(1);
+        done();
       });
     });
 
@@ -385,6 +444,10 @@ describe('author.post | Public API', function () {
         result.should.eql([]);
         done();
       });
+    });
+
+    afterEach(function () {
+      plz = require('../app/core.hub')(Tc.validAuthorConfig);
     });
 
     after(function (done) {
@@ -510,3 +573,36 @@ describe('author.post | Public API', function () {
     });
   });
 });
+
+describe('author.post | Private API', function () {
+  var author, plz;
+
+  describe('checkRequiredOptions()', function () {
+    beforeEach(function () {
+      plz = require('../app/core.hub')(Tc.validAuthorConfig);
+    });
+
+    it('should callback an error if required field\'s type is not valid', function (done) {
+      author = require('../app/author.post')(plz);
+
+      var options = {
+        userName: 'Mario',
+        title: 'Donkey Kong',
+        visibility: 'banana',
+        content: 'more whatever',
+        contentType: 'whatever',
+        createdAt: 111111111,
+        modifiedAt: 222222222,
+        status: 9000
+      };
+
+      author.checkRequiredOptions(options, function (error, result) {
+        console.log(error, result);
+        error.should.be.true;
+        result.should.be.a.String;
+        done();
+      });
+    });
+  });
+});
+

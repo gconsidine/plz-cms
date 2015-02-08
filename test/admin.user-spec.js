@@ -19,11 +19,8 @@ describe('admin | Configuration', function () {
 });
 
 describe('admin.user | Public API', function () {
-  var plz, Utility, db;
-
-  plz = require('../app/core.hub')(Tc.validAdminConfig);
-  Utility = require('../app/utility.api')(plz);
-  db = Utility.db;
+  var plz = require('../app/core.hub')(Tc.validAdminConfig),
+      db = require('../app/utility.database')(plz);
 
   describe('plz.create.user()', function () {
 
@@ -294,6 +291,53 @@ describe('admin.user | Public API', function () {
     });
 
   });
-
 });
 
+describe('admin.user | Private API', function () {
+  var plz = {
+    config: {
+      admin: {
+        roles: {
+          user: true
+        },
+        required: {
+          email: 'string'
+        }
+      }
+    },
+  };
+
+  var adminUser = require('../app/admin.user')(plz);
+
+  describe('prepareUserCreation()', function () {
+    it('should callback an error if required role is not present', function (done) {
+      var options = {
+        role: 'prince-of-amber'
+      };
+
+      adminUser.prepareUserCreation(options, function (error, message) {
+        error.should.be.true;
+        message.should.be.a.String;
+        done();
+      });
+    });
+
+    it('should callback an error if required type is not valid', function (done) {
+      var options = {
+        role: 'user',
+        email: 1000
+      };
+
+      // Mock validation
+      plz.validate = {
+        typeAs: function () { return false; }
+      };
+
+      adminUser.prepareUserCreation(options, function (error, message) {
+        error.should.be.true;
+        message.should.be.a.String;
+        done();
+      });
+    });
+  });
+});

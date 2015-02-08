@@ -3,11 +3,9 @@
 require('should');
 
 var Tc = require('./test-config');
-var Crypto = require('crypto');
 
 var plz = require('../app/core.hub')(Tc.validAdminConfig),
-    Utility = require('../app/utility.api')(plz),
-    database = Utility.db;
+    database = require('../app/utility.database')(plz);
 
 describe('admin.account | Public API', function () {
   describe('plz.login.user()', function () {
@@ -16,7 +14,22 @@ describe('admin.account | Public API', function () {
         done();
       });
     });
-     
+
+    it('should callback an error if getDocument fails', function (done) {
+      var mockDatabase = {};
+
+      mockDatabase.getDocument = function (query, callback) {
+        callback(true, 'Mock failure');
+      };
+
+      require('../app/admin.account')(plz, mockDatabase);
+
+      plz.login.user({}, function (error) {
+        error.should.be.true;
+        done();
+      });
+    });
+
     it('should return a user with matching email/password', function (done) {
       var login = {
         email: 'sender@example.com',
@@ -43,6 +56,11 @@ describe('admin.account | Public API', function () {
       });
     });
 
+    afterEach(function () {
+      plz = require('../app/core.hub')(Tc.validAdminConfig);
+      database = require('../app/utility.database')(plz);
+    });
+
     after(function (done) {
       database.getDatabase(function (error, db) {
         db.collection('user').drop(function () { done(); });
@@ -51,7 +69,6 @@ describe('admin.account | Public API', function () {
   });
 
   describe('plz.send.activation()', function () {
-    var Crypto = require('crypto');
     var _user;
 
     before(function (done) {
@@ -61,34 +78,42 @@ describe('admin.account | Public API', function () {
       });
     });
 
-    it('should prepare a user for activation via email', function (done) {
-      var hash = Crypto.createHash('sha256');
-      hash.update('#|');
-      hash = hash.digest('hex');
+    it('should callback false on error', function (done) {
+      var adminAccount = require('../app/admin.account')(plz);
 
-      var options = {
-        user: _user,
-        subject: 'Activation Link',
-        body: '<p>activation hash: ' + hash + '</p>',
-        hash: hash
+      adminAccount.sendLink = function (options, callback) {
+        callback(true, 'Mock Failure');
       };
 
-      /*
-      * NOTE: Mailing is not tested, only modifications made to the user in 
-      * preparation for sending.
-      */
+      var options = {};
+
       plz.send.activation(options, function (error, result) {
+        options.status.should.be.ok;
         error.should.be.true;
-        result.should.eql('Mail not sent');
-
-        plz.get.user({email: options.user.email}, function (error, result) {
-          error.should.be.false;
-          result[0].tempAuth.should.eql(hash);
-          result[0].status.should.eql('activation-pending');
-
-          done();
-        });
+        result.should.be.a.String;
+        done();
       });
+    });
+
+    it('should callback true on send success', function (done) {
+      var adminAccount = require('../app/admin.account')(plz);
+
+      adminAccount.sendLink = function (options, callback) {
+        callback(false, 'Mock Success');
+      };
+
+      var options = {};
+
+      plz.send.activation(options, function (error, result) {
+        options.status.should.be.ok;
+        error.should.be.false;
+        result.should.be.a.String;
+        done();
+      });
+    });
+
+    afterEach(function () {
+      plz = require('../app/core.hub')(Tc.validAdminConfig);
     });
 
     after(function (done) {
@@ -108,34 +133,42 @@ describe('admin.account | Public API', function () {
       });
     });
 
-    it('should prepare a user for password reset via email', function (done) {
-      var hash = Crypto.createHash('sha256');
-      hash.update('#|');
-      hash = hash.digest('hex');
+    it('should callback true on reset success', function (done) {
+      var adminAccount = require('../app/admin.account')(plz);
 
-      var options = {
-        user: _user,
-        subject: 'Activation Link',
-        body: '<p>activation hash: ' + hash + '</p>',
-        hash: hash
+      adminAccount.sendLink = function (options, callback) {
+        callback(true, 'Mock failure');
       };
 
-      /*
-      * Note: Mailing is not tested, only modifications made to the user in 
-      * preparation for sending.
-      */
+      var options = {};
+
       plz.send.reset(options, function (error, result) {
+        options.status.should.be.ok;
         error.should.be.true;
-        result.should.eql('Mail not sent');
-       
-        plz.get.user({email: options.user.email}, function (error, result) {
-          error.should.be.false;
-          result[0].tempAuth.should.eql(hash);
-          result[0].status.should.eql('reset-pending');
-
-          done();
-        });
+        result.should.be.a.String;
+        done();
       });
+    });
+
+    it('should callback true on reset success', function (done) {
+      var adminAccount = require('../app/admin.account')(plz);
+
+      adminAccount.sendLink = function (options, callback) {
+        callback(false, 'Mock Success');
+      };
+
+      var options = {};
+
+      plz.send.reset(options, function (error, result) {
+        options.status.should.be.ok;
+        error.should.be.false;
+        result.should.be.a.String;
+        done();
+      });
+    });
+
+    afterEach(function () {
+      plz = require('../app/core.hub')(Tc.validAdminConfig);
     });
 
     after(function (done) {
@@ -144,266 +177,246 @@ describe('admin.account | Public API', function () {
       });
     });
   });
+});
 
-  describe('plz.authorize.activation()', function () {
-    var _user;
+describe('admin.account | Private API', function () {
+  var account, plz, mailer, database, mockDatabase, mockMailer;
 
-    before(function (done) {
-      plz.create.user(Tc.validUser, function (error, result) {
-        _user = result.ops[0];
+  describe('sendLink()', function () {
+    beforeEach(function () {
+      plz = require('../app/core.hub')(Tc.validAdminConfig);
+      database = require('../app/utility.database')(plz);
+      mailer = require('../app/utility.mailer')(plz);
 
-        var hash = Crypto.createHash('sha256');
-        hash.update('#|');
-        hash = hash.digest('hex');
+      mockDatabase = {};
+      mockMailer = {};
+    });
 
-        var options = {
-          user: _user,
-          subject: 'Activation Link',
-          body: '<p>activation hash: ' + hash + '</p>',
-          hash: hash
-        };
+    it('should callback an error if db editDocument fails', function (done) {
+      mockDatabase.editDocument = function (query, callback) {
+        callback(true, 'Mock failure');
+      };
 
-        plz.send.activation(options, function () {
-          plz.get.user({email: options.user.email}, function (error, user) {
-            _user = user;
-            done();
-          });
-        });
+      account = require('../app/admin.account')(plz, mockDatabase);
+
+      var options = {
+        user: {
+          email: 'merlin@sonofamberandchaos.com',
+        },
+        status: 'pending',
+        hash: 'aaaaaaaaaaddddddddddfffffffffffffff001233'
+      };
+      
+      account.sendLink(options, function (error, result) {
+        error.should.be.true;
+        result.should.be.a.String;
+        done();
       });
     });
 
-    it('should return true if activation hash is valid', function (done) {
-      var options = {
-        email: _user.email,
-        hash: _user.tempAuth
+    it('should callback an error if mailer fails', function (done) {
+      mockDatabase.editDocument = function (query, callback) {
+        callback(false, 'Mock DB Success');
       };
 
-      plz.authorize.activation(options, function (error, result) {
+      mockMailer.sendMail = function (options, callback) {
+        callback(true, 'Mock mail Failure');
+      };
+
+      account = require('../app/admin.account')(plz, mockDatabase);
+
+      var options = {
+        user: {
+          email: 'merlin@sonofamberandchaos.com',
+        },
+        status: 'pending',
+        hash: 'aaaaaaaaaaddddddddddfffffffffffffff001233'
+      };
+      
+      account.sendLink(options, function (error, result) {
+        error.should.be.true;
+        result.should.be.a.String;
+        done();
+      });
+    });
+
+    it('should callback result if mailer succeeds', function (done) {
+      mockDatabase.editDocument = function (query, callback) {
+        callback(false, 'Mock DB success');
+      };
+
+      mockMailer.sendMail = function (options, callback) {
+        callback(false, 'Mock mailer success');
+      };
+
+      account = require('../app/admin.account')(plz, mockDatabase, mockMailer);
+
+      var options = {
+        user: {
+          email: 'merlin@sonofamberandchaos.com',
+        },
+        status: 'pending',
+        hash: 'aaaaaaaaaaddddddddddfffffffffffffff001233',
+        subject: 'Hi, Corwin',
+        body: '...Are you really my father or is it some elaborate plot?'
+      };
+      
+      account.sendLink(options, function (error, result) {
+        error.should.be.false;
+        result.should.be.a.String;
+        done();
+      });
+    });
+  });
+
+  describe('authorize()', function () {
+    beforeEach(function () {
+      plz = require('../app/core.hub')(Tc.validAdminConfig);
+      database = require('../app/utility.database')(plz);
+      mockDatabase = {};
+    });
+
+    it('should callback an error if db getDocument fails', function (done) {
+      mockDatabase.getDocument = function (query, callback) {
+        callback(true, 'Mock failure');
+      };
+
+      account = require('../app/admin.account')(plz, mockDatabase);
+
+      var options = {
+        user: {
+          email: 'merlin@sonofamberandchaos.com',
+        },
+        hash: 'aaaaaaaaaaddddddddddfffffffffffffff001233'
+      };
+      
+      account.authorize(options, function (error, result) {
+        error.should.be.true;
+        result.should.be.false;
+        done();
+      });
+    });
+
+    it('should callback an error if result is empty', function (done) {
+      mockDatabase.getDocument = function (query, callback) {
+        callback(false, []);
+      };
+
+      account = require('../app/admin.account')(plz, mockDatabase);
+
+      var options = {
+        user: {
+          email: 'merlin@sonofamberandchaos.com',
+        },
+        hash: 'aaaaaaaaaaddddddddddfffffffffffffff001233'
+      };
+      
+      account.authorize(options, function (error, result) {
+        error.should.be.true;
+        result.should.be.false;
+        done();
+      });
+    });
+
+    it('should callback success if result is present', function (done) {
+      mockDatabase.getDocument = function (query, callback) {
+        callback(false, [{name: 'Corwin'}]);
+      };
+
+      account = require('../app/admin.account')(plz, mockDatabase);
+
+      var options = {
+        user: {
+          email: 'merlin@sonofamberandchaos.com',
+        },
+        hash: 'aaaaaaaaaaddddddddddfffffffffffffff001233'
+      };
+      
+      account.authorize(options, function (error, result) {
         error.should.be.false;
         result.should.be.true;
         done();
       });
     });
 
-    after(function (done) {
-      database.getDatabase(function (error, db) {
-        db.collection('user').drop(function () { done(); });
-      });
-    });
   });
 
-  describe('plz.authorize.reset()', function () {
-    var _user;
-
-    before(function (done) {
-      plz.create.user(Tc.validUser, function (error, result) {
-        _user = result.ops[0];
-
-        var hash = Crypto.createHash('sha256');
-        hash.update('#|');
-        hash = hash.digest('hex');
-
-        var options = {
-          user: _user,
-          subject: 'Activation Link',
-          body: '<p>activation hash: ' + hash + '</p>',
-          hash: hash
-        };
-
-        plz.send.reset(options, function () {
-          plz.get.user({email: options.user.email}, function (error, user) {
-            _user = user;
-            done();
-          });
-        });
-      });
+  describe('completeAction()', function () {
+    beforeEach(function () {
+      plz = require('../app/core.hub')(Tc.validAdminConfig);
+      database = require('../app/utility.database')(plz);
+      mockDatabase = {};
     });
 
-    it('should return true if activation hash is valid', function (done) {
+    it('should callback an error if password is not complex', function (done) {
       var options = {
-        email: _user.email,
-        hash: _user.tempAuth
+        passwordNew: 'password'
+      };
+      
+      account = require('../app/admin.account')(plz);
+
+      account.completeAction(options, function (error, result) {
+        error.should.be.true;
+        result.should.be.a.String;
+        done();
+      });
+    });
+
+    it('should callback an error if passwords don\'t match', function (done) {
+      var options = {
+        passwordNew: 'WAoS0Compl3x',
+        passwordConfirm: 'WAoS0Compl3xy',
+      };
+      
+      account = require('../app/admin.account')(plz);
+
+      account.completeAction(options, function (error, result) {
+        error.should.be.true;
+        result.should.a.String;
+        done();
+      });
+    });
+
+    it('should callback an error if database editDocument fails', function (done) {
+      var options = {
+        email: 'merlin@sonofamberandchaos.com',
+        passwordNew: 'WAoS0Compl3x',
+        passwordConfirm: 'WAoS0Compl3x',
       };
 
-      plz.authorize.reset(options, function (error, result) {
+      mockDatabase.editDocument = function (query, callback) {
+        callback(true, 'Mock failure');
+      };
+
+      account = require('../app/admin.account')(plz, mockDatabase);
+
+      account.completeAction(options, function (error, result) {
+        error.should.be.true;
+        result.should.a.String;
+        done();
+      });
+    });
+
+    it('should callback result if editDocument succeeds', function (done) {
+      var options = {
+        email: 'merlin@sonofamberandchaos.com',
+        passwordNew: 'WAoS0Compl3x',
+        passwordConfirm: 'WAoS0Compl3x',
+      };
+
+      mockDatabase.editDocument = function (query, callback) {
+        callback(false, 'Mock success');
+      };
+
+      account = require('../app/admin.account')(plz, mockDatabase);
+
+      account.completeAction(options, function (error, result) {
         error.should.be.false;
-        result.should.be.true;
+        result.should.a.String;
         done();
       });
     });
 
-    after(function (done) {
-      database.getDatabase(function (error, db) {
-        db.collection('user').drop(function () { done(); });
-      });
-    });
   });
 
-  describe('plz.complete.activation()', function () {
-    var _user,
-        _options;
-
-    before(function (done) {
-      plz.create.user(Tc.validUser, function (error, result) {
-        _user = result.ops[0];
-
-        var hash = Crypto.createHash('sha256');
-        hash.update('#|');
-        hash = hash.digest('hex');
-
-        _options = {
-          user: _user,
-          subject: 'Activation Link',
-          body: '<p>activation hash: ' + hash + '</p>',
-          hash: hash
-        };
-
-        plz.send.reset(_options, function () {
-          plz.get.user({email: _options.user.email}, function (error, user) {
-            _user = user;
-            done();
-          });
-        });
-      });
-    });
-
-    it('should reject non-matching passwords', function (done) {
-      _options = {
-        email: 'sender@example.com',
-        passwordNew: 'someFakePass0',
-        passwordConfirm: 'someFakePass1',
-        hash: _user.tempAuth
-      };
-
-      plz.complete.activation(_options, function (error, result) {
-        error.should.be.true;    
-        result.should.be.type('string');
-
-        done();
-      });
-    });
-
-    it('should reject non-complex passwords', function (done) {
-      _options = {
-        email: 'sender@example.com',
-        passwordNew: 'password',
-        passwordConfirm: 'password',
-        hash: _user.tempAuth
-      };
-
-      plz.complete.activation(_options, function (error, result) {
-        error.should.be.true;    
-        result.should.be.type('string');
-
-        done();
-      });
-    });
-
-    it('should set a user as activated and update password', function (done) {
-       _options = {
-        email: 'sender@example.com',
-        passwordNew: 'someFakePass0',
-        passwordConfirm: 'someFakePass0',
-        hash: _user.tempAuth
-      };
-
-      plz.complete.activation(_options, function (error, result) {
-        error.should.be.false;    
-        result.should.be.type('object');
-
-        done();
-      });
-    
-    });
-
-    after(function (done) {
-      database.getDatabase(function (error, db) {
-        db.collection('user').drop(function () { done(); });
-      });
-    });
-  });
-
-  describe('plz.complete.reset()', function () {
-    var _user,
-        _options;
-
-    before(function (done) {
-      plz.create.user(Tc.validUser, function (error, result) {
-        _user = result.ops[0];
-
-        var hash = Crypto.createHash('sha256');
-        hash.update('#|');
-        hash = hash.digest('hex');
-
-        _options = {
-          user: _user,
-          subject: 'Activation Link',
-          body: '<p>activation hash: ' + hash + '</p>',
-          hash: hash
-        };
-
-        plz.send.reset(_options, function () {
-          plz.get.user({email: _options.user.email}, function (error, user) {
-            _user = user;
-            done();
-          });
-        });
-      });
-    });
-
-    it('should reject non-matching passwords', function (done) {
-      _options = {
-        email: 'sender@example.com',
-        passwordNew: 'someFakePass0',
-        passwordConfirm: 'someFakePass1',
-        hash: _user.tempAuth
-      };
-
-      plz.complete.reset(_options, function (error, result) {
-        error.should.be.true;    
-        result.should.be.type('string');
-
-        done();
-      });
-    });
-
-    it('should reject non-complex passwords', function (done) {
-      _options = {
-        email: 'sender@example.com',
-        passwordNew: 'password',
-        passwordConfirm: 'password',
-        hash: _user.tempAuth
-      };
-
-      plz.complete.reset(_options, function (error, result) {
-        error.should.be.true;    
-        result.should.be.type('string');
-
-        done();
-      });
-    });
-
-    it('should revert user status to active and update password', 
-      function (done) {
-       _options = {
-        email: 'sender@example.com',
-        passwordNew: 'someFakePass0',
-        passwordConfirm: 'someFakePass0',
-        hash: _user.tempAuth
-      };
-
-      plz.complete.reset(_options, function (error, result) {
-        error.should.be.false;    
-        result.should.be.type('object');
-
-        done();
-      });
-    });
-    
-    after(function (done) {
-      database.getDatabase(function (error, db) {
-        db.collection('user').drop(function () { done(); });
-      });
-    });
-  });
 });

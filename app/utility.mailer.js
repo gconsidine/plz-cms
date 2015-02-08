@@ -7,6 +7,8 @@ var UtilityMailer = function (plz, NodeMailer) {
 
   var nodeMailer = NodeMailer || require('nodemailer');
 
+  var member = {};
+
   /**
   * Gets a transporter used to send mail based on the default mailer
   * configuration options sepcified.  A second parameter 'name' can optionally
@@ -16,7 +18,7 @@ var UtilityMailer = function (plz, NodeMailer) {
   * @param {mailer} callback
   * @param {string=} - The name of a mailer from the configuration options.
   */
-  function getMailer (callback, name) {
+  member.getMailer = function (callback, name) {
     var mailer;
 
     if(name) {
@@ -38,10 +40,10 @@ var UtilityMailer = function (plz, NodeMailer) {
     });
 
     callback(false, transporter);
-  }
+  };
 
-  function sendMail(options, callback) {
-    getMailer(function (error, transporter) {
+  member.sendMail = function (options, callback) {
+    member.getMailer(function (error, transporter) {
       var from;
 
       if(options.name) {
@@ -67,12 +69,9 @@ var UtilityMailer = function (plz, NodeMailer) {
       });
 
     }, options.name);
-  }
-  
-  return {
-    getMailer: getMailer,
-    sendMail: sendMail
   };
+
+  return member;
 };
 
 module.exports = UtilityMailer;
