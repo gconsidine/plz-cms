@@ -214,7 +214,33 @@ describe('admin.account | Private API', function () {
       });
     });
 
-    it('should callback callback result if mailer succeeds', function (done) {
+    it('should callback an error if mailer fails', function (done) {
+      mockDatabase.editDocument = function (query, callback) {
+        callback(false, 'Mock DB Success');
+      };
+
+      mockMailer.sendMail = function (options, callback) {
+        callback(true, 'Mock mail Failure');
+      };
+
+      account = require('../app/admin.account')(plz, mockDatabase);
+
+      var options = {
+        user: {
+          email: 'merlin@sonofamberandchaos.com',
+        },
+        status: 'pending',
+        hash: 'aaaaaaaaaaddddddddddfffffffffffffff001233'
+      };
+      
+      account.sendLink(options, function (error, result) {
+        error.should.be.true;
+        result.should.be.a.String;
+        done();
+      });
+    });
+
+    it('should callback result if mailer succeeds', function (done) {
       mockDatabase.editDocument = function (query, callback) {
         callback(false, 'Mock DB success');
       };
@@ -273,7 +299,7 @@ describe('admin.account | Private API', function () {
 
     it('should callback an error if result is empty', function (done) {
       mockDatabase.getDocument = function (query, callback) {
-        callback(true, 'Mock failure');
+        callback(false, []);
       };
 
       account = require('../app/admin.account')(plz, mockDatabase);
@@ -291,6 +317,28 @@ describe('admin.account | Private API', function () {
         done();
       });
     });
+
+    it('should callback success if result is present', function (done) {
+      mockDatabase.getDocument = function (query, callback) {
+        callback(false, [{name: 'Corwin'}]);
+      };
+
+      account = require('../app/admin.account')(plz, mockDatabase);
+
+      var options = {
+        user: {
+          email: 'merlin@sonofamberandchaos.com',
+        },
+        hash: 'aaaaaaaaaaddddddddddfffffffffffffff001233'
+      };
+      
+      account.authorize(options, function (error, result) {
+        error.should.be.false;
+        result.should.be.true;
+        done();
+      });
+    });
+
   });
 
   describe('completeAction()', function () {
@@ -344,6 +392,26 @@ describe('admin.account | Private API', function () {
 
       account.completeAction(options, function (error, result) {
         error.should.be.true;
+        result.should.a.String;
+        done();
+      });
+    });
+
+    it('should callback result if editDocument succeeds', function (done) {
+      var options = {
+        email: 'merlin@sonofamberandchaos.com',
+        passwordNew: 'WAoS0Compl3x',
+        passwordConfirm: 'WAoS0Compl3x',
+      };
+
+      mockDatabase.editDocument = function (query, callback) {
+        callback(false, 'Mock success');
+      };
+
+      account = require('../app/admin.account')(plz, mockDatabase);
+
+      account.completeAction(options, function (error, result) {
+        error.should.be.false;
         result.should.a.String;
         done();
       });

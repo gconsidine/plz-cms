@@ -39,6 +39,15 @@ describe('utility.mailer | Private API', function () {
         done();
       }, 'other');
     });
+
+    it('should get the default mailer', function(done) {
+      mailer.getMailer(function (error, transporter) {
+        error.should.be.false;
+        transporter.should.be.type('object');
+        done();
+      });
+    });
+
   });
 
   describe('sendMail()', function () {
@@ -68,7 +77,7 @@ describe('utility.mailer | Private API', function () {
       });
     });
 
-    it('should be able to reference mailer and send', function(done) {
+    it('should be able to reference non-default mailer and send', function(done) {
       nodeMailer.createTransport = function () {
         function sendMail(options, callback) {
           callback(false, 'mocked success'); 
@@ -86,6 +95,27 @@ describe('utility.mailer | Private API', function () {
       };
 
       mailer.sendMail(options, function (error, result) {
+        error.should.be.false;
+        result.should.be.type('string');
+        result.should.equal('mocked success');
+        done();
+      });
+    });
+
+    it('should be able to reference default mailer and send', function(done) {
+      nodeMailer.createTransport = function () {
+        function sendMail(options, callback) {
+          callback(false, 'mocked success'); 
+        }
+
+        return {
+          sendMail: sendMail
+        };
+      };
+
+      mailer = require('../app/utility.mailer')(plz, nodeMailer);
+
+      mailer.sendMail({}, function (error, result) {
         error.should.be.false;
         result.should.be.type('string');
         result.should.equal('mocked success');
