@@ -5,10 +5,10 @@
  * @memberof author
  * @namespace author.page
  */
-var AuthorPage = function (plz) {
+var AuthorPage = function (plz, database) {
   'use strict';
 
-  var database = require('./utility.database')(plz);
+  database = database || require('./utility.database')(plz);
  
   plz = plz || {},
   plz.get = plz.get || {};
@@ -17,8 +17,10 @@ var AuthorPage = function (plz) {
   plz.edit = plz.edit || {};
   plz.remove = plz.remove || {};
 
-  var _required = plz.config.author.page.required,
-      _collectionName = plz.config.author.page.collection;
+  var member = {
+    required: plz.config.author.page.required,
+    collectionName: plz.config.author.page.collection
+  };
 
   /**
   * Creates a page with given options and inserts it into the database, 
@@ -41,7 +43,7 @@ var AuthorPage = function (plz) {
   *  (perhaps this should be simply errorDescription || null)
   */
   plz.create.page = function (options, callback) {
-    checkRequiredOptions(options, function (error, result) {
+    member.checkRequiredOptions(options, function (error, result) {
       if(error) {
         callback(true, result);
         return;
@@ -55,7 +57,7 @@ var AuthorPage = function (plz) {
       options.status = 'created';
 
       var query = {
-        collectionName: _collectionName,
+        collectionName: member.collectionName,
         document: options,
         uniqueFields: {title: options.title}
       };
@@ -83,7 +85,7 @@ var AuthorPage = function (plz) {
     }
 
     var query = {
-      collectionName: _collectionName,
+      collectionName: member.collectionName,
       update:  {$set:{visibility: "public", status: "published"}}
     };
 
@@ -112,7 +114,7 @@ var AuthorPage = function (plz) {
   */
   plz.get.page = function (options, callback) {
     var query = {
-      collectionName: _collectionName
+      collectionName: member.collectionName
     };
 
     if(options.hasOwnProperty('_id')) {
@@ -158,7 +160,7 @@ var AuthorPage = function (plz) {
     var currentTimestamp = new Date();
 
     var query = {
-      collectionName: _collectionName
+      collectionName: member.collectionName
     };
 
     if(options._id) {
@@ -171,7 +173,7 @@ var AuthorPage = function (plz) {
     }
 
     database.getDocument(query, function (error, getResult) {
-      if(error) {
+      if(error || getResult.length === 0) {
         callback(true, 'Existing page matching criteria not found');
         return;
       }
@@ -184,7 +186,7 @@ var AuthorPage = function (plz) {
       delete oldPage._id;
 
       var editQuery = {
-        collectionName: _collectionName,
+        collectionName: member.collectionName,
         criteria: { _id: pageId },
         update: {
           $set:{
@@ -196,13 +198,13 @@ var AuthorPage = function (plz) {
       };
 
       database.editDocument(editQuery, function(error) {
-        if (error) {
+        if(error) {
           callback(error, getResult);
           return;
         }
 
         var createQuery = {
-          collectionName: _collectionName,
+          collectionName: member.collectionName,
           document: oldPage,
           uniqueFields: {
             title: oldPage.title,
@@ -210,7 +212,7 @@ var AuthorPage = function (plz) {
           }
         };
 
-        database.createDocument(createQuery, function(error, createResult){
+        database.createDocument(createQuery, function(error, createResult) {
           callback(error, createResult);
         });
       });
@@ -234,7 +236,7 @@ var AuthorPage = function (plz) {
     }
 
     var query = {
-      collectionName: _collectionName
+      collectionName: member.collectionName
     };
 
     if(options.hasOwnProperty('_id')) {
@@ -251,15 +253,15 @@ var AuthorPage = function (plz) {
     });
   };
 
-  function checkRequiredOptions(options, callback) {
-    for(var field in _required) {
-      if(_required.hasOwnProperty(field)) {
+  member.checkRequiredOptions = function (options, callback) {
+    for(var field in member.required) {
+      if(member.required.hasOwnProperty(field)) {
         if(typeof options[field] === 'undefined') {
           callback(true, 'Required field ' + field + ' not present in options');
           return;
         }
 
-        if(!plz.validate.typeAs(_required[field], options[field])) {
+        if(!plz.validate.typeAs(member.required[field], options[field])) {
           callback(true, 'Required fields\' types not valid in options');
           return;
         }
@@ -267,9 +269,9 @@ var AuthorPage = function (plz) {
     }
 
     callback(false);
-  }
+  };
 
-  return plz;
+  return member;
 };
 
 module.exports = AuthorPage;
