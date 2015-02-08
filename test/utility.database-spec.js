@@ -255,6 +255,22 @@ describe('utility.database | Private API', function () {
       });
     });
 
+    it('should find everything without criteria and with a set limit', function(done) {
+      var plz = require('../app/core.hub')(Tc.validCoreConfig),
+          db = require('../app/utility.database')(plz);
+
+      var options = {
+        collectionName: 'test',
+        limit: 1
+      };
+
+      db.getDocument(options, function (error, result) {
+        error.should.be.false; 
+        result.should.be.eql([]);
+        done();
+      });
+    });
+
     after(function (done) {
       var plz = require('../app/core.hub')(Tc.validCoreConfig),
           db = require('../app/utility.database')(plz);

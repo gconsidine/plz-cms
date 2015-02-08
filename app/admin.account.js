@@ -187,7 +187,7 @@ var AdminAccount = function (plz, database, mailer) {
         return;
       }
 
-      if(!result) {
+      if(result.length === 0) {
         callback(true, false);
         return;
       }
