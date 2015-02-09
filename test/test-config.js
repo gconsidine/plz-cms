@@ -212,6 +212,16 @@ var TestConfig = function () {
           productName: 'string'
         }
       },
+      charge: {
+        collection: 'charge',
+        api: 'stripe',
+        api_key: 'sk_test_BQokikJOvBiI2HlWgH4olfQ2',
+        required: {
+          amount: 'number',
+          currency: 'string',
+          description: 'string'
+        }
+      }
     }
   };
 
@@ -349,6 +359,13 @@ var TestConfig = function () {
 
   var validCustomerId = 'chahm@caprahorn.com';
 
+  var validCard = {
+    number: '4242424242424242',
+    exp_month: 12,
+    exp_year: 2020,
+    cvc: '123'
+  };
+
   return {
     validCoreConfig: validCoreConfig,
     invalidCoreConfig: invalidCoreConfig,
@@ -370,6 +387,7 @@ var TestConfig = function () {
     anotherValidProduct: anotherValidProduct,
     invalidProduct: invalidProduct,
     validCustomerId: validCustomerId,
+    validCard: validCard,
     invalidDatabase: invalidDatabase
   };
 };
