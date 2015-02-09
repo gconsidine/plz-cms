@@ -18,6 +18,10 @@ var CoreApi = function (config) {
     require('./author.post')(plz);
   }
 
+  if(plz.config.modules.merchant) {
+    require('./merchant.api')(plz);
+  }
+
   return plz;
 };
 

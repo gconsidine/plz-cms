@@ -18,6 +18,7 @@
   "dependencies": {
     "mongodb": "^2.0.5",
     "nodemailer": "^1.2.1",
+    "stripe": "^3.0.2",
     "validator": "^3.22.1"
   },
   "devDependencies": {
