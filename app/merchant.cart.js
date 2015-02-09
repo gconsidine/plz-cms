@@ -5,11 +5,10 @@
  * @memberof merchant
  * @namespace merchant.cart
  */
-var MerchantCart = function (plz) {
+var MerchantCart = function (plz, database) {
   'use strict';
 
-  var Utility = require('./utility.api')(plz),
-      database = Utility.db;
+  database = database || require('./utility.database')(plz);
  
   plz = plz || {},
   plz.get = plz.get || {};
@@ -17,7 +16,9 @@ var MerchantCart = function (plz) {
   plz.remove = plz.remove || {};
   plz.add = plz.add || {};
 
-  var _collectionName = plz.config.merchant.cart.collection;
+  var member = {
+    collectionName: plz.config.merchant.cart.collection
+  };
 
   /**
   * Adds an item to the shopping cart corresonding to the specified
@@ -49,28 +50,30 @@ var MerchantCart = function (plz) {
     };
 
     database.getDocument(productQuery, function (error, result) {
-      if (error)
-      {
+      if(error || result.length === 0) {
         var errorString = "product matching " + options.productName;
         errorString += "does not exist in database";
         callback(true, errorString );
         return;
       }
       var query = {
-        collectionName: _collectionName,
+        collectionName: member.collectionName,
         criteria: {
           customerId: options.customerId,
-          productName: result.name
+          productName: options.productName
         }
       };
 
       // now check to see if an existing cart item exists
       database.getDocument(query, function(error, getResult) {
-        if (error) {
+        if(error) {
+          callback(true, getResult);
+        }
+        else if(getResult.length === 0) {
           options.modifiedAt = currentTimestamp;
           // does not exist, create a new one
           var createQuery = {
-            collectionName: _collectionName,
+            collectionName: member.collectionName,
             document: options,
             uniqueFields: {
               customerId: options.customerId,
@@ -89,17 +92,17 @@ var MerchantCart = function (plz) {
         else {
           // already exists -- modify the quantity of existing cartItem
           var editQuery = {
-            collectionName: _collectionName,
-            criteria: { _id: getResult._id },
+            collectionName: member.collectionName,
+            criteria: { _id: getResult[0]._id },
             update: {
               $set:{
-                quantity: getResult.quantity + options.quantity,
+                quantity: getResult[0].quantity + options.quantity,
                 modifiedAt: currentTimestamp
               }
             }
           };
-          database.editDocument(editQuery, function(error) {
-            callback(error, getResult);
+          database.editDocument(editQuery, function(error, result) {
+            callback(error, result);
           });
         }
       });
@@ -128,7 +131,7 @@ var MerchantCart = function (plz) {
       return;
     }
     var query = {
-      collectionName: _collectionName,
+      collectionName: member.collectionName,
       criteria: {
         customerId : options.customerId,
         productName : options.productName
@@ -136,30 +139,30 @@ var MerchantCart = function (plz) {
     };
 
     database.getDocument(query, function(error, getResult) {
-      if (error) {
+      if(error || getResult.length === 0) {
         callback(true, error);
       }
       else {
-        if (options.quantity === undefined ||
-            options.quantity >= getResult.quantity) {
+        if(options.quantity === undefined ||
+            options.quantity >= getResult[0].quantity) {
           database.removeDocument(query, function(error, result) {
              callback(error, result);
           });
         }
         else {
           var modifications = {
-            quantity: getResult.quantity - options.quantity
+            quantity: getResult[0].quantity - options.quantity
           };
           var editQuery = {
-            collectionName: _collectionName,
-            criteria: { _id: getResult._id },
+            collectionName: member.collectionName,
+            criteria: { _id: getResult[0]._id },
             update: {
               $set: modifications
             }
           };
 
-          database.editDocument(editQuery, function(error) {
-            callback(error, getResult);
+          database.editDocument(editQuery, function(error, result) {
+            callback(error, result);
           });
         }
       }
@@ -181,15 +184,14 @@ var MerchantCart = function (plz) {
       return;
     }
     var query = {
-      collectionName: _collectionName,
-      limit: '*',
+      collectionName: member.collectionName,
       criteria: {
         customerId : options.customerId
       }
     };
 
     database.getDocument(query, function(error, getResult) {
-      if (error) {
+      if(error) {
         callback(true, error);
       }
       else {
@@ -213,14 +215,14 @@ var MerchantCart = function (plz) {
       return;
     }
     var query = {
-      collectionName: _collectionName,
+      collectionName: member.collectionName,
       limit: '*',
       criteria: {
         customerId : options.customerId
       }
     };
     database.removeDocument(query, function(error, getResult) {
-      if (error) {
+      if(error) {
         callback(true, error);
       }
       else {
@@ -244,36 +246,39 @@ var MerchantCart = function (plz) {
       return;
     }
     var query = {
-      collectionName: _collectionName,
-      limit: '*',
+      collectionName: member.collectionName,
       criteria: {
         customerId : options.customerId
       }
     };
+    var subtotal = 0;
+    var numProductsAdded = 0;
     database.getDocument(query, function(error, getResult) {
-      if (error) {
+      if(error) {
         callback(true, error);
+        return;
+      }
+      else if(getResult.length === 0) {
+        callback(false, 0);
       }
       else {
-        var subtotal = 0;
-        var numProductsAdded = 0;
         var addProductPrice = function(product, callback){
           var productQuery = {
             collectionName: plz.config.merchant.product.collection,
             criteria: { name: product.productName }
           };
           database.getDocument(productQuery, function (error, productResult) {
-            if (error) {
+            if(error || productResult.length === 0) {
               var errorString = "No product matching " + product.productName;
               callback(true, errorString);
             }
             else {
-              var price = parseFloat(productResult.price.replace(/^\$/,''));
+              var price = parseFloat(productResult[0].price.replace(/^\$/,''));
               subtotal += price * product.quantity;
-              numProductsAdded++;
-              if (numProductsAdded === getResult.length){
-                callback(false, subtotal);
-              }
+            }
+            numProductsAdded++;
+            if(numProductsAdded === getResult.length){
+              callback(false, subtotal);
             }
           });
         };
@@ -283,6 +288,7 @@ var MerchantCart = function (plz) {
       }
     });
   };
+  return member;
 };
 
 module.exports = MerchantCart;

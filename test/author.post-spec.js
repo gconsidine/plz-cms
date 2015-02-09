@@ -597,7 +597,7 @@ describe('author.post | Private API', function () {
       };
 
       author.checkRequiredOptions(options, function (error, result) {
-        console.log(error, result);
+        //console.log(error, result);
         error.should.be.true;
         result.should.be.a.String;
         done();

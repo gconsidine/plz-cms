@@ -5,12 +5,10 @@
  * @memberof merchant
  * @namespace merchant.charge
  */
-var MerchantCharge = function (plz) {
+var MerchantCharge = function (plz, database) {
   'use strict';
 
-  var Utility = require('./utility.api')(plz),
-      database = Utility.db,
-      paymentApi;
+  database = database || require('./utility.database')(plz);
 
   plz = plz || {},
   plz.get = plz.get || {};
@@ -18,10 +16,12 @@ var MerchantCharge = function (plz) {
   plz.edit = plz.edit || {};
   plz.remove = plz.remove || {};
 
-  var _collectionName = plz.config.merchant.charge.collection;
+  var member = {
+    collectionName: plz.config.merchant.charge.collection
+  };
 
-  if (plz.config.merchant.charge.api === "stripe") {
-    paymentApi = require("stripe") ( plz.config.merchant.charge.api_key );
+  if (plz.config.merchant.charge.api === 'stripe') {
+    member.paymentApi = require('stripe')(plz.config.merchant.charge.api_key);
   }
 
   /**
@@ -41,7 +41,7 @@ var MerchantCharge = function (plz) {
   *  (perhaps this should be simply errorDescription || null)
   */
   plz.create.charge = function (options, callback) {
-    paymentApi.charges.create(options, function(error, result) {
+    member.paymentApi.charges.create(options, function(error, result) {
       if (error) {
         callback(true, result);
         return;
@@ -49,7 +49,7 @@ var MerchantCharge = function (plz) {
       result.createdAt = new Date().getTime();
       result.status = 'pending';
       var query = {
-        collectionName: _collectionName,
+        collectionName: member.collectionName,
         document: result,
         uniqueFields: {id: result.id}
       };
@@ -59,7 +59,7 @@ var MerchantCharge = function (plz) {
       });
     });
   };
-  return plz;
+  return member;
 };
 
 module.exports = MerchantCharge;

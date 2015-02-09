@@ -19,11 +19,10 @@ describe('merchant | Configuration', function () {
 });
 
 describe('merchant.cart | Public API', function () {
-  var plz, collectionName, cartCollection, Utility, db;
+  var collectionName, cartCollection;
 
-  plz = require('../app/core.hub')(Tc.validMerchantConfig);
-  Utility = require('../app/utility.api')(plz);
-  db = Utility.db;
+  var plz = require('../app/core.hub')(Tc.validMerchantConfig);
+  var db = require('../app/utility.database')(plz);
   collectionName = Tc.validMerchantConfig.merchant.cart.collection;
 
   describe('plz.add.cartItem()', function () {

@@ -19,11 +19,10 @@ describe('merchant | Configuration', function () {
 });
 
 describe('merchant.product | Public API', function () {
-  var plz, collectionName, productCollection, Utility, db;
+  var collectionName, productCollection;
 
-  plz = require('../app/core.hub')(Tc.validMerchantConfig);
-  Utility = require('../app/utility.api')(plz);
-  db = Utility.db;
+  var plz = require('../app/core.hub')(Tc.validMerchantConfig);
+  var db = require('../app/utility.database')(plz);
 
   describe('plz.create.product()', function () {
 
@@ -151,7 +150,6 @@ describe('merchant.product | Public API', function () {
         error.should.be.false;
         var request = {
           label: 'tools',
-          limit: '*'
         };
         plz.get.product(request, function (error, result) {
           error.should.be.false;
@@ -186,7 +184,6 @@ describe('merchant.product | Public API', function () {
         error.should.be.false;
         var getRequest = {
           label: 'tools',
-          limit: '*'
         };
         plz.get.product(getRequest, function (error, result) {
           error.should.be.false;

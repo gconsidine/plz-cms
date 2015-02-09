@@ -5,11 +5,10 @@
  * @memberof merchant
  * @namespace merchant.product
  */
-var MerchantProduct = function (plz) {
+var MerchantProduct = function (plz, database) {
   'use strict';
 
-  var Utility = require('./utility.api')(plz),
-      database = Utility.db;
+  database = database || require('./utility.database')(plz);
  
   plz = plz || {},
   plz.get = plz.get || {};
@@ -18,8 +17,10 @@ var MerchantProduct = function (plz) {
   plz.remove = plz.remove || {};
   plz.add = plz.add || {};
 
-  var _required = plz.config.merchant.product.required,
-      _collectionName = plz.config.merchant.product.collection;
+  var member = {
+    required: plz.config.merchant.product.required,
+    collectionName: plz.config.merchant.product.collection
+  };
 
   /**
   * Creates a sellable product item with given options and inserts it into 
@@ -42,7 +43,7 @@ var MerchantProduct = function (plz) {
   *  (perhaps this should be simply errorDescription || null)
   */
   plz.create.product = function (options, callback) {
-    checkRequiredOptions(options, function (error, result) {
+    member.checkRequiredOptions(options, function (error, result) {
       if(error) {
         callback(true, result);
         return;
@@ -56,7 +57,7 @@ var MerchantProduct = function (plz) {
       options.status = 'created';
 
       var query = {
-        collectionName: _collectionName,
+        collectionName: member.collectionName,
         document: options,
         uniqueFields: {name: options.name}
       };
@@ -78,7 +79,7 @@ var MerchantProduct = function (plz) {
   */
   plz.get.product = function (options, callback) {
     var query = {
-      collectionName: _collectionName
+      collectionName: member.collectionName
     };
 
     if(options.hasOwnProperty('_id')) {
@@ -100,6 +101,10 @@ var MerchantProduct = function (plz) {
     }
 
     database.getDocument(query, function (error, result) {
+      if(error || result.length === 0) {
+        callback(true, 'Existing product matching criteria not found');
+        return;
+      }
       callback(error, result);
     });
   };
@@ -127,7 +132,7 @@ var MerchantProduct = function (plz) {
     modifications.modifiedAt = currentTimestamp;
 
     var query = {
-      collectionName: _collectionName
+      collectionName: member.collectionName
     };
 
     if (options.hasOwnProperty('_id')) {
@@ -140,20 +145,20 @@ var MerchantProduct = function (plz) {
     }
 
     database.getDocument(query, function (error, getResult) {
-      if(error) {
+      if(error || getResult.length === 0) {
         callback(true, 'Existing product matching criteria not found');
         return;
       }
 
-      var productId = getResult._id;
+      var productId = getResult[0]._id;
 
-      var oldProduct = getResult;
+      var oldProduct = getResult[0];
       oldProduct.status = "archived";
       delete oldProduct._id;
       modifications.revisionNumber = oldProduct.revisionNumber+1;
 
       var editQuery = {
-        collectionName: _collectionName,
+        collectionName: member.collectionName,
         criteria: { _id: productId },
         update: {
           $set: modifications
@@ -161,13 +166,13 @@ var MerchantProduct = function (plz) {
       };
 
       database.editDocument(editQuery, function(error) {
-        if (error) {
-          callback(error, getResult);
+        if(error) {
+          callback(error, getResult[0]);
           return;
         }
 
         var createQuery = {
-          collectionName: _collectionName,
+          collectionName: member.collectionName,
           document: oldProduct,
           uniqueFields: {
             name: oldProduct.name,
@@ -199,8 +204,7 @@ var MerchantProduct = function (plz) {
     }
 
     var query = {
-      collectionName: _collectionName,
-      limit: '*'
+      collectionName: member.collectionName,
     };
 
     if(options.hasOwnProperty('_id')) {
@@ -217,15 +221,15 @@ var MerchantProduct = function (plz) {
     });
   };
 
-  function checkRequiredOptions(options, callback) {
-    for(var field in _required) {
-      if(_required.hasOwnProperty(field)) {
+  member.checkRequiredOptions = function(options, callback) {
+    for(var field in member.required) {
+      if(member.required.hasOwnProperty(field)) {
         if(typeof options[field] === 'undefined') {
           callback(true, 'Required field ' + field + ' not present in options');
           return;
         }
 
-        if(!plz.validate.typeAs(_required[field], options[field])) {
+        if(!plz.validate.typeAs(member.required[field], options[field])) {
           callback(true, 'Required fields\' types not valid in options');
           return;
         }
@@ -233,9 +237,9 @@ var MerchantProduct = function (plz) {
     }
 
     callback(false);
-  }
+  };
 
-  return plz;
+  return member;
 };
 
 module.exports = MerchantProduct;

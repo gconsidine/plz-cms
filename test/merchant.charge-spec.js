@@ -19,11 +19,9 @@ describe('merchant | Configuration', function () {
 });
 
 describe('merchant.charge | Public API', function () {
-  var plz, collectionName, chargeCollection, Utility, db;
-
-  plz = require('../app/core.hub')(Tc.validMerchantConfig);
-  Utility = require('../app/utility.api')(plz);
-  db = Utility.db;
+  var collectionName, chargeCollection;
+  var plz = require('../app/core.hub')(Tc.validMerchantConfig);
+  var db = require('../app/utility.database')(plz);
   collectionName = Tc.validMerchantConfig.merchant.charge.collection;
 
   describe('plz.create.charge()', function () {
