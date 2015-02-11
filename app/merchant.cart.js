@@ -52,7 +52,7 @@ var MerchantCart = function (plz, database) {
     database.getDocument(productQuery, function (error, result) {
       if(error || result.length === 0) {
         var errorString = "product matching " + options.productName;
-        errorString += "does not exist in database";
+        errorString += " does not exist in database";
         callback(true, errorString );
         return;
       }
@@ -140,7 +140,7 @@ var MerchantCart = function (plz, database) {
 
     database.getDocument(query, function(error, getResult) {
       if(error || getResult.length === 0) {
-        callback(true, error);
+        callback(true, getResult);
       }
       else {
         if(options.quantity === undefined ||
@@ -192,7 +192,7 @@ var MerchantCart = function (plz, database) {
 
     database.getDocument(query, function(error, getResult) {
       if(error) {
-        callback(true, error);
+        callback(true, getResult);
       }
       else {
         callback(false, getResult);
@@ -223,7 +223,7 @@ var MerchantCart = function (plz, database) {
     };
     database.removeDocument(query, function(error, getResult) {
       if(error) {
-        callback(true, error);
+        callback(true, getResult);
       }
       else {
         callback(false, getResult);
@@ -268,11 +268,7 @@ var MerchantCart = function (plz, database) {
             criteria: { name: product.productName }
           };
           database.getDocument(productQuery, function (error, productResult) {
-            if(error || productResult.length === 0) {
-              var errorString = "No product matching " + product.productName;
-              callback(true, errorString);
-            }
-            else {
+            if(!error && productResult.length > 0) {
               var price = parseFloat(productResult[0].price.replace(/^\$/,''));
               subtotal += price * product.quantity;
             }
@@ -282,7 +278,7 @@ var MerchantCart = function (plz, database) {
             }
           });
         };
-		for(var index = 0; index < getResult.length; index++) {
+        for(var index = 0; index < getResult.length; index++) {
           addProductPrice(getResult[index], callback);
         }
       }

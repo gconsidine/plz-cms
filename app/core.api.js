@@ -19,7 +19,9 @@ var CoreApi = function (config) {
   }
 
   if(plz.config.modules.merchant) {
-    require('./merchant.api')(plz);
+    require('./merchant.cart')(plz);
+    require('./merchant.charge')(plz);
+    require('./merchant.product')(plz);
   }
 
   return plz;

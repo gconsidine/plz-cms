@@ -92,4 +92,112 @@ describe('merchant.charge | Public API', function () {
     });
   });
 
+  describe('plz.get.charge()', function () {
+
+    before(function (done) {
+      var request = {
+        customerId: Tc.validCustomerId,
+        amount: 100,
+        currency: 'usd',
+        card: Tc.validCard,
+        description: 'test request without amount'
+      };
+      plz.create.charge(request, function (error, result) {
+        error.should.be.false;
+        (result === null).should.be.false;
+        chargeCollection.count(function(error, count) {
+          count.should.equal(1);
+          done();
+        });
+      });
+    });
+
+    it('should return error if required fields are missing', function(done) {
+      var invalidRequest = {
+        options: 'invalid options',
+      };
+
+      plz.get.charge(invalidRequest, function (error) {
+        error.should.be.true;
+        done();
+      });
+    });
+
+    it('should return array of existing charges', function(done) {
+      var request = {
+        customerId: Tc.validCustomerId
+      };
+
+      plz.get.charge(request, function (error) {
+        error.should.be.false;
+        chargeCollection.count(function(error, count) {
+          count.should.equal(1);
+          var findOptions = {
+            customerId: Tc.validCustomerId
+          };
+
+          chargeCollection.findOne(findOptions, function (error) {
+            (error === null).should.be.true;
+            done();
+          });
+        });
+      });
+    });
+
+    after(function (done) {
+      chargeCollection.drop(function () {
+        done();
+      });
+    });
+  });
+
+  describe('plz.remove.charge()', function () {
+    var chargeId;
+    before(function (done) {
+      var request = {
+        customerId: Tc.validCustomerId,
+        amount: 100,
+        currency: 'usd',
+        card: Tc.validCard,
+        description: 'test request without amount'
+      };
+      plz.create.charge(request, function (error, result) {
+        error.should.be.false;
+        (result === null).should.be.false;
+        chargeId = result.ops[0].id;
+        done();
+      });
+    });
+
+    it('should return error if required fields are missing', function(done) {
+      var invalidRequest = {
+        options: 'invalid options',
+      };
+
+      plz.remove.charge(invalidRequest, function (error) {
+        error.should.be.true;
+        done();
+      });
+    });
+
+    it('should remove existing charge', function(done) {
+      var request = {
+        id: chargeId
+      };
+
+      plz.remove.charge(request, function (error) {
+        error.should.be.false;
+
+        chargeCollection.count(function(error, count) {
+          count.should.equal(0);
+          done();
+        });
+      });
+    });
+    after(function (done) {
+      chargeCollection.drop(function () {
+        done();
+      });
+    });
+  });
 });

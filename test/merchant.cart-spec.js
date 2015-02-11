@@ -19,11 +19,21 @@ describe('merchant | Configuration', function () {
 });
 
 describe('merchant.cart | Public API', function () {
-  var collectionName, cartCollection;
-
+  var cartCollection;
+  var collectionName = Tc.validMerchantConfig.merchant.cart.collection;
+  var mockDatabase = {
+    getDocument: function (query, callback) {
+      if(query.collectionName === collectionName) {
+        callback(true, 'Mock failure');
+      }
+      else {
+        callback(false, 'Mock success');
+      }
+    },
+    removeDocument: function (query, callback) { callback(true, 'fail'); }
+  };
   var plz = require('../app/core.hub')(Tc.validMerchantConfig);
   var db = require('../app/utility.database')(plz);
-  collectionName = Tc.validMerchantConfig.merchant.cart.collection;
 
   describe('plz.add.cartItem()', function () {
 
@@ -65,6 +75,18 @@ describe('merchant.cart | Public API', function () {
             done();
           });
         });
+      });
+    });
+
+    it('should return error if product does not exist', function(done) {
+      var request = {
+        customerId: Tc.validCustomerId,
+        productName: 'nonexistant product',
+        quantity: 1
+      };
+      plz.add.cartItem(request, function (error) {
+        error.should.be.true;
+        done();
       });
     });
 
@@ -126,6 +148,23 @@ describe('merchant.cart | Public API', function () {
         });
       });
     });
+
+    it('should callback error if getDocument fails', function(done) {
+      require('../app/merchant.cart')(plz, mockDatabase);
+
+      var addRequest = {
+        customerId: Tc.validCustomerId,
+        productName: 'Acme 16-oz Claw Hammer',
+        quantity: 2
+      };
+      plz.add.cartItem(addRequest, function (error, result) {
+        error.should.be.true;
+        result.should.be.a.String;
+        require('../app/merchant.cart')(plz);
+        done();
+      });
+    });
+
     after(function (done) {
       cartCollection.drop(function () {
         done();
@@ -158,16 +197,28 @@ describe('merchant.cart | Public API', function () {
         var requestWithoutCustomerId = {
           productName: Tc.validProduct.name
         };
-        plz.add.cartItem(requestWithoutCustomerId, function (error) {
+        plz.remove.cartItem(requestWithoutCustomerId, function (error) {
           error.should.be.true;
           var requestWithoutProductName = {
             customerId: Tc.validCustomerId
           };
-          plz.add.cartItem(requestWithoutProductName, function (error) {
+          plz.remove.cartItem(requestWithoutProductName, function (error) {
             error.should.be.true;
             done();
           });
         });
+      });
+    });
+
+    it('should return error if product does not exist', function(done) {
+      var request = {
+        customerId: Tc.validCustomerId,
+        productName: 'nonexistant product',
+        quantity: 1
+      };
+      plz.remove.cartItem(request, function (error) {
+        error.should.be.true;
+        done();
       });
     });
 
@@ -214,6 +265,22 @@ describe('merchant.cart | Public API', function () {
         });
       });
     });
+
+    it('should callback error if getDocument fails', function(done) {
+      require('../app/merchant.cart')(plz, mockDatabase);
+
+      var removeRequest = {
+        customerId: Tc.validCustomerId,
+        productName: 'Acme 16-oz Claw Hammer',
+      };
+      plz.remove.cartItem(removeRequest, function (error, result) {
+        error.should.be.true;
+        result.should.be.a.String;
+        require('../app/merchant.cart')(plz);
+        done();
+      });
+    });
+
     after(function (done) {
       cartCollection.drop(function () {
         done();
@@ -256,7 +323,7 @@ describe('merchant.cart | Public API', function () {
       });
     });
 
-    it('should return an array of added cart items', function(done) {
+    it('should return the expected array of added cart items', function(done) {
       var request = {
         customerId: Tc.validCustomerId
       };
@@ -265,7 +332,8 @@ describe('merchant.cart | Public API', function () {
         result.length.should.equal(2);
         var productsDictObject = {};
         for(var index in result) {
-          if (result[index].customerId === Tc.validCustomerId) {
+          if(result.hasOwnProperty(index)) {
+            result[index].customerId.should.equal(request.customerId);
             if (result[index].productName === Tc.validProduct.name ||
                 result[index].productName === Tc.anotherValidProduct.name ) {
               productsDictObject[result[index].productName] = 1;
@@ -276,6 +344,21 @@ describe('merchant.cart | Public API', function () {
         done();
       });
     });
+
+    it('should callback error if getDocument fails', function(done) {
+      require('../app/merchant.cart')(plz, mockDatabase);
+
+      var request = {
+        customerId: Tc.validCustomerId
+      };
+      plz.get.cart(request, function (error, result) {
+        error.should.be.true;
+        result.should.be.a.String;
+        require('../app/merchant.cart')(plz);
+        done();
+      });
+    });
+
     after(function (done) {
       cartCollection.drop(function () {
         done();
@@ -331,6 +414,43 @@ describe('merchant.cart | Public API', function () {
         });
       });
     });
+
+    it('should not remove items that do not match customerId', function(done) {
+      var addRequest = {
+        customerId: Tc.validCustomerId,
+        productName: Tc.validProduct.name,
+        quantity: 1
+      };
+      plz.add.cartItem(addRequest, function (error) {
+        error.should.be.false;
+        var request = {
+          customerId: 'different customer'
+        };
+        plz.remove.cart(request, function (error, result) {
+          error.should.be.false;
+          (result === null).should.be.false;
+          cartCollection.count(function(error, count) {
+            count.should.equal(1);
+            done();
+          });
+        });
+      });
+    });
+
+    it('should callback error if removeDocument fails', function(done) {
+      require('../app/merchant.cart')(plz, mockDatabase);
+
+      var request = {
+        customerId: Tc.validCustomerId
+      };
+      plz.remove.cart(request, function (error, result) {
+        error.should.be.true;
+        result.should.be.a.String;
+        require('../app/merchant.cart')(plz);
+        done();
+      });
+    });
+
     after(function (done) {
       cartCollection.drop(function () {
         done();
@@ -383,6 +503,20 @@ describe('merchant.cart | Public API', function () {
         error.should.be.false;
         result.should.equal(expected);
         done();
+      });
+    });
+
+    it('should return 0 for an empty cart', function(done) {
+      var request = {
+        customerId: Tc.validCustomerId
+      };
+      plz.remove.cart(request, function (error) {
+        error.should.be.false;
+        plz.get.cartSubtotal(request, function (error, result) {
+          error.should.be.false;
+          result.should.equal(0);
+          done();
+        });
       });
     });
 

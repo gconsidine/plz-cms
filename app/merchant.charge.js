@@ -30,6 +30,7 @@ var MerchantCharge = function (plz, database) {
   *
   * @memberof merchant.charge
   * @param {object} options
+  * @param {string} options.customerId - Unique itentifier for customer charged
   * @param {number} options.amount - Total amount to be charged to the card
   * @param {string} options.currency - Three-letter ISO currency code
   * @param {string} options.card
@@ -41,11 +42,14 @@ var MerchantCharge = function (plz, database) {
   *  (perhaps this should be simply errorDescription || null)
   */
   plz.create.charge = function (options, callback) {
+    var customerId = options.customerId;
+    delete options.customerId;
     member.paymentApi.charges.create(options, function(error, result) {
       if (error) {
-        callback(true, result);
+        callback(true, error);
         return;
       }
+      result.customerId = customerId;
       result.createdAt = new Date().getTime();
       result.status = 'pending';
       var query = {
@@ -59,6 +63,58 @@ var MerchantCharge = function (plz, database) {
       });
     });
   };
+
+  /**
+  * Fetches a charge object(s) matching the id specified in options
+  *
+  * @memberof merchant.charge
+  * @param {object} options
+  * @param {string} options.customerId - Unique id used in charge lookup
+  * @param {charge} callback
+  */
+  plz.get.charge = function (options, callback) {
+    var query = {
+      collectionName: member.collectionName
+    };
+
+    if(options.hasOwnProperty('customerId')) {
+      query.criteria = { customerId: options.customerId };
+    } else {
+      callback(true, 'Valid criteria field not present in options');
+      return;
+    }
+
+    database.getDocument(query, function (error, result) {
+      callback(error, result);
+    });
+  };
+
+  /**
+  * Deletes a charge from database if it exists
+  *
+  * @memberof merchant.charge
+  * @param {object} options
+  * @param {string} options.id - Unique id used in charge lookup
+  * @param {charge} callback
+  */
+  plz.remove.charge = function (options, callback) {
+    var query = {
+      collectionName: member.collectionName
+    };
+
+    if(options.hasOwnProperty('id')) {
+      query.criteria = { id: options.id };
+    } else {
+      callback(true, 'Valid criteria field not present in options');
+      return;
+    }
+
+    database.removeDocument(query, function(error, result) {
+      callback(error, result);
+    });
+  };
+
+
   return member;
 };
 
