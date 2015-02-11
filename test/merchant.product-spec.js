@@ -19,7 +19,12 @@ describe('merchant | Configuration', function () {
 });
 
 describe('merchant.product | Public API', function () {
-  var collectionName, productCollection;
+  var productCollection;
+  var collectionName = Tc.validMerchantConfig.merchant.product.collection;
+  var mockDatabase = {
+    getDocument: function (query, callback) { callback(true, 'fail'); },
+    editDocument: function (query, callback) { callback(true, 'fail'); }
+  };
 
   var plz = require('../app/core.hub')(Tc.validMerchantConfig);
   var db = require('../app/utility.database')(plz);
@@ -46,6 +51,16 @@ describe('merchant.product | Public API', function () {
     it('should return error if required fields are missing', function(done) {
       plz.create.product(Tc.invalidProduct, function (error) {
         error.should.be.true;
+        done();
+      });
+    });
+
+    it('should return error if fields have invalid types', function(done) {
+      var origName = Tc.validProduct.name;
+      Tc.validProduct.name = 123;
+      plz.create.product(Tc.validProduct, function (error) {
+        error.should.be.true;
+        Tc.validProduct.name = origName;
         done();
       });
     });
@@ -238,6 +253,7 @@ describe('merchant.product | Public API', function () {
         error.should.be.true;
         var requestWithoutCriteria = {
           userName: 'chahm',
+          modifications: { price: '$10.99' }
         };
         plz.edit.product(requestWithoutCriteria, function (error) {
           error.should.be.true;
@@ -298,6 +314,43 @@ describe('merchant.product | Public API', function () {
       plz.get.product(request, function (error, result) {
         error.should.be.true;
         result.should.not.be.empty;
+        done();
+      });
+    });
+
+    it('should callback error if getDocument fails', function(done) {
+      require('../app/merchant.product')(plz, mockDatabase);
+
+      var request = {
+        userName: 'chahm',
+        name: 'Acme 16-oz Claw Hammer',
+        modifications: { price: '$10.99' }
+      };
+
+      plz.edit.product(request, function (error, result) {
+        error.should.be.true;
+        result.should.be.a.String;
+        require('../app/merchant.product')(plz);
+        done();
+      });
+    });
+
+    it('should callback error if editDocument fails', function(done) {
+      mockDatabase.getDocument = function (query, callback) {
+        callback(false, 'pass'); 
+      };
+      require('../app/merchant.product')(plz, mockDatabase);
+
+      var request = {
+        userName: 'chahm',
+        name: 'Acme 16-oz Claw Hammer',
+        modifications: { price: '$10.99' }
+      };
+
+      plz.edit.product(request, function (error, result) {
+        error.should.be.true;
+        result.should.be.a.String;
+        require('../app/merchant.product')(plz);
         done();
       });
     });

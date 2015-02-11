@@ -255,7 +255,7 @@ var MerchantCart = function (plz, database) {
     var numProductsAdded = 0;
     database.getDocument(query, function(error, getResult) {
       if(error) {
-        callback(true, error);
+        callback(true, getResult);
         return;
       }
       else if(getResult.length === 0) {

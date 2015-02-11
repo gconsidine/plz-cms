@@ -520,6 +520,20 @@ describe('merchant.cart | Public API', function () {
       });
     });
 
+    it('should callback error if removeDocument fails', function(done) {
+      require('../app/merchant.cart')(plz, mockDatabase);
+
+      var request = {
+        customerId: Tc.validCustomerId
+      };
+      plz.get.cartSubtotal(request, function (error, result) {
+        error.should.be.true;
+        result.should.be.a.String;
+        require('../app/merchant.cart')(plz);
+        done();
+      });
+    });
+
     after(function (done) {
       cartCollection.drop(function () {
         done();
