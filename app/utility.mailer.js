@@ -56,7 +56,7 @@ var UtilityMailer = function (plz, NodeMailer) {
         from: from,
         to: options.to,
         subject: options.subject,
-        body: options.body
+        html: options.body
       };
 
       transporter.sendMail(mailOptions, function (error, result) {
