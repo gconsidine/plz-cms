@@ -297,6 +297,27 @@ describe('author.post | Public API', function () {
       });
     });
 
+    it('should callback error and return if database fails', function(done) {
+      var mockDatabase = {
+        getDocument: function (query, callback) {
+          callback(true, { ok: false, message: 'Mock failure', data: null });
+        }
+      };
+
+      var request = {
+        userName: 'chahm',
+        title: 'nonexistent post',
+      };
+
+      require('../app/author.post')(plz, mockDatabase);
+
+      plz.get.post(request, function (error, result) {
+        error.should.be.true;
+        result.should.be.an.Object;
+        done();
+      });
+    });
+
     after(function (done) {
       postCollection.drop(function () {
         done();
@@ -445,6 +466,36 @@ describe('author.post | Public API', function () {
       plz.get.post(request, function (error, result) {
         error.should.be.false;
         result.data.should.eql([]);
+        done();
+      });
+    });
+
+    it('should callback an error and return if database fails', function(done) {
+      var mockDatabase = {};
+
+      mockDatabase.getDocument = function (query, callback) {
+        callback(false, [{_id: '0001', status: 'something', revisionNumber: 1}]);
+      };
+
+      mockDatabase.editDocument = function (query, callback) {
+        callback(false, { ok: true, message: 'Mock Success', data: {} });
+      };
+
+      mockDatabase.createDocument = function (query, callback) {
+        callback(true, { ok: false, message: 'Mock failure', data: null });
+      };
+
+      require('../app/author.post')(plz, mockDatabase);
+
+      var request = {
+        userName: 'chahm',
+        title: 'nonexistent post',
+        content: 'blah blah blah...',
+      };
+
+      plz.edit.post(request, function (error, result) {
+        error.should.be.true;
+        result.should.be.an.Object;
         done();
       });
     });
@@ -605,7 +656,6 @@ describe('author.post | Private API', function () {
       };
 
       author.checkRequiredOptions(options, function (error, result) {
-        console.log(error, result);
         error.should.be.true;
         result.should.be.a.String;
         done();
