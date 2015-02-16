@@ -76,11 +76,16 @@ var UtilityDatabase = function (plz) {
 
       collection.findOneAndUpdate(options.criteria, options.update, function (error, result) {
         if(error) {
-          callback(true, 'Database findOneAndUpdate error: ' + error);
+          callback(true, 'Edit document failed');
           return;
         }
 
-        callback(false, result);
+        if(!result.ok || result.value === null) {
+          callback(true, 'No documents affected by edit operation');
+          return;
+        }
+
+        callback(false, result.lastErrorObject);
       });
     });
   };
@@ -116,13 +121,13 @@ var UtilityDatabase = function (plz) {
         findCursor = collection.find(options.criteria).limit(options.limit);
       }
 
-      findCursor.toArray(function(error, docs) {
+      findCursor.toArray(function(error, result) {
         if(error) {
-          callback(true, 'Database find error: ' + error);
+          callback(true, 'Cannot find document');
           return;
         }
         
-        callback(false, docs);
+        callback(false, result);
       });
     });
   };
@@ -148,11 +153,16 @@ var UtilityDatabase = function (plz) {
       
       collection.remove(options.criteria, {w: 1}, function (error, result) {
         if(error) {
-          callback(true, result);
+          callback(true, 'Database error: cannot remove document');
           return;
         }
 
-        callback(false, result);
+        if(!result.result.ok || result.result.n === 0) {
+          callback(true, 'No existing documents affected by remove');
+          return;
+        }
+
+        callback(false, result.result);
       });
     });
   };
