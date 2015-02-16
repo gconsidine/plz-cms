@@ -625,6 +625,27 @@ describe('author.post | Public API', function () {
       });
     });
 
+    it('should callback an error and return if database fails', function(done) {
+      var mockDatabase = {};
+
+      mockDatabase.removeDocument = function (query, callback) {
+        callback(true, { ok: false, message: 'Mock failure', data: null });
+      };
+
+      require('../app/author.post')(plz, mockDatabase);
+
+      var request = {
+        userName: 'chahm',
+        title: 'nonexistent post',
+      };
+
+      plz.remove.post(request, function (error, result) {
+        error.should.be.true;
+        result.should.be.an.Object;
+        done();
+      });
+    });
+
     after(function (done) {
       postCollection.drop(function () {
         done();

@@ -304,6 +304,27 @@ describe('author.page | Public API', function () {
       });
     });
 
+    it('should callback error and return if database fails', function(done) {
+      var mockDatabase = {
+        getDocument: function (query, callback) {
+          callback(true, { ok: false, message: 'Mock failure', data: null });
+        }
+      };
+
+      var request = {
+        userName: 'chahm',
+        title: 'nonexistent post',
+      };
+
+      require('../app/author.page')(plz, mockDatabase);
+
+      plz.get.page(request, function (error, result) {
+        error.should.be.true;
+        result.should.be.an.Object;
+        done();
+      });
+    });
+
     after(function (done) {
       pageCollection.drop(function () {
         done();
@@ -457,6 +478,36 @@ describe('author.page | Public API', function () {
       });
     });
 
+    it('should callback an error and return if database fails', function(done) {
+      var mockDatabase = {};
+
+      mockDatabase.getDocument = function (query, callback) {
+        callback(false, [{_id: '0001', status: 'something', revisionNumber: 1}]);
+      };
+
+      mockDatabase.editDocument = function (query, callback) {
+        callback(false, { ok: true, message: 'Mock Success', data: {} });
+      };
+
+      mockDatabase.createDocument = function (query, callback) {
+        callback(true, { ok: false, message: 'Mock failure', data: null });
+      };
+
+      require('../app/author.page')(plz, mockDatabase);
+
+      var request = {
+        userName: 'chahm',
+        title: 'a page',
+        content: 'blah blah blah...',
+      };
+
+      plz.edit.page(request, function (error, result) {
+        error.should.be.true;
+        result.should.be.an.Object;
+        done();
+      });
+    });
+
     afterEach(function () {
       plz = require('../app/core.hub')(Tc.validAuthorConfig);
     });
@@ -545,6 +596,27 @@ describe('author.page | Public API', function () {
       plz.get.page(request, function (error, result) {
         error.should.be.false;
         result.data.should.eql([]);
+        done();
+      });
+    });
+
+    it('should callback an error and return if database fails', function(done) {
+      var mockDatabase = {};
+
+      mockDatabase.removeDocument = function (query, callback) {
+        callback(true, { ok: false, message: 'Mock failure', data: null });
+      };
+
+      require('../app/author.page')(plz, mockDatabase);
+
+      var request = {
+        userName: 'chahm',
+        title: 'nonexistent post',
+      };
+
+      plz.remove.page(request, function (error, result) {
+        error.should.be.true;
+        result.should.be.an.Object;
         done();
       });
     });
