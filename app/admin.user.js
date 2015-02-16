@@ -2,16 +2,19 @@
 * @memberof admin
 * @namespace admin.user
 */
-var AdminUser = function (plz) {
+var AdminUser = function (plz, database, crypto) {
   'use strict';
   
-  var database = require('./utility.database')(plz);
+  database = database || require('./utility.database')(plz);
+  crypto = crypto || require('crypto');
 
   plz = plz || {};
   plz.create = plz.create || {};
   plz.get = plz.get || {};
   plz.edit = plz.edit || {};
   plz.remove = plz.remove || {};
+  
+  var member = {};
 
   /**
   * Creates a user only if the required fields specified in the configuration 
@@ -23,11 +26,15 @@ var AdminUser = function (plz) {
   * @param {user} callback
   */
   plz.create.user = function (options, callback) {
-    prepareUserCreation(options, function (error, result) {
+    member.prepareUserCreation(options, function (error, result) {
       if(error) {
-        callback(true, result);
+        callback(true, { ok: false, message: result, data: null });
         return;
       }
+
+      options.createdAt = Date.now();
+      options.status = 'unactivated';
+      options.tempAuth = crypto.createHash('sha256').update(JSON.stringify(options)).digest('hex');
       
       var query = {
         collectionName: plz.config.admin.collection,
@@ -36,7 +43,12 @@ var AdminUser = function (plz) {
       };
 
       database.createDocument(query, function(error, result){
-        callback(error, result);
+        if(error) {
+          callback(true, { ok: false, message: result, data: null });
+          return;
+        }
+
+        callback(false, { ok: true, message: 'success', data: result.ops });
       });
     });
   };
@@ -56,7 +68,12 @@ var AdminUser = function (plz) {
     };
 
     database.getDocument(query, function (error, result) {
-      callback(error, result);
+      if(error) {
+        callback(true, { ok: false, message: result, data: null });
+        return;
+      }
+
+      callback(false, { ok: true, message: 'success', data: result });
     });
   };
 
@@ -75,7 +92,12 @@ var AdminUser = function (plz) {
     };
 
     database.removeDocument(query, function(error, result) {
-      callback(error, result);
+      if(error) {
+        callback(true, { ok: false, message: result, data: null });
+        return;
+      }
+
+      callback(false, { ok: true, message: 'success', data: result });
     });
   };
 
@@ -96,11 +118,16 @@ var AdminUser = function (plz) {
     };
 
     database.editDocument(query, function(error, result){
-      callback(error, result);
+      if(error) {
+        callback(true, { ok: false, message: result, data: null });
+        return;
+      }
+
+      callback(false, { ok: true, message: 'success', data: result });
     });
   };
 
-  function prepareUserCreation(options, callback) {
+  member.prepareUserCreation = function(options, callback) {
     var roles = plz.config.admin.roles,
         required = plz.config.admin.required;
 
@@ -124,11 +151,9 @@ var AdminUser = function (plz) {
     }
 
     callback(false);
-  }
-
-  return {
-    prepareUserCreation: prepareUserCreation
   };
+
+  return member;
 };
 
 module.exports = AdminUser;

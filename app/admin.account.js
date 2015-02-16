@@ -188,7 +188,7 @@ var AdminAccount = function (plz, database, mailer) {
       }
 
       if(result.length === 0) {
-        callback(true, false);
+        callback(false, false);
         return;
       }
 
@@ -197,36 +197,32 @@ var AdminAccount = function (plz, database, mailer) {
   };
 
   member.completeAction = function (options, callback) {
-    if(!plz.validate.complexity(options.passwordNew)) {
-      callback(true, 'Password does not meet the complexity requirements');
-      return;
-    }
-
-    if(!plz.validate.match(options.passwordNew, options.passwordConfirm)) {
-      callback(true, 'Passwords do not match');
-      return;
-    }
-
     var collectionName = plz.config.admin.collection;
 
     var query = {
       collectionName: collectionName,
-      criteria: { email: options.email },
+      criteria: { email: options.email, tempAuth: options.hash },
       update: {
         $set: {
           status: 'active',
-          modifiedAt: new Date().getTime() / 1000
+          password: options.password,
+          modifiedAt: Date.now()
         }
       }
     };
 
     database.editDocument(query, function (error, result) {
       if(error) {
-        callback(true, result);
+        callback(true, false);
         return;
       }
 
-      callback(false, result);
+      if(!result.value.ok) {
+        callback(false, false);
+        return;
+      }
+
+      callback(false, true);
     });
   };
 
