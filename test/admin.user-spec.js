@@ -96,6 +96,22 @@ describe('admin.user | Public API', function () {
       });
     });
 
+    it('should callback error JSON if database fails', function (done) {
+      var database = {
+        getDocument: function (query, callback) { 
+          callback(true, { ok: false, message: 'Mocked Failure', data: null });
+        }
+      };
+
+      require('../app/admin.user')(plz, database); 
+
+      plz.get.user({name: 'zanzabar'}, function (error, result) {
+        error.should.be.true;
+        result.should.be.an.Object;
+        done();
+      });
+    });
+
     after(function (done) {
       db.getDatabase(function (error, database) {
         database.collection('user').drop(function () {
