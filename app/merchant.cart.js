@@ -41,7 +41,7 @@ var MerchantCart = function (plz, database) {
       callback(true, 'options.productName not a valid string');
       return;
     }
-    var currentTimestamp = new Date().getTime() / 1000;
+    var currentTimestamp = new Date().getTime();
 
     //first check to see if the product exists
     var productQuery = {

@@ -48,7 +48,7 @@ var AuthorPost = function (plz, database) {
         return;
       }
 
-      var currentTimestamp = new Date().getTime() / 1000;
+      var currentTimestamp = new Date().getTime();
 
       options.revisionNumber = 0;
       options.createdAt = currentTimestamp;

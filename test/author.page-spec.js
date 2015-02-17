@@ -51,6 +51,7 @@ describe('author.page | Public API', function () {
     });
 
     it('should insert a page with required fields present', function(done) {
+      var beforeCreateDate = new Date();
       plz.create.page(Tc.validPage, function (error) {
         error.should.be.false;
 
@@ -70,6 +71,10 @@ describe('author.page | Public API', function () {
                 }
               }
             }
+            var afterCreateDate = new Date();
+            var createDate = new Date(result.createdAt);
+            (createDate > beforeCreateDate).should.be.true;
+            (createDate < afterCreateDate).should.be.true;
             done();
           });
         });

@@ -215,7 +215,7 @@ var AdminAccount = function (plz, database, mailer) {
       update: {
         $set: {
           status: 'active',
-          modifiedAt: new Date().getTime() / 1000
+          modifiedAt: new Date().getTime()
         }
       }
     };
