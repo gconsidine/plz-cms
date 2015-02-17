@@ -45,7 +45,7 @@ var MerchantProduct = function (plz, database) {
   plz.create.product = function (options, callback) {
     member.checkRequiredOptions(options, function (error, result) {
       if(error) {
-        callback(true, result);
+        callback(true, { ok: false, message: result, data: null });
         return;
       }
 
@@ -63,7 +63,12 @@ var MerchantProduct = function (plz, database) {
       };
 
       database.createDocument(query, function(error, result){
-        callback(error, result);
+        if(error) {
+          callback(error, { ok: false, message: result, data: null });
+          return;
+        }
+
+        callback(false, { ok: true, message: 'success', data: result.ops });
 	  });
     });
   };
@@ -92,7 +97,7 @@ var MerchantProduct = function (plz, database) {
     } else if(options.hasOwnProperty('name')) {
       query.criteria = {name: options.name};
     } else {
-      callback(true, 'Valid criteria field not present in options');
+      callback(true, { ok: false, message: 'Valid criteria not present in options', data: null });
       return;
     }
 
@@ -102,10 +107,13 @@ var MerchantProduct = function (plz, database) {
 
     database.getDocument(query, function (error, result) {
       if(error || result.length === 0) {
-        callback(true, 'Existing product matching criteria not found');
+        var errmsg = 'Existing product matching criteria not found';
+        callback(true, { ok: false, message: errmsg, data: null});
         return;
       }
-      callback(error, result);
+
+      callback(false, { ok: true, message: 'success', data: result });
+
     });
   };
 
@@ -123,7 +131,8 @@ var MerchantProduct = function (plz, database) {
   plz.edit.product = function (options, callback) {
     if(typeof options.userName !== 'string' ||
        typeof options.modifications !== 'object') {
-      callback(true, 'Required field not present in options');
+      callback(true, { ok: false, message: 'Required field not present in options', data: null });
+
       return;
     }
 
@@ -140,13 +149,14 @@ var MerchantProduct = function (plz, database) {
     } else if(options.hasOwnProperty('name')) {
       query.criteria = { name: options.name };
     } else {
-      callback(true, 'Valid criteria field not present in options');
+      callback(true, { ok: false, message: 'Valid criteria not present in options', data: null });
       return;
     }
 
     database.getDocument(query, function (error, getResult) {
       if(error || getResult.length === 0) {
-        callback(true, 'Existing product matching criteria not found');
+        var errmsg = 'Existing product matching criteria not found';
+        callback(true, { ok: false, message: errmsg, data: null});
         return;
       }
 
@@ -167,7 +177,7 @@ var MerchantProduct = function (plz, database) {
 
       database.editDocument(editQuery, function(error) {
         if(error) {
-          callback(error, getResult[0]);
+          callback(true, { ok: false, message: 'Database error in edit attempt', data: null});
           return;
         }
 
@@ -181,7 +191,12 @@ var MerchantProduct = function (plz, database) {
         };
 
         database.createDocument(createQuery, function(error, createResult){
-          callback(error, createResult);
+          if(error) {
+            callback(error, { ok: false, message: createResult, data: null });
+            return;
+          }
+
+          callback(false, { ok: true, message: 'success', data: createResult.ops });
         });
       });
     });
@@ -212,12 +227,17 @@ var MerchantProduct = function (plz, database) {
     } else if(options.hasOwnProperty('name')) {
       query.criteria = { name: options.name };
     } else {
-      callback(true, 'Valid criteria field not present in options');
+      callback(true, { ok: false, message: 'Valid criteria not present in options', data: null });
       return;
     }
 
     database.removeDocument(query, function(error, result) {
-      callback(error, result);
+      if(error) {
+        callback(error, { ok: false, message: result, data: null });
+        return;
+      }
+
+      callback(false, { ok: true, message: 'success', data: result.ops || [] });
     });
   };
 

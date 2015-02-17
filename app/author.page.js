@@ -1,6 +1,5 @@
 /**
- * Contains CRUD actions that can be performed on a page from the author 
- * component.
+ * Contains CRUD actions that can be performed on a page from the author component.
  *
  * @memberof author
  * @namespace author.page
@@ -45,7 +44,7 @@ var AuthorPage = function (plz, database) {
   plz.create.page = function (options, callback) {
     member.checkRequiredOptions(options, function (error, result) {
       if(error) {
-        callback(true, result);
+        callback(true, { ok: false, message: result, data: null });
         return;
       }
 
@@ -63,7 +62,12 @@ var AuthorPage = function (plz, database) {
       };
 
       database.createDocument(query, function(error, result){
-        callback(error, result);
+        if(error) {
+          callback(error, { ok: false, message: result, data: null });
+          return;
+        }
+
+        callback(false, { ok: true, message: 'success', data: result.ops });
 	    });
     });
   };
@@ -80,26 +84,31 @@ var AuthorPage = function (plz, database) {
   */
   plz.publish.page = function (options, callback) {
     if(typeof options.userName !== 'string'){ 
-      callback(true, 'Required field not present in options');
+      callback(true, { ok: false, message: 'Required field not present in options', data: null });
       return;
     }
 
     var query = {
       collectionName: member.collectionName,
-      update:  {$set:{visibility: "public", status: "published"}}
+      update: { $set: { visibility: "public", status: "published" } }
     };
 
-    if( options.hasOwnProperty('_id')) {
+    if(options.hasOwnProperty('_id')) {
       query.criteria = { _id: options._id };
     } else if(options.hasOwnProperty('title')) {
       query.criteria = { title: options.title };
     } else {
-      callback(true, 'Valid criteria field not present in options');
+      callback(true, { ok: false, message: 'Valid criteria not present in options', data: null });
       return;
     }
 
     database.editDocument(query, function(error, result) {
-      callback(error, result);
+      if(error) {
+        callback(true, { ok: false, message: result, data: null });
+        return;
+      }
+
+      callback(false, { ok: true, message: 'success', data: result });
     });
   };
 
@@ -127,7 +136,7 @@ var AuthorPage = function (plz, database) {
     } else if(options.hasOwnProperty('title')) {
       query.criteria = {title: options.title};
     } else {
-      callback(true, 'Valid criteria field not present in options');
+      callback(true, { ok: false, message: 'Valid criteria not present in options', data: null });
       return;
     }
 
@@ -136,7 +145,12 @@ var AuthorPage = function (plz, database) {
     }
 
     database.getDocument(query, function (error, result) {
-      callback(error, result);
+      if(error) {
+        callback(true, { ok: false, message: result, data: null });
+        return;
+      }
+
+      callback(false, { ok: true, message: 'success', data: result });
     });
   };
 
@@ -153,7 +167,7 @@ var AuthorPage = function (plz, database) {
   */
   plz.edit.page = function (options, callback) {
     if(typeof options.userName !== 'string' || typeof options.content !== 'string') {
-      callback(true, 'Required field not present in options');
+      callback(true, { ok: false, message: 'Required field not present in options', data: null });
       return;
     }
 
@@ -168,18 +182,18 @@ var AuthorPage = function (plz, database) {
     } else if(options.title) {
       query.criteria = { title: options.title };
     } else {
-      callback(true, 'Valid criteria field not present in options');
+      callback(true, { ok: false, message: 'Valid criteria not present in options', data: null });
       return;
     }
 
-    database.getDocument(query, function (error, getResult) {
-      if(error || getResult.length === 0) {
-        callback(true, 'Existing page matching criteria not found');
+    database.getDocument(query, function (error, result) {
+      if(error || result.length === 0) {
+        callback(true, { ok: false, message: 'Existing page criteria not found', data: null });
         return;
       }
 
-      var pageId = getResult[0]._id;
-      var oldPage = getResult[0];
+      var pageId = result[0]._id;
+      var oldPage = result[0];
 
       oldPage.status = "archived";
 
@@ -191,7 +205,7 @@ var AuthorPage = function (plz, database) {
         update: {
           $set:{
             modifiedAt: currentTimestamp,
-            revisionNumber: oldPage.revisionNumber+1,
+            revisionNumber: oldPage.revisionNumber + 1,
             content: options.content
           }
         }
@@ -199,7 +213,7 @@ var AuthorPage = function (plz, database) {
 
       database.editDocument(editQuery, function(error) {
         if(error) {
-          callback(error, getResult);
+          callback(true, { ok: false, message: 'Database error in page edit attempt', data: null });
           return;
         }
 
@@ -212,8 +226,13 @@ var AuthorPage = function (plz, database) {
           }
         };
 
-        database.createDocument(createQuery, function(error, createResult) {
-          callback(error, createResult);
+        database.createDocument(createQuery, function(error, result) {
+          if(error) {
+            callback(error, { ok: false, message: result, data: null });
+            return;
+          }
+
+          callback(false, { ok: true, message: 'success', data: result.ops });
         });
       });
     });
@@ -230,26 +249,29 @@ var AuthorPage = function (plz, database) {
   * @param {page} callback
   */
   plz.remove.page = function (options, callback) {
-    if(typeof options.userName !== 'string'){
-      callback(true, 'Required field not present in options');
+    if(typeof options.userName !== 'string'){ 
+      callback(true, { ok: false, message: 'Required field not present in options', data: null });
       return;
     }
 
-    var query = {
-      collectionName: member.collectionName
-    };
+    var query = { collectionName: member.collectionName };
 
-    if(options.hasOwnProperty('_id')) {
+    if(options._id) {
       query.criteria = { _id: options._id };
-    } else if(options.hasOwnProperty('title')) {
+    } else if(options.title) {
       query.criteria = { title: options.title };
     } else {
-      callback(true, 'Valid criteria field not present in options');
+      callback(true, { ok: false, message: 'Valid criteria not present in options', data: null });
       return;
     }
 
     database.removeDocument(query, function(error, result) {
-      callback(error, result);
+      if(error) {
+        callback(true, { ok: false, message: result, data: null });
+        return;
+      }
+
+      callback(false, { ok: true, message: 'success', data: result });
     });
   };
 

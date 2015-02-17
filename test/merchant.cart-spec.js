@@ -168,7 +168,7 @@ describe('merchant.cart | Public API', function () {
       };
       plz.add.cartItem(addRequest, function (error, result) {
         error.should.be.true;
-        result.should.be.a.String;
+        result.message.should.be.a.String;
         require('../app/merchant.cart')(plz);
         done();
       });
@@ -284,7 +284,7 @@ describe('merchant.cart | Public API', function () {
       };
       plz.remove.cartItem(removeRequest, function (error, result) {
         error.should.be.true;
-        result.should.be.a.String;
+        result.message.should.be.a.String;
         require('../app/merchant.cart')(plz);
         done();
       });
@@ -338,14 +338,15 @@ describe('merchant.cart | Public API', function () {
       };
       plz.get.cart(request, function (error, result) {
         error.should.be.false;
-        result.length.should.equal(2);
+        var cart = result.data;
+        cart.length.should.equal(2);
         var productsDictObject = {};
-        for(var index in result) {
-          if(result.hasOwnProperty(index)) {
-            result[index].customerId.should.equal(request.customerId);
-            if (result[index].productName === Tc.validProduct.name ||
-                result[index].productName === Tc.anotherValidProduct.name ) {
-              productsDictObject[result[index].productName] = 1;
+        for(var index in cart) {
+          if(cart.hasOwnProperty(index)) {
+            cart[index].customerId.should.equal(request.customerId);
+            if (cart[index].productName === Tc.validProduct.name ||
+                cart[index].productName === Tc.anotherValidProduct.name ) {
+              productsDictObject[cart[index].productName] = 1;
             }
           }
 		}
@@ -362,7 +363,7 @@ describe('merchant.cart | Public API', function () {
       };
       plz.get.cart(request, function (error, result) {
         error.should.be.true;
-        result.should.be.a.String;
+        result.message.should.be.a.String;
         require('../app/merchant.cart')(plz);
         done();
       });
@@ -436,7 +437,7 @@ describe('merchant.cart | Public API', function () {
           customerId: 'different customer'
         };
         plz.remove.cart(request, function (error, result) {
-          error.should.be.false;
+          error.should.be.true;
           (result === null).should.be.false;
           cartCollection.count(function(error, count) {
             count.should.equal(1);
@@ -454,7 +455,7 @@ describe('merchant.cart | Public API', function () {
       };
       plz.remove.cart(request, function (error, result) {
         error.should.be.true;
-        result.should.be.a.String;
+        result.message.should.be.a.String;
         require('../app/merchant.cart')(plz);
         done();
       });
@@ -510,7 +511,7 @@ describe('merchant.cart | Public API', function () {
       expected += parseFloat(Tc.anotherValidProduct.price.replace(/^\$/,''))*2;
       plz.get.cartSubtotal(request, function (error, result) {
         error.should.be.false;
-        result.should.equal(expected);
+        result.data.should.equal(expected);
         done();
       });
     });
@@ -523,7 +524,7 @@ describe('merchant.cart | Public API', function () {
         error.should.be.false;
         plz.get.cartSubtotal(request, function (error, result) {
           error.should.be.false;
-          result.should.equal(0);
+          result.data.should.equal(0);
           done();
         });
       });
@@ -537,7 +538,7 @@ describe('merchant.cart | Public API', function () {
       };
       plz.get.cartSubtotal(request, function (error, result) {
         error.should.be.true;
-        result.should.be.a.String;
+        result.message.should.be.a.String;
         require('../app/merchant.cart')(plz);
         done();
       });

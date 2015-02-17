@@ -34,11 +34,11 @@ var MerchantCart = function (plz, database) {
   plz.add.cartItem = function (options, callback) {
 
     if(!plz.validate.typeAs('string', options.customerId)) {
-      callback(true, 'options.customerId is not a valid string');
+      callback(true, { ok: false, message: 'options.customerId is not a valid string', data: null});
       return;
     }
     if(!plz.validate.typeAs('string', options.productName)) {
-      callback(true, 'options.productName not a valid string');
+      callback(true, { ok: false, message: 'options.productName not a valid string', data: null});
       return;
     }
     var currentTimestamp = new Date();
@@ -53,7 +53,7 @@ var MerchantCart = function (plz, database) {
       if(error || result.length === 0) {
         var errorString = "product matching " + options.productName;
         errorString += " does not exist in database";
-        callback(true, errorString );
+        callback(true, { ok: false, message: errorString, data: null} );
         return;
       }
       var query = {
@@ -67,7 +67,7 @@ var MerchantCart = function (plz, database) {
       // now check to see if an existing cart item exists
       database.getDocument(query, function(error, getResult) {
         if(error) {
-          callback(true, getResult);
+          callback(true, { ok: false, message: getResult, data: null});
         }
         else if(getResult.length === 0) {
           options.createdAt = currentTimestamp;
@@ -87,7 +87,12 @@ var MerchantCart = function (plz, database) {
           //    Tentavively set a maximum number of entries, and start
           //    removing the oldest entries when the max is reached
           database.createDocument(createQuery, function(error, createResult){
-            callback(error, createResult);
+            if(error) {
+              callback(error, { ok: false, message: createResult, data: null });
+              return;
+            }
+
+            callback(false, { ok: true, message: 'success', data: createResult.ops });
           });
         }
         else {
@@ -103,7 +108,12 @@ var MerchantCart = function (plz, database) {
             }
           };
           database.editDocument(editQuery, function(error, result) {
-            callback(error, result);
+            if(error) {
+              callback(error, { ok: false, message: result, data: null });
+              return;
+            }
+
+            callback(false, { ok: true, message: 'success', data: result.ops });
           });
         }
       });
@@ -124,11 +134,11 @@ var MerchantCart = function (plz, database) {
   plz.remove.cartItem = function (options, callback) {
 
     if(!plz.validate.typeAs('string', options.customerId)) {
-      callback(true, 'options.customerId is not a valid string');
+      callback(true, { ok: false, message: 'options.customerId is not a valid string', data: null});
       return;
     }
     if(!plz.validate.typeAs('string', options.productName)) {
-      callback(true, 'options.productName not a valid string');
+      callback(true, { ok: false, message: 'options.productName not a valid string', data: null});
       return;
     }
     var query = {
@@ -141,13 +151,18 @@ var MerchantCart = function (plz, database) {
 
     database.getDocument(query, function(error, getResult) {
       if(error || getResult.length === 0) {
-        callback(true, getResult);
+        callback(true, { ok: false, message: getResult, data: null});
       }
       else {
         if(options.quantity === undefined ||
             options.quantity >= getResult[0].quantity) {
           database.removeDocument(query, function(error, result) {
-             callback(error, result);
+            if(error) {
+              callback(error, { ok: false, message: result, data: null });
+              return;
+            }
+
+            callback(false, { ok: true, message: 'success', data: result.ops });
           });
         }
         else {
@@ -163,7 +178,12 @@ var MerchantCart = function (plz, database) {
           };
 
           database.editDocument(editQuery, function(error, result) {
-            callback(error, result);
+            if(error) {
+              callback(error, { ok: false, message: result, data: null });
+              return;
+            }
+
+            callback(false, { ok: true, message: 'success', data: result.ops });
           });
         }
       }
@@ -181,7 +201,7 @@ var MerchantCart = function (plz, database) {
   plz.get.cart = function (options, callback) {
 
     if(!plz.validate.typeAs('string', options.customerId)) {
-      callback(true, 'options.customerId is not a valid string');
+      callback(true, { ok: false, message: 'options.customerId is not a valid string', data: null});
       return;
     }
     var query = {
@@ -193,10 +213,10 @@ var MerchantCart = function (plz, database) {
 
     database.getDocument(query, function(error, getResult) {
       if(error) {
-        callback(true, getResult);
+        callback(true, { ok: false, message: getResult, data: null});
       }
       else {
-        callback(false, getResult);
+        callback(false, { ok: true, message: null, data: getResult});
       }
     });
   };
@@ -212,7 +232,7 @@ var MerchantCart = function (plz, database) {
   plz.remove.cart = function (options, callback) {
 
     if(!plz.validate.typeAs('string', options.customerId)) {
-      callback(true, 'options.customerId is not a valid string');
+      callback(true, { ok: false, message: 'options.customerId is not a valid string', data: null});
       return;
     }
     var query = {
@@ -224,10 +244,10 @@ var MerchantCart = function (plz, database) {
     };
     database.removeDocument(query, function(error, getResult) {
       if(error) {
-        callback(true, getResult);
+        callback(true, { ok: false, message: getResult, data: null});
       }
       else {
-        callback(false, getResult);
+        callback(false, { ok: true, message: null, data: getResult});
       }
     });
   };
@@ -243,7 +263,7 @@ var MerchantCart = function (plz, database) {
   plz.get.cartSubtotal = function (options, callback) {
 
     if(!plz.validate.typeAs('string', options.customerId)) {
-      callback(true, 'options.customerId is not a valid string');
+      callback(true, { ok: false, message: 'options.customerId is not a valid string', data: null});
       return;
     }
     var query = {
@@ -256,11 +276,11 @@ var MerchantCart = function (plz, database) {
     var numProductsAdded = 0;
     database.getDocument(query, function(error, getResult) {
       if(error) {
-        callback(true, getResult);
+        callback(true, { ok: false, message:getResult, data: null });
         return;
       }
       else if(getResult.length === 0) {
-        callback(false, 0);
+        callback(false, { ok: true, message: null, data:0 });
       }
       else {
         var addProductPrice = function(product, callback){
@@ -275,7 +295,7 @@ var MerchantCart = function (plz, database) {
             }
             numProductsAdded++;
             if(numProductsAdded === getResult.length){
-              callback(false, subtotal);
+              callback(false, { ok: true, message: null, data: subtotal });
             }
           });
         };

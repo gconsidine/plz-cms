@@ -164,7 +164,7 @@ describe('merchant.charge | Public API', function () {
       plz.create.charge(request, function (error, result) {
         error.should.be.false;
         (result === null).should.be.false;
-        chargeId = result.ops[0].id;
+        chargeId = result.data.id;
         done();
       });
     });

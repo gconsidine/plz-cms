@@ -146,7 +146,7 @@ describe('merchant.product | Public API', function () {
 
       plz.get.product(request, function (error, result) {
         error.should.be.false;
-        result.should.not.be.empty;
+        result.data.should.not.be.empty;
         done();
       });
     });
@@ -155,11 +155,11 @@ describe('merchant.product | Public API', function () {
       plz.create.product(Tc.anotherValidProduct, function (error, result) {
         error.should.be.false;
         var request = {
-          _id: result.insertedId
+          _id: result.data[0]._id
         };
         plz.get.product(request, function (error, result) {
           error.should.be.false;
-          result.should.not.be.empty;
+          result.data.should.not.be.empty;
           done();
         });
       });
@@ -175,8 +175,8 @@ describe('merchant.product | Public API', function () {
         };
         plz.get.product(request, function (error, result) {
           error.should.be.false;
-          result.should.not.be.empty;
-          result.length.should.equal(3);
+          result.data.should.not.be.empty;
+          result.data.length.should.equal(3);
           done();
         });
       });
@@ -189,8 +189,8 @@ describe('merchant.product | Public API', function () {
       };
       plz.get.product(request, function (error, result) {
         error.should.be.false;
-        result.should.not.be.empty;
-        result.length.should.equal(request.limit);
+        result.data.should.not.be.empty;
+        result.data.length.should.equal(request.limit);
         done();
       });
     });
@@ -209,8 +209,8 @@ describe('merchant.product | Public API', function () {
         };
         plz.get.product(getRequest, function (error, result) {
           error.should.be.false;
-          result.should.not.be.empty;
-          result.length.should.equal(3);
+          result.data.should.not.be.empty;
+          result.data.length.should.equal(3);
           done();
         });
       });
@@ -224,7 +224,7 @@ describe('merchant.product | Public API', function () {
 
       plz.get.product(request, function (error, result) {
         error.should.be.true;
-        result.should.not.be.empty;
+        result.message.should.be.a.String;
         done();
       });
     });
@@ -278,7 +278,7 @@ describe('merchant.product | Public API', function () {
 
       plz.edit.product(editRequest, function (error, result) {
         error.should.be.false;
-        result.should.not.be.empty;
+        result.data.should.not.be.empty;
 
         var findRequest = {
           userName: 'chahm',
@@ -296,12 +296,12 @@ describe('merchant.product | Public API', function () {
         error.should.be.false;
         var request = {
           userName: 'chahm',
-          _id: result.insertedId,
+          _id: result.data[0]._id,
           modifications: { price: '$10.99' }
         };
         plz.edit.product(request, function (error, result) {
           error.should.be.false;
-          result.should.not.be.empty;
+          result.data.should.not.be.empty;
 
           var findRequest = {_id : request._id};
           productCollection.findOne(findRequest, function (error, result) {
@@ -320,7 +320,7 @@ describe('merchant.product | Public API', function () {
 
       plz.get.product(request, function (error, result) {
         error.should.be.true;
-        result.should.not.be.empty;
+        result.message.should.be.a.String;
         done();
       });
     });
@@ -336,7 +336,7 @@ describe('merchant.product | Public API', function () {
 
       plz.edit.product(request, function (error, result) {
         error.should.be.true;
-        result.should.be.a.String;
+        result.message.should.be.a.String;
         require('../app/merchant.product')(plz);
         done();
       });
@@ -356,7 +356,7 @@ describe('merchant.product | Public API', function () {
 
       plz.edit.product(request, function (error, result) {
         error.should.be.true;
-        result.should.be.a.String;
+        result.message.should.be.a.String;
         require('../app/merchant.product')(plz);
         done();
       });
@@ -407,9 +407,8 @@ describe('merchant.product | Public API', function () {
         name: 'Acme 16-oz Claw Hammer'
       };
 
-      plz.remove.product(request, function (error, result) {
+      plz.remove.product(request, function (error) {
         error.should.be.false;
-        result.should.not.be.empty;
 
         productCollection.count(function(error, count) {
           count.should.equal(0);
@@ -423,7 +422,7 @@ describe('merchant.product | Public API', function () {
         error.should.be.false;
         var request = {
           userName: 'chahm',
-          _id: result.insertedId
+          _id: result.data[0]._id
         };
         plz.remove.product(request, function (error, result) {
           error.should.be.false;

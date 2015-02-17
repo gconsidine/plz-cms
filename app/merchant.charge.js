@@ -46,7 +46,7 @@ var MerchantCharge = function (plz, database) {
     delete options.customerId;
     member.paymentApi.charges.create(options, function(error, result) {
       if (error) {
-        callback(true, error);
+        callback(true, { ok: false, message: error, data: null});
         return;
       }
       result.customerId = customerId;
@@ -59,7 +59,11 @@ var MerchantCharge = function (plz, database) {
       };
 
       database.createDocument(query, function(error, result){
-        callback(error, result);
+        if(error) {
+          callback(error, { ok: false, message: result, data: null });
+          return;
+        }
+        callback(false, { ok: true, message: 'success', data: result.ops[0] });
       });
     });
   };
@@ -80,12 +84,16 @@ var MerchantCharge = function (plz, database) {
     if(options.hasOwnProperty('customerId')) {
       query.criteria = { customerId: options.customerId };
     } else {
-      callback(true, 'Valid criteria field not present in options');
+      callback(true, { ok: false, message: 'Valid criteria not present in options', data: null});
       return;
     }
 
     database.getDocument(query, function (error, result) {
-      callback(error, result);
+      if(error) {
+        callback(error, { ok: false, message: result, data: null });
+        return;
+      }
+      callback(false, { ok: true, message: 'success', data: result.ops });
     });
   };
 
@@ -105,12 +113,17 @@ var MerchantCharge = function (plz, database) {
     if(options.hasOwnProperty('id')) {
       query.criteria = { id: options.id };
     } else {
-      callback(true, 'Valid criteria field not present in options');
+      callback(true, { ok: false, message: 'Valid criteria not present in options', data: null});
       return;
     }
 
     database.removeDocument(query, function(error, result) {
-      callback(error, result);
+      if(error) {
+        callback(error, { ok: false, message: result, data: null });
+        return;
+      }
+
+      callback(false, { ok: true, message: 'success', data: result.ops });
     });
   };
 

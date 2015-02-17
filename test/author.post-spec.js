@@ -121,9 +121,8 @@ describe('author.post | Public API', function () {
       plz.publish.post(invalidRequest, function (error) {
         error.should.be.true;
 
-        var requestWithoutCriteria = {
-          userName: 'chahm',
-        };
+        var requestWithoutCriteria = { userName: 'chahm', }; 
+
         plz.publish.post(requestWithoutCriteria, function (error) {
           error.should.be.true;
           done();
@@ -131,7 +130,7 @@ describe('author.post | Public API', function () {
       });
     });
 
-    it('should publish a post by namewith public visibility', function(done) {
+    it('should publish a post by name with public visibility', function(done) {
       var request = {
         userName: 'chahm',
         title: 'Simple post',
@@ -151,10 +150,12 @@ describe('author.post | Public API', function () {
     it('should publish a post by id with public visibility', function(done) {
       plz.create.post(Tc.anotherValidPost, function (error, result) {
         error.should.be.false;
+
         var request = {
           userName: 'chahm',
-          _id: result.insertedId
+          _id: result.data[0]._id
         };
+
         plz.publish.post(request, function (error, result) {
           error.should.be.false;
           result.should.not.be.empty;
@@ -174,8 +175,8 @@ describe('author.post | Public API', function () {
       };
 
       plz.publish.post(request, function (error, result) {
-        error.should.be.false;
-        (result.value === null).should.be.true;
+        error.should.be.true;
+        result.ok.should.be.false;
         done();
       });
     });
@@ -229,12 +230,12 @@ describe('author.post | Public API', function () {
     it('should fetch a post using _id', function(done) {
       plz.create.post(Tc.anotherValidPost, function (error, result) {
         error.should.be.false;
-        var request = {
-          _id: result.insertedId
-        };
+
+        var request = { _id: result.data[0]._id }; 
+
         plz.get.post(request, function (error, result) {
           error.should.be.false;
-          result.should.not.be.empty;
+          result.data.should.not.be.empty;
           done();
         });
       });
@@ -243,14 +244,15 @@ describe('author.post | Public API', function () {
     it('should fetch multiple posts using label', function(done) {
       Tc.anotherValidPost.title = 'post 3';
       Tc.anotherValidPost._id = undefined;
+
       plz.create.post(Tc.anotherValidPost, function (error) {
         error.should.be.false;
         var request = { label: 'news' };
 
         plz.get.post(request, function (error, result) {
           error.should.be.false;
-          result.should.not.be.empty;
-          result.length.should.equal(3);
+          result.data.should.not.be.empty;
+          result.data.length.should.equal(3);
           done();
         });
       });
@@ -264,7 +266,7 @@ describe('author.post | Public API', function () {
 
       plz.get.post(request, function (error, result) {
         error.should.be.false;
-        result.length.should.equal(2);
+        result.data.length.should.equal(2);
         done();
       });
     });
@@ -282,8 +284,8 @@ describe('author.post | Public API', function () {
 
         plz.get.post(getRequest, function (error, result) {
           error.should.be.false;
-          result.should.not.be.empty;
-          result.length.should.equal(3);
+          result.data.should.not.be.empty;
+          result.data.length.should.equal(3);
           done();
         });
       });
@@ -297,7 +299,28 @@ describe('author.post | Public API', function () {
 
       plz.get.post(request, function (error, result) {
         error.should.be.false;
-        result.should.eql([]);
+        result.data.should.eql([]);
+        done();
+      });
+    });
+
+    it('should callback error and return if database fails', function(done) {
+      var mockDatabase = {
+        getDocument: function (query, callback) {
+          callback(true, { ok: false, message: 'Mock failure', data: null });
+        }
+      };
+
+      var request = {
+        userName: 'chahm',
+        title: 'nonexistent post',
+      };
+
+      require('../app/author.post')(plz, mockDatabase);
+
+      plz.get.post(request, function (error, result) {
+        error.should.be.true;
+        result.should.be.an.Object;
         done();
       });
     });
@@ -351,14 +374,14 @@ describe('author.post | Public API', function () {
 
       plz.edit.post(options, function (error, result) {
         error.should.be.true;
-        result.should.be.a.String;
+        result.ok.should.be.false;
         done();
       });
     });
 
     it('should callback error if getDocument fails', function(done) {
       mockDatabase.getDocument = function (query, callback) {
-        callback(true, 'Mock failure');
+        callback(true, { ok: false, message: 'Mock failure', data: null });
       };
 
       require('../app/author.post')(plz, mockDatabase);
@@ -371,7 +394,7 @@ describe('author.post | Public API', function () {
 
       plz.edit.post(options, function (error, result) {
         error.should.be.true;
-        result.should.be.a.String;
+        result.ok.should.be.false;
         done();
       });
     });
@@ -382,7 +405,7 @@ describe('author.post | Public API', function () {
       };
 
       mockDatabase.editDocument = function (query, callback) {
-        callback(true, 'Mock failure');
+        callback(true, { ok: false, message: 'Mock failure', data: null });
       };
 
       require('../app/author.post')(plz, mockDatabase);
@@ -395,8 +418,7 @@ describe('author.post | Public API', function () {
 
       plz.edit.post(options, function (error, result) {
         error.should.be.true;
-        result[0].status.should.equal('archived');
-        result[0].revisionNumber.should.equal(1);
+        result.ok.should.be.false;
         done();
       });
     });
@@ -422,14 +444,16 @@ describe('author.post | Public API', function () {
     it('should modify a post by id with new content', function(done) {
       plz.create.post(Tc.anotherValidPost, function (error, result) {
         error.should.be.false;
+
         var request = {
           userName: 'chahm',
-          _id: result.insertedId,
+          _id: result.data[0]._id,
           content: 'more new content'
         };
+
         plz.edit.post(request, function (error, result) {
           error.should.be.false;
-          result.should.not.be.empty;
+          result.data.should.not.be.empty;
 
           var findRequest = {_id : request._id};
           postCollection.findOne(findRequest, function (error, result) {
@@ -448,7 +472,37 @@ describe('author.post | Public API', function () {
 
       plz.get.post(request, function (error, result) {
         error.should.be.false;
-        result.should.eql([]);
+        result.data.should.eql([]);
+        done();
+      });
+    });
+
+    it('should callback an error and return if database fails', function(done) {
+      var mockDatabase = {};
+
+      mockDatabase.getDocument = function (query, callback) {
+        callback(false, [{_id: '0001', status: 'something', revisionNumber: 1}]);
+      };
+
+      mockDatabase.editDocument = function (query, callback) {
+        callback(false, { ok: true, message: 'Mock Success', data: {} });
+      };
+
+      mockDatabase.createDocument = function (query, callback) {
+        callback(true, { ok: false, message: 'Mock failure', data: null });
+      };
+
+      require('../app/author.post')(plz, mockDatabase);
+
+      var request = {
+        userName: 'chahm',
+        title: 'nonexistent post',
+        content: 'blah blah blah...',
+      };
+
+      plz.edit.post(request, function (error, result) {
+        error.should.be.true;
+        result.should.be.an.Object;
         done();
       });
     });
@@ -516,13 +570,15 @@ describe('author.post | Public API', function () {
     it('should remove a post matching the given _id', function(done) {
       plz.create.post(Tc.anotherValidPost, function (error, result) {
         error.should.be.false;
+
         var request = {
           userName: 'chahm',
-          _id: result.insertedId
+          _id: result.data[0]._id
         };
+
         plz.remove.post(request, function (error, result) {
           error.should.be.false;
-          result.should.not.be.empty;
+          result.data.should.not.be.empty;
 
           postCollection.count(function(error, count) {
             count.should.equal(0);
@@ -535,13 +591,16 @@ describe('author.post | Public API', function () {
     it('should remove all versions of a post if multiple exist', function(done){
       plz.create.post(Tc.validPost, function (error) {
         error.should.be.false;
+
         var editRequest = {
           userName: 'chahm',
           title: 'Simple post',
           content: 'new content'
         };
+
         plz.edit.post(editRequest, function (error) {
           error.should.be.false;
+
           var removeRequest = {
             userName: 'chahm',
             title: 'Simple post'
@@ -549,7 +608,7 @@ describe('author.post | Public API', function () {
 
           plz.remove.post(removeRequest, function (error, result) {
             error.should.be.false;
-            result.should.not.be.empty;
+            result.data.should.not.be.empty;
 
             postCollection.count(function(error, count) {
               count.should.equal(0);
@@ -566,9 +625,30 @@ describe('author.post | Public API', function () {
         title: 'nonexistent post',
       };
 
-      plz.remove.post(request, function (error, response) {
-        error.should.be.false;
-        response.result.n.should.equal(0);
+      plz.remove.post(request, function (error, result) {
+        error.should.be.true;
+        (result.data === null).should.be.true;
+        done();
+      });
+    });
+
+    it('should callback an error and return if database fails', function(done) {
+      var mockDatabase = {};
+
+      mockDatabase.removeDocument = function (query, callback) {
+        callback(true, { ok: false, message: 'Mock failure', data: null });
+      };
+
+      require('../app/author.post')(plz, mockDatabase);
+
+      var request = {
+        userName: 'chahm',
+        title: 'nonexistent post',
+      };
+
+      plz.remove.post(request, function (error, result) {
+        error.should.be.true;
+        result.should.be.an.Object;
         done();
       });
     });
@@ -604,7 +684,6 @@ describe('author.post | Private API', function () {
       };
 
       author.checkRequiredOptions(options, function (error, result) {
-        //console.log(error, result);
         error.should.be.true;
         result.should.be.a.String;
         done();
