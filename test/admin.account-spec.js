@@ -177,6 +177,74 @@ describe('admin.account | Public API', function () {
       });
     });
   });
+
+  describe('plz.restrict.user()', function () {
+    var user;
+
+    before(function () {
+      plz = require('../app/core.hub')(Tc.validAdminConfig);
+    });
+
+    it('should return true if a user has access', function (done) {
+      var options = {
+        user: user,
+        roles: ['peasant', 'peon']
+      };
+
+      plz.restrict.user(options, function (error, access) {
+        error.should.be.false;
+        access.should.be.true;
+        done();
+      });
+    });
+
+    it('should return false if a user does not have access', function (done) {
+      var options = {
+        user: user,
+        roles: ['admin']
+      };
+
+      plz.restrict.user(options, function (error, access) {
+        error.should.be.false;
+        access.should.be.false;
+        done();
+      });
+    });
+  });
+
+  describe('plz.allow.user()', function () {
+    var user;
+
+    before(function () {
+      plz = require('../app/core.hub')(Tc.validAdminConfig);
+    });
+
+    it('should return true if a user has access', function (done) {
+      var options = {
+        user: user,
+        roles: ['admin']
+      };
+
+      plz.allow.user(options, function (error, access) {
+        error.should.be.false;
+        access.should.be.true;
+        done();
+      });
+    });
+
+    it('should return false if a user does not have access', function (done) {
+      var options = {
+        user: user,
+        roles: ['super-admin']
+      };
+
+      plz.allow.user(options, function (error, access) {
+        error.should.be.false;
+        access.should.be.false;
+        done();
+      });
+    });
+  });
 });
 
 describe('admin.account | Private API', function () {
@@ -401,7 +469,5 @@ describe('admin.account | Private API', function () {
         done();
       });
     });
-
   });
-
 });

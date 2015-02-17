@@ -2,11 +2,12 @@
 * @memberof admin
 * @namespace admin.account
 */
-var AdminAccount = function (plz, database, mailer) {
+var AdminAccount = function (plz, database, mailer, crypto) {
   'use strict';
   
   database = database || require('./utility.database')(plz);
   mailer = mailer || require('./utility.mailer')(plz);
+  crypto = crypto || require('crypto');
 
   plz = plz || {};
   plz.login = plz.login || {};
@@ -25,22 +26,40 @@ var AdminAccount = function (plz, database, mailer) {
   * @memberof admin.account
   * @param {object} options
   * @param {string} options.email - A user's email address 
-  * @param {string} options.password - The user's password as stored in the DB
+  * @param {object} options.password - Object containing information password details
+  * @param {string} options.password.current - The user's current password
+  * @param {string} options.password.hash - the string name of a Node.js (crypto) supported hashing 
+  * algorithm.  Optionally, you may pass 'none' if you've hashed elsewhere before creation
+  * originally.
   * @param {login} callback
   */
   plz.login.user = function (options, callback) {
+    if(!options.password || !options.password.current || !options.password.hash) {
+      callback(true, { ok: false, message: 'Invalid password options object', data: null });
+    }
+
+    var criteria = { email: options.email };
+
+    if(options.password.hash === 'none') {
+      criteria.password =  options.password.current;
+    } else {
+      criteria.password = crypto.createHash(options.password.hash)
+                                .update(options.password.current)
+                                .digest('hex');
+    }
+
     var query = {
       collectionName: plz.config.admin.collection,
-      criteria: options
+      criteria: criteria
     };
 
-    database.getDocument(query, function (error, user) {
+    database.getDocument(query, function (error, result) {
       if(error) {
-        callback(true, user);
+        callback(true, { ok: false, message: result, data: null });
         return;
       }
 
-      callback(false, user);
+      callback(false, { ok: true, message: 'success', data: result });
     });
   };
 
@@ -54,7 +73,7 @@ var AdminAccount = function (plz, database, mailer) {
   * @param {object} options.email - A user's email address 
   * @param {string} options.subject - The subject of the email
   * @param {string} options.body - The message body of the email
-  * @param {string} options.hash - The hash used for reset validation
+  * @param {string} options.tempAuth - The hash used for reset validation
   * @param {mail} callback
   */
   plz.send.reset = function (options, callback) {
@@ -62,11 +81,11 @@ var AdminAccount = function (plz, database, mailer) {
 
     member.sendLink(options, function (error, result) {
       if(error) {
-        callback(true, result);
+        callback(true, { ok: false, message: result, data: null });
         return;
       }
 
-      callback(false, result);
+      callback(false, { ok: true, message: 'success', data: result });
     });
   };
 
@@ -78,7 +97,7 @@ var AdminAccount = function (plz, database, mailer) {
   * @param {object} options.user - A user object 
   * @param {string} options.subject - The subject of the email
   * @param {string} options.body - The message body of the email
-  * @param {string} options.hash - The hash used to validate account activation
+  * @param {string} options.tempAuth - The hash used to validate account activation
   * @param {mail} callback
   */
   plz.send.activation = function (options, callback) {
@@ -86,11 +105,11 @@ var AdminAccount = function (plz, database, mailer) {
 
     member.sendLink(options, function (error, result) {
       if(error) {
-        callback(true, result);
+        callback(true, { ok: false, message: result, data: null });
         return;
       }
 
-      callback(false, result);
+      callback(false, { ok: true, message: 'success', data: result });
     });
   };
 
@@ -106,11 +125,11 @@ var AdminAccount = function (plz, database, mailer) {
   */
   plz.allow.user = function (options, callback) {
     if(options.roles.indexOf(options.user.role) === -1) {
-      callback(false, false);
+      callback(true, { ok: false, message: 'User\'s role not permitted', data: null });
       return;
     }
 
-    callback(false, true);
+    callback(false, { ok: true, message: 'success', data: null });
   };
 
   /**
@@ -125,11 +144,11 @@ var AdminAccount = function (plz, database, mailer) {
   */
   plz.restrict.user = function (options, callback) {
     if(options.roles.indexOf(options.user.role) !== -1) {
-      callback(false, false);
+      callback(true, { ok: false, message: 'User\'s role not permitted', data: null });
       return;
     }
 
-    callback(false, true);
+    callback(false, { ok: true, message: 'success', data: null });
   };
 
   member.sendLink = function (options, callback) {
@@ -141,8 +160,8 @@ var AdminAccount = function (plz, database, mailer) {
       update: {
         $set: {
           status: options.status,
-          modifiedAt: new Date().getTime(),
-          tempAuth: options.hash
+          modifiedAt: Date.now(),
+          tempAuth: options.tempAuth
         }
       }
     };
@@ -177,52 +196,68 @@ var AdminAccount = function (plz, database, mailer) {
       collectionName: collectionName,
       criteria: { 
         email: options.email,
-        tempAuth: options.hash
+        tempAuth: options.tempAuth
       }
     };
 
     database.getDocument(query, function (error, result) {
       if(error) {
-        callback(true, false);
+        callback(true, { ok: false, message: result, data: null });
         return;
       }
 
-      if(result.length === 0) {
-        callback(false, false);
-        return;
-      }
-
-      callback(false, true);
+      callback(false, { ok: true, message: 'success', data: result });
     });
   };
 
   member.completeAction = function (options, callback) {
+    if(!options.password || !options.password.hash || !options.password.new) {
+      callback(true, { ok: false, message: 'Invalid password options', data: null });
+      return;
+    }
+
     var collectionName = plz.config.admin.collection;
+
+    var set = {
+      status: 'active',
+      modifiedAt: Date.now()
+    };
+
+    if(options.password.hash !== 'none') {
+      if(!plz.validate.complexity(options.password.new)) {
+        callback(true, { 
+          ok: false, 
+          message: 'Password does not meet the complexity requirements',
+          data: null 
+        });
+        return;
+      }
+
+      if(!plz.validate.match(options.password.new, options.password.confirm)) {
+        callback(true, { ok: false, message: 'Passwords do not match', data: null });
+        return;
+      }
+
+      set.password = crypto.createHash(options.password.hash)
+                           .update(options.password.new)
+                           .digest('hex');
+    } else {
+      set.password = options.password.new;
+    }
 
     var query = {
       collectionName: collectionName,
-      criteria: { email: options.email, tempAuth: options.hash },
-      update: {
-        $set: {
-          status: 'active',
-          password: options.password,
-          modifiedAt: Date.now()
-        }
-      }
+      criteria: { email: options.email, tempAuth: options.tempAuth },
+      update: { $set: set }
     };
 
     database.editDocument(query, function (error, result) {
       if(error) {
-        callback(true, false);
+        callback(true, { ok: false, message: result, data: null });
         return;
       }
 
-      if(!result.value.ok) {
-        callback(false, false);
-        return;
-      }
-
-      callback(false, true);
+      callback(false, { ok: true, message: 'success', data: result });
     });
   };
 
@@ -233,7 +268,7 @@ var AdminAccount = function (plz, database, mailer) {
   * @memberof admin.account
   * @param {object} options
   * @param {string} options.email - Email address of the user
-  * @param {string} options.hash - The hash used to validate account activation
+  * @param {string} options.tempAuth - The hash used to validate account activation
   * @param {authorize} callback
   */
   plz.authorize.reset =  member.authorize;
@@ -245,22 +280,28 @@ var AdminAccount = function (plz, database, mailer) {
   * @memberof admin.account
   * @param {object} options
   * @param {string} options.email - Email address of the user
-  * @param {string} options.hash - The hash used to validate account activation
+  * @param {string} options.tempAuth - The hash used to validate account activation
   * @param {authorize} callback
   */
   plz.authorize.activation = member.authorize;
 
   /**
   * Finds the user with matching tempAuth hash, email, and status, and updates 
-  * the user's password and status.  Passwords are validated for complexity and
+  * the user's password and status.  Optionally, passwords are validated for complexity and
   * status is set to 'active' when successful.
   *
   * @memberof admin.account
   * @param {object} options
   * @param {string} options.email - Email address of the user
   * @param {string} options.hash - The hash used to validate account activation
-  * @param {string} options.passwordNew - New password set by user 
-  * @param {string} options.passwordConfirm - New password repeated
+  * @param {object} options.password - Object containing information password details
+  * @param {string} options.password.new - New password to be set
+  * @param {string} options.password.confirm - Same password for confirmation
+  * @param {string} options.password.hash - the string name of a Node.js (crypto) supported hashing 
+  * algorithm.  Optionally, you may pass 'none' if you've hashed elsewhere before passing it to
+  * plz.  However, this will skip over password complexity and matching checks for obvious resaons
+  * and take only the 'new' property of the password object.
+  * @param {string=} options.password.salt - Optionally supply a salt
   * @param {complete} callback
   */
   plz.complete.reset = member.completeAction; 
@@ -274,8 +315,14 @@ var AdminAccount = function (plz, database, mailer) {
   * @param {object} options
   * @param {string} options.email - Email address of the user
   * @param {string} options.hash - The hash used to validate account activation
-  * @param {string} options.passwordNew - New password set by user 
-  * @param {string} options.passwordConfirm - New password repeated
+  * @param {object} options.password - Object containing information password details
+  * @param {string} options.password.new - New password to be set
+  * @param {string} options.password.confirm - Same password for confirmation
+  * @param {string} options.password.hash - the string name of a Node.js (crypto) supported hashing 
+  * algorithm.  Optionally, you may pass 'none' if you've hashed elsewhere before passing it to 
+  * plz.  However, this will skip over password complexity and matching checks for obvious resaons
+  * and take only the 'new' property of the password object.
+  * @param {string=} options.password.salt - Optionally supply a salt
   * @param {complete} callback
   */
   plz.complete.activation = member.completeAction; 
@@ -284,6 +331,8 @@ var AdminAccount = function (plz, database, mailer) {
 };
 
 module.exports = AdminAccount;
+
+/* TODO: Update callback documentation */
 
 /**
 * @callback login
