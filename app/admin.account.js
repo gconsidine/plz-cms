@@ -36,6 +36,7 @@ var AdminAccount = function (plz, database, mailer, crypto) {
   plz.login.user = function (options, callback) {
     if(!options.password || !options.password.current || !options.password.hash) {
       callback(true, { ok: false, message: 'Invalid password options object', data: null });
+      return;
     }
 
     var criteria = { email: options.email };
@@ -56,6 +57,11 @@ var AdminAccount = function (plz, database, mailer, crypto) {
     database.getDocument(query, function (error, result) {
       if(error) {
         callback(true, { ok: false, message: result, data: null });
+        return;
+      }
+
+      if(result.length === 0) {
+        callback(true, { ok: false, message: 'Invalid credentials', data: null });
         return;
       }
 
@@ -203,6 +209,11 @@ var AdminAccount = function (plz, database, mailer, crypto) {
     database.getDocument(query, function (error, result) {
       if(error) {
         callback(true, { ok: false, message: result, data: null });
+        return;
+      }
+
+      if(result.length === 0) {
+        callback(true, { ok: false, message: 'Invalid credentials', data: null });
         return;
       }
 

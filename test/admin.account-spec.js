@@ -30,28 +30,46 @@ describe('admin.account | Public API', function () {
       });
     });
 
-    it('should return a user with matching email/password', function (done) {
-      var login = {
-        email: 'sender@example.com',
-        password: 'someFakePass0'
+    it('should callback if options.password object is invalid', function (done) {
+      var options = {
+        password: 'so invalid.'
       };
 
-      plz.login.user(login, function (error, result) {
-        error.should.be.false;
-        result.should.be.type('object');
+      plz.login.user(options, function (error, result) {
+        error.should.be.true;
+        result.ok.should.not.be.ok;
         done();
       });
     });
 
-    it('should return an empty array if no match is found', function (done) {
+    it('should return a user with matching email/password', function (done) {
       var login = {
         email: 'sender@example.com',
-        password: 'someWrongPass0'
+        password: {
+          current: 'someFakePass0',
+          hash: 'none'
+        }
       };
 
       plz.login.user(login, function (error, result) {
         error.should.be.false;
-        result.should.eql([]);
+        result.data[0].password.should.equal(login.password.current);
+        done();
+      });
+    });
+
+    it('should callback an error if no match is found', function (done) {
+      var login = {
+        email: 'sender@example.com',
+        password: {
+          current: 'someWrongPass0',
+          hash: 'none'
+        }
+      };
+
+      plz.login.user(login, function (error, result) {
+        error.should.be.true;
+        result.ok.should.not.be.ok;
         done();
       });
     });
@@ -78,7 +96,7 @@ describe('admin.account | Public API', function () {
       });
     });
 
-    it('should callback false on error', function (done) {
+    it('should callback false and JSON on error', function (done) {
       var adminAccount = require('../app/admin.account')(plz);
 
       adminAccount.sendLink = function (options, callback) {
@@ -90,12 +108,12 @@ describe('admin.account | Public API', function () {
       plz.send.activation(options, function (error, result) {
         options.status.should.be.ok;
         error.should.be.true;
-        result.should.be.a.String;
+        result.ok.should.be.false;
         done();
       });
     });
 
-    it('should callback true on send success', function (done) {
+    it('should callback true and JSON on send success', function (done) {
       var adminAccount = require('../app/admin.account')(plz);
 
       adminAccount.sendLink = function (options, callback) {
@@ -107,7 +125,7 @@ describe('admin.account | Public API', function () {
       plz.send.activation(options, function (error, result) {
         options.status.should.be.ok;
         error.should.be.false;
-        result.should.be.a.String;
+        result.ok.should.be.true;
         done();
       });
     });
@@ -133,7 +151,7 @@ describe('admin.account | Public API', function () {
       });
     });
 
-    it('should callback true on reset success', function (done) {
+    it('should callback false and JSON on reset failure', function (done) {
       var adminAccount = require('../app/admin.account')(plz);
 
       adminAccount.sendLink = function (options, callback) {
@@ -145,12 +163,12 @@ describe('admin.account | Public API', function () {
       plz.send.reset(options, function (error, result) {
         options.status.should.be.ok;
         error.should.be.true;
-        result.should.be.a.String;
+        result.ok.should.be.false;
         done();
       });
     });
 
-    it('should callback true on reset success', function (done) {
+    it('should callback true and JSON on reset success', function (done) {
       var adminAccount = require('../app/admin.account')(plz);
 
       adminAccount.sendLink = function (options, callback) {
@@ -162,7 +180,7 @@ describe('admin.account | Public API', function () {
       plz.send.reset(options, function (error, result) {
         options.status.should.be.ok;
         error.should.be.false;
-        result.should.be.a.String;
+        result.ok.should.be.true;
         done();
       });
     });
@@ -179,68 +197,76 @@ describe('admin.account | Public API', function () {
   });
 
   describe('plz.restrict.user()', function () {
-    var user;
-
     before(function () {
       plz = require('../app/core.hub')(Tc.validAdminConfig);
     });
 
-    it('should return true if a user has access', function (done) {
+    it('should restrict user to any role not passed and return JSON on success', function (done) {
       var options = {
-        user: user,
+        user: {
+          email: 'tingle@oldpseudoelf.com',
+          role: 'map-maker'
+        },
         roles: ['peasant', 'peon']
       };
 
-      plz.restrict.user(options, function (error, access) {
+      plz.restrict.user(options, function (error, result) {
         error.should.be.false;
-        access.should.be.true;
+        result.ok.should.be.true;
         done();
       });
     });
 
-    it('should return false if a user does not have access', function (done) {
+    it('should restrict user to any role not passed and return JSON on error', function (done) {
       var options = {
-        user: user,
-        roles: ['admin']
+        user: {
+          email: 'tingle@oldpseudoelf.com',
+          role: 'map-maker'
+        },
+        roles: ['map-maker']
       };
 
-      plz.restrict.user(options, function (error, access) {
-        error.should.be.false;
-        access.should.be.false;
+      plz.restrict.user(options, function (error, result) {
+        error.should.be.true;
+        result.ok.should.be.false;
         done();
       });
     });
   });
 
   describe('plz.allow.user()', function () {
-    var user;
-
     before(function () {
       plz = require('../app/core.hub')(Tc.validAdminConfig);
     });
 
-    it('should return true if a user has access', function (done) {
+    it('should allow user within roles passed and return JSON on success', function (done) {
       var options = {
-        user: user,
-        roles: ['admin']
+        user: {
+          email: 'tingle@oldpseudoelf.com',
+          role: 'map-maker'
+        },
+        roles: ['map-maker']
       };
 
-      plz.allow.user(options, function (error, access) {
+      plz.allow.user(options, function (error, result) {
         error.should.be.false;
-        access.should.be.true;
+        result.ok.should.be.true;
         done();
       });
     });
 
-    it('should return false if a user does not have access', function (done) {
+    it('should allow user within roles passed and return JSON on error', function (done) {
       var options = {
-        user: user,
-        roles: ['super-admin']
+        user: {
+          email: 'tingle@oldpseudoelf.com',
+          role: 'map-maker'
+        },
+        roles: ['actual-elves']
       };
 
-      plz.allow.user(options, function (error, access) {
-        error.should.be.false;
-        access.should.be.false;
+      plz.allow.user(options, function (error, result) {
+        error.should.be.true;
+        result.ok.should.be.false;
         done();
       });
     });
@@ -346,38 +372,38 @@ describe('admin.account | Private API', function () {
 
     it('should callback an error if db getDocument fails', function (done) {
       mockDatabase.getDocument = function (query, callback) {
-        callback(true, false);
+        callback(true, 'mock failure');
       };
 
       account = require('../app/admin.account')(plz, mockDatabase);
 
       var options = {
         email: 'merlin@sonofamberandchaos.com',
-        hash: 'aaaaaaaaaaddddddddddfffffffffffffff001233'
+        tempAuth: 'aaaaaaaaaaddddddddddfffffffffffffff001233'
       };
       
       account.authorize(options, function (error, result) {
         error.should.be.true;
-        result.should.be.false;
+        result.ok.should.be.false;
         done();
       });
     });
 
     it('should callback an error if result is empty', function (done) {
       mockDatabase.getDocument = function (query, callback) {
-        callback(false, []);
+        callback(true, []);
       };
 
       account = require('../app/admin.account')(plz, mockDatabase);
 
       var options = {
         email: 'merlin@sonofamberandchaos.com',
-        hash: 'aaaaaaaaaaddddddddddfffffffffffffff001233'
+        tempAuth: 'aaaaaaaaaaddddddddddfffffffffffffff001233'
       };
       
       account.authorize(options, function (error, result) {
-        error.should.be.false;
-        result.should.be.false;
+        error.should.be.true;
+        result.ok.should.be.false;
         done();
       });
     });
@@ -391,12 +417,12 @@ describe('admin.account | Private API', function () {
 
       var options = {
         email: 'merlin@sonofamberandchaos.com',
-        hash: 'aaaaaaaaaaddddddddddfffffffffffffff001233'
+        tempAuth: 'aaaaaaaaaaddddddddddfffffffffffffff001233'
       };
       
       account.authorize(options, function (error, result) {
         error.should.be.false;
-        result.should.be.true;
+        result.ok.should.be.true;
         done();
       });
     });
@@ -410,22 +436,100 @@ describe('admin.account | Private API', function () {
       mockDatabase = {};
     });
 
-    it('should callback an error if database editDocument fails', function (done) {
+    it('should callback an error if password options are invalid', function (done) {
       var options = {
         email: 'merlin@sonofamberandchaos.com',
-        passwordNew: 'WAoS0Compl3x',
-        passwordConfirm: 'WAoS0Compl3x',
+        password: ''
+      };
+
+      account = require('../app/admin.account')(plz);
+
+      account.completeAction(options, function (error, result) {
+        error.should.be.true;
+        result.ok.should.be.false;
+        done();
+      });
+    });
+
+    it('should callback error if password is not complex', function (done) {
+      var options = {
+        email: 'merlin@sonofamberandchaos.com',
+        password: {
+          new: 'password',
+          confirm: 'password',
+          hash: 'none'
+        }
+      };
+
+      account = require('../app/admin.account')(plz);
+
+      account.completeAction(options, function (error, result) {
+        error.should.be.true;
+        result.ok.should.be.false;
+        done();
+      });
+    });
+
+    it('should callback error if passwords do not match', function (done) {
+      var options = {
+        email: 'merlin@sonofamberandchaos.com',
+        password: {
+          new: 'password',
+          confirm: 'passwordOopsies',
+          hash: 'none'
+        }
+      };
+
+      account = require('../app/admin.account')(plz);
+
+      account.completeAction(options, function (error, result) {
+        error.should.be.true;
+        result.ok.should.be.false;
+        done();
+      });
+    });
+
+    it('should hash complex and matching passwords', function (done) {
+      var options = {
+        email: 'merlin@sonofamberandchaos.com',
+        password: {
+          new: 'SuperD00per0--#C0mplexIss!',
+          confirm: 'SuperD00per0--#C0mplexIss!',
+          hash: 'sha256'
+        }
       };
 
       mockDatabase.editDocument = function (query, callback) {
-        callback(true, false);
+        callback(false, query);
+      };
+
+      account = require('../app/admin.account')(plz, mockDatabase);
+
+      account.completeAction(options, function (error, result) {
+        (/^[a-f0-9]{64}$/i.test(result.data.update.$set.password)).should.be.true;
+        done();
+      });
+    });
+
+    it('should callback an error if database editDocument fails', function (done) {
+      var options = {
+        email: 'merlin@sonofamberandchaos.com',
+        password: { 
+          new: 'WAoS0Compl3x',
+          confirm: 'WAoS0Compl3x',
+          hash: 'none'
+        }
+      };
+
+      mockDatabase.editDocument = function (query, callback) {
+        callback(true, 'Mock failure');
       };
 
       account = require('../app/admin.account')(plz, mockDatabase);
 
       account.completeAction(options, function (error, result) {
         error.should.be.true;
-        result.should.be.false;
+        result.ok.should.be.false;
         done();
       });
     });
@@ -433,19 +537,22 @@ describe('admin.account | Private API', function () {
     it('should callback an error if document was not edited', function (done) {
       var options = {
         email: 'merlin@sonofamberandchaos.com',
-        passwordNew: 'WAoS0Compl3x',
-        passwordConfirm: 'WAoS0Compl3x',
+        password: { 
+          new: 'WAoS0Compl3x',
+          confirm: 'WAoS0Compl3x',
+          hash: 'none'
+        }
       };
 
       mockDatabase.editDocument = function (query, callback) {
-        callback(false, {value: { ok: 0 } });
+        callback(true, 'mock failure');
       };
 
       account = require('../app/admin.account')(plz, mockDatabase);
 
       account.completeAction(options, function (error, result) {
-        error.should.be.false;
-        result.should.be.false;
+        error.should.be.true;
+        result.ok.should.be.false;
         done();
       });
     });
@@ -453,19 +560,22 @@ describe('admin.account | Private API', function () {
     it('should callback true if editDocument succeeds', function (done) {
       var options = {
         email: 'merlin@sonofamberandchaos.com',
-        passwordNew: 'WAoS0Compl3x',
-        passwordConfirm: 'WAoS0Compl3x',
+        password: { 
+          new: 'WAoS0Compl3x',
+          confirm: 'WAoS0Compl3x',
+          hash: 'none'
+        }
       };
 
       mockDatabase.editDocument = function (query, callback) {
-        callback(false, {value: { ok: 1 } });
+        callback(false, {value: [{ email: 'brand@jelly.com'}], ok: 1 });
       };
 
       account = require('../app/admin.account')(plz, mockDatabase);
 
       account.completeAction(options, function (error, result) {
         error.should.be.false;
-        result.should.be.true;
+        result.ok.should.be.true;
         done();
       });
     });
