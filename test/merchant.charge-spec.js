@@ -4,20 +4,6 @@ require('should');
 
 var Tc = require('./test-config');
 
-describe('merchant | Configuration', function () {
-  it('should not accept undefined merchant options', function () {
-    (function () {
-      require('../app/core.hub')(Tc.invalidMerchantConfig);
-    }).should.throw();
-  });
-
-  it('should accept properly defined merchant options', function () {
-    (function () {
-      require('../app/core.hub')(Tc.validMerchantConfig);
-    }).should.not.throw();
-  });
-});
-
 describe('merchant.charge | Public API', function () {
   var collectionName, chargeCollection;
   var plz = require('../app/core.hub')(Tc.validMerchantConfig);
