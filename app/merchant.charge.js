@@ -50,7 +50,7 @@ var MerchantCharge = function (plz, database) {
         return;
       }
       result.customerId = customerId;
-      result.createdAt = new Date().getTime();
+      result.createdAt = Date.now();
       result.status = 'pending';
       var query = {
         collectionName: member.collectionName,

@@ -141,7 +141,7 @@ var AdminAccount = function (plz, database, mailer) {
       update: {
         $set: {
           status: options.status,
-          modifiedAt: new Date(),
+          modifiedAt: Date.now(),
           tempAuth: options.hash
         }
       }

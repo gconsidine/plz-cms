@@ -76,8 +76,9 @@ describe('author.post | Public API', function () {
               }
             }
             var afterCreateDate = new Date();
-            (result.createdAt >= beforeCreateDate).should.be.true;
-            (result.createdAt <= afterCreateDate).should.be.true;
+            var createDate = new Date(result.createdAt);
+            (createDate.getTime() >= beforeCreateDate.getTime()).should.be.true;
+            (createDate.getTime() <= afterCreateDate.getTime()).should.be.true;
             done();
           });
         });
