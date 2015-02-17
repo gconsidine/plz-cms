@@ -66,15 +66,17 @@ describe('author.page | Public API', function () {
                   var arrayString = result[field].toString();
                   arrayString.should.equal(Tc.validPage[field].toString());
                 }
+                else if(typeof result[field] === 'object'){
+                  result[field].toString().should.equal(Tc.validPage[field].toString());
+                }
                 else{
                   result[field].should.equal(Tc.validPage[field]);
                 }
               }
             }
             var afterCreateDate = new Date();
-            var createDate = new Date(result.createdAt);
-            (createDate > beforeCreateDate).should.be.true;
-            (createDate < afterCreateDate).should.be.true;
+            (result.createdAt >= beforeCreateDate).should.be.true;
+            (result.createdAt <= afterCreateDate).should.be.true;
             done();
           });
         });

@@ -66,6 +66,7 @@ describe('merchant.product | Public API', function () {
     });
 
     it('should insert a product with required fields present', function(done) {
+      var beforeCreateDate = new Date();
       plz.create.product(Tc.validProduct, function (error) {
         error.should.be.false;
 
@@ -80,11 +81,17 @@ describe('merchant.product | Public API', function () {
                   var arrayString = result[field].toString();
                   arrayString.should.equal(Tc.validProduct[field].toString());
                 }
+                else if(typeof result[field] === 'object'){
+                  result[field].toString().should.equal(Tc.validProduct[field].toString());
+                }
                 else{
                   result[field].should.equal(Tc.validProduct[field]);
                 }
               }
             }
+            var afterCreateDate = new Date();
+            (result.createdAt >= beforeCreateDate).should.be.true;
+            (result.createdAt <= afterCreateDate).should.be.true;
             done();
           });
         });

@@ -81,8 +81,6 @@ var TestConfig = function () {
         name: 'string',
         email: 'email',
         password: 'password',
-        createdAt: 'number',
-        modifiedAt: 'number',
         lastLogin: 'number',
         status: 'string'
       }
@@ -133,8 +131,6 @@ var TestConfig = function () {
           visibility: 'string',
           contentType: 'string',
           content: 'string',
-          createdAt: 'number',
-          modifiedAt: 'number',
           status: 'string'
         }
       },
@@ -146,8 +142,6 @@ var TestConfig = function () {
           visibility: 'string',
           contentType: 'string',
           content: 'string',
-          createdAt: 'number',
-          modifiedAt: 'number',
           status: 'string'
         }
       }
@@ -200,8 +194,6 @@ var TestConfig = function () {
           imageFile: 'string',
           description: 'string',
           visibility: 'string',
-          createdAt: 'number',
-          modifiedAt: 'number',
           status: 'string'
         }
       },
@@ -247,8 +239,6 @@ var TestConfig = function () {
     title: 'Simple plz-cms page',
     labels: ['mainmenu'],
     visibility: 'public',
-    createdAt: 3134999944,
-    modifiedAt: 3134999944,
     status: 'draft',
     contentType: 'text/plain',
     content: 'The text content'
@@ -259,8 +249,6 @@ var TestConfig = function () {
     title: 'Another plz-cms page',
     labels: ['mainmenu'],
     visibility: 'public',
-    createdAt: 3134999944,
-    modifiedAt: 3134999944,
     status: 'draft',
     contentType: 'text/plain',
     content: 'Some different content'
@@ -268,8 +256,6 @@ var TestConfig = function () {
 
   var invalidPage = {
     title: 'invalid options',
-    createdAt: 3134999944,
-    modifiedAt: 3134999944,
     status: 'draft'
   };
 
@@ -278,8 +264,6 @@ var TestConfig = function () {
     title: 'Simple post',
     labels: ['news'],
     visibility: 'public',
-    createdAt: 3135000000,
-    modifiedAt: 3135000000,
     status: 'draft',
     contentType: 'text/plain',
     content: 'some text'
@@ -290,8 +274,6 @@ var TestConfig = function () {
     title: 'Simple post 2',
     labels: ['news'],
     visibility: 'public',
-    createdAt: 3135000000,
-    modifiedAt: 3135000000,
     status: 'draft',
     contentType: 'text/plain',
     content: 'some more text'
@@ -299,8 +281,6 @@ var TestConfig = function () {
 
   var invalidPost = {
     title: 'invalid options',
-    createdAt: 3134999944,
-    modifiedAt: 3134999944,
     status: 'draft'
   };
 
@@ -308,8 +288,6 @@ var TestConfig = function () {
     name: 'greg',
     email: 'sender@example.com',
     password: 'someFakePass0',
-    createdAt: 3134999944,
-    modifiedAt: 3134999945,
     lastLogin: 0,
     status: 'created',
     role: 'admin'
@@ -319,8 +297,6 @@ var TestConfig = function () {
     name: 'greg',
     email: 'sender@exmaple.com',
     password: 'someFakePass0',
-    createdAt: 3134999944,
-    modifiedAt: 3134999945,
     role: 'admin'
   };
   
@@ -334,8 +310,6 @@ var TestConfig = function () {
       '* Excellent durability\n' +
       '* Comfortable grip',
     visibility: 'public',
-    createdAt: 3134999944,
-    modifiedAt: 3134999944,
     status: 'draft'
   };
 
@@ -348,8 +322,6 @@ var TestConfig = function () {
     description: '* Acme\'s most popular screwdriver\n' +
       '* Comfortable grip allows maximum torque',
     visibility: 'public',
-    createdAt: 3134999944,
-    modifiedAt: 3134999944,
     status: 'draft'
   };
 

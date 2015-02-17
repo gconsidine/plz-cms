@@ -41,7 +41,7 @@ var MerchantCart = function (plz, database) {
       callback(true, 'options.productName not a valid string');
       return;
     }
-    var currentTimestamp = new Date().getTime();
+    var currentTimestamp = new Date();
 
     //first check to see if the product exists
     var productQuery = {
@@ -70,6 +70,7 @@ var MerchantCart = function (plz, database) {
           callback(true, getResult);
         }
         else if(getResult.length === 0) {
+          options.createdAt = currentTimestamp;
           options.modifiedAt = currentTimestamp;
           // does not exist, create a new one
           var createQuery = {

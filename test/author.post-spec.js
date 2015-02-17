@@ -51,6 +51,7 @@ describe('author.post | Public API', function () {
     });
 
     it('should insert a post with required fields present', function(done) {
+      var beforeCreateDate = new Date();
       plz.create.post(Tc.validPost, function (error) {
         error.should.be.false;
 
@@ -66,11 +67,17 @@ describe('author.post | Public API', function () {
                   var arrayString = result[field].toString();
                   arrayString.should.equal(Tc.validPost[field].toString());
                 }
+                else if(typeof result[field] === 'object'){
+                  result[field].toString().should.equal(Tc.validPost[field].toString());
+                }
                 else{
                   result[field].should.equal(Tc.validPost[field]);
                 }
               }
             }
+            var afterCreateDate = new Date();
+            (result.createdAt >= beforeCreateDate).should.be.true;
+            (result.createdAt <= afterCreateDate).should.be.true;
             done();
           });
         });

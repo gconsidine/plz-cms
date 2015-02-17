@@ -49,7 +49,7 @@ var MerchantProduct = function (plz, database) {
         return;
       }
 
-      var currentTimestamp = new Date().getTime();
+      var currentTimestamp = new Date();
 
       options.revisionNumber = 0;
       options.createdAt = currentTimestamp;
@@ -128,7 +128,7 @@ var MerchantProduct = function (plz, database) {
     }
 
     var modifications = options.modifications;
-    var currentTimestamp = new Date().getTime();
+    var currentTimestamp = new Date();
     modifications.modifiedAt = currentTimestamp;
 
     var query = {

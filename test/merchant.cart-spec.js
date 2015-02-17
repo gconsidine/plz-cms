@@ -91,6 +91,7 @@ describe('merchant.cart | Public API', function () {
     });
 
     it('should add the product to the cart collection', function(done) {
+      var beforeCreateDate = new Date();
       var addRequest = {
         customerId: Tc.validCustomerId,
         productName: 'Acme 16-oz Claw Hammer',
@@ -110,9 +111,17 @@ describe('merchant.cart | Public API', function () {
             (error === null).should.be.true;
             for(var field in addRequest) {
               if(addRequest.hasOwnProperty(field) && field !== "_id") {
-                result[field].should.equal(addRequest[field]);
+                if(typeof result[field] === 'object'){
+                  result[field].toString().should.equal(addRequest[field].toString());
+                }
+                else {
+                  result[field].should.equal(addRequest[field]);
+                }
               }
             }
+            var afterCreateDate = new Date();
+            (result.createdAt >= beforeCreateDate).should.be.true;
+            (result.createdAt <= afterCreateDate).should.be.true;
             done();
           });
         });

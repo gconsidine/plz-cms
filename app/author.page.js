@@ -49,7 +49,7 @@ var AuthorPage = function (plz, database) {
         return;
       }
 
-      var currentTimestamp = new Date().getTime();
+      var currentTimestamp = new Date();
 
       options.revisionNumber = 0;
       options.createdAt = currentTimestamp;
