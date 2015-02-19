@@ -65,6 +65,8 @@ var AdminAccount = function (plz, database, mailer, crypto) {
         return;
       }
 
+      // TODO: Strip password from user before return
+
       callback(false, { ok: true, message: 'success', data: result });
     });
   };
@@ -166,8 +168,7 @@ var AdminAccount = function (plz, database, mailer, crypto) {
       update: {
         $set: {
           status: options.status,
-          modifiedAt: Date.now(),
-          tempAuth: options.tempAuth
+          modifiedAt: Date.now()
         }
       }
     };

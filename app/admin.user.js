@@ -72,6 +72,8 @@ var AdminUser = function (plz, database, crypto) {
         callback(true, { ok: false, message: result, data: null });
         return;
       }
+      
+      // TODO: Strip password from user before returning
 
       callback(false, { ok: true, message: 'success', data: result });
     });
