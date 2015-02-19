@@ -150,7 +150,8 @@ describe('merchant.charge | Public API', function () {
       plz.create.charge(request, function (error, result) {
         error.should.be.false;
         (result === null).should.be.false;
-        chargeId = result.data.id;
+console.log(result);
+        chargeId = result.data[0].id;
         done();
       });
     });

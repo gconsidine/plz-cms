@@ -191,12 +191,12 @@ var MerchantProduct = function (plz, database) {
         };
 
         database.createDocument(createQuery, function(error, createResult){
-          if(error) {
-            callback(error, { ok: false, message: createResult, data: null });
-            return;
-          }
-
-          callback(false, { ok: true, message: 'success', data: createResult.ops });
+          var result_object = {
+            ok: !error,
+            message: error ? createResult : 'success',
+            data: error ? null : createResult.ops
+          };
+          callback(error, result_object);
         });
       });
     });
@@ -232,12 +232,12 @@ var MerchantProduct = function (plz, database) {
     }
 
     database.removeDocument(query, function(error, result) {
-      if(error) {
-        callback(error, { ok: false, message: result, data: null });
-        return;
-      }
-
-      callback(false, { ok: true, message: 'success', data: result.ops || [] });
+      var result_object = {
+        ok: !error,
+        message: error ? result : 'success',
+        data: error ? null : result.ops
+      };
+      callback(error, result_object);
     });
   };
 

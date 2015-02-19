@@ -59,11 +59,12 @@ var MerchantCharge = function (plz, database) {
       };
 
       database.createDocument(query, function(error, result){
-        if(error) {
-          callback(error, { ok: false, message: result, data: null });
-          return;
-        }
-        callback(false, { ok: true, message: 'success', data: result.ops[0] });
+		var result_object = {
+          ok: !error,
+          message: error ? result : 'success',
+          data: error ? null : result.ops
+        };
+        callback(error, result_object);
       });
     });
   };
@@ -89,11 +90,12 @@ var MerchantCharge = function (plz, database) {
     }
 
     database.getDocument(query, function (error, result) {
-      if(error) {
-        callback(error, { ok: false, message: result, data: null });
-        return;
-      }
-      callback(false, { ok: true, message: 'success', data: result.ops });
+      var result_object = {
+        ok: !error,
+        message: error ? result : 'success',
+        data: error ? null : result.ops
+      };
+      callback(error, result_object);
     });
   };
 
@@ -118,12 +120,12 @@ var MerchantCharge = function (plz, database) {
     }
 
     database.removeDocument(query, function(error, result) {
-      if(error) {
-        callback(error, { ok: false, message: result, data: null });
-        return;
-      }
-
-      callback(false, { ok: true, message: 'success', data: result.ops });
+      var result_object = {
+        ok: !error,
+        message: error ? result : 'success',
+        data: error ? null : result.ops
+      };
+      callback(error, result_object);
     });
   };
 
