@@ -132,6 +132,23 @@ describe('core.validate | Public API', function () {
     });
   });
   
+  describe('plz.validate.currency()', function () {
+    it('should validate currency types', function () {
+      var i;
+
+      var valid = ['$1.23', '$0.01', '9999.99', '0.23', '3.14'];
+      var invalid = ['$1.234', '$1', '.12', 'one dollar', 10, 1.23, [], false];
+
+      for(i = 0; i < valid.length; i++) {
+        plz.validate.currency(valid[i]).should.be.true;
+      }
+
+      for(i = 0; i < invalid.length; i++) {
+        plz.validate.currency(invalid[i]).should.be.false;
+      }
+    });
+  });
+  
   describe('plz.validate.typeAs()', function () {
     it('should validate based on given type string', function () {
       var cases = {

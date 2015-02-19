@@ -81,8 +81,6 @@ var TestConfig = function () {
         name: 'string',
         email: 'email',
         password: 'password',
-        createdAt: 'number',
-        modifiedAt: 'number',
         lastLogin: 'number',
         status: 'string'
       }
@@ -133,8 +131,6 @@ var TestConfig = function () {
           visibility: 'string',
           contentType: 'string',
           content: 'string',
-          createdAt: 'number',
-          modifiedAt: 'number',
           status: 'string'
         }
       },
@@ -146,8 +142,6 @@ var TestConfig = function () {
           visibility: 'string',
           contentType: 'string',
           content: 'string',
-          createdAt: 'number',
-          modifiedAt: 'number',
           status: 'string'
         }
       }
@@ -172,13 +166,79 @@ var TestConfig = function () {
     }
   };
 
+  var validMerchantConfig = {
+    modules: {
+      admin: false,
+      author: false,
+      merchant: true
+    },
+    database: {
+      default: {
+        uri: MONGO_URI
+      }
+    },
+    mailer: {
+      default: {
+        service: '',
+        address: 'sender@example.com',
+        password: ''
+      }
+    },
+    merchant: {
+      product: {
+        collection: 'product',
+        required: {
+          userName: 'string',
+          name: 'string',
+          price: 'currency',
+          imageFile: 'string',
+          description: 'string',
+          visibility: 'string',
+          status: 'string'
+        }
+      },
+      cart: {
+        collection: 'cart',
+        required: {
+          customerId: 'string',
+          productName: 'string'
+        }
+      },
+      charge: {
+        collection: 'charge',
+        api: 'stripe',
+        api_key: 'sk_test_BQokikJOvBiI2HlWgH4olfQ2',
+        required: {
+          amount: 'number',
+          currency: 'string',
+          description: 'string'
+        }
+      }
+    }
+  };
+
+  var invalidMerchantConfig = {
+    modules: {
+      merchant: true
+    },
+    database: {
+      default: {
+        uri: MONGO_URI
+      }
+    },
+    mailer: {
+      default: {
+        service: '',
+        address: 'sender@example.com',
+        password: ''
+      }
+    }
+  }
   var validPage = {
     userName: 'chahm',
     title: 'Simple plz-cms page',
     labels: ['mainmenu'],
     visibility: 'public',
-    createdAt: 3134999944,
-    modifiedAt: 3134999944,
     status: 'draft',
     contentType: 'text/plain',
     content: 'The text content'
@@ -189,8 +249,6 @@ var TestConfig = function () {
     title: 'Another plz-cms page',
     labels: ['mainmenu'],
     visibility: 'public',
-    createdAt: 3134999944,
-    modifiedAt: 3134999944,
     status: 'draft',
     contentType: 'text/plain',
     content: 'Some different content'
@@ -198,8 +256,6 @@ var TestConfig = function () {
 
   var invalidPage = {
     title: 'invalid options',
-    createdAt: 3134999944,
-    modifiedAt: 3134999944,
     status: 'draft'
   };
 
@@ -208,8 +264,6 @@ var TestConfig = function () {
     title: 'Simple post',
     labels: ['news'],
     visibility: 'public',
-    createdAt: 3135000000,
-    modifiedAt: 3135000000,
     status: 'draft',
     contentType: 'text/plain',
     content: 'some text'
@@ -220,8 +274,6 @@ var TestConfig = function () {
     title: 'Simple post 2',
     labels: ['news'],
     visibility: 'public',
-    createdAt: 3135000000,
-    modifiedAt: 3135000000,
     status: 'draft',
     contentType: 'text/plain',
     content: 'some more text'
@@ -229,8 +281,6 @@ var TestConfig = function () {
 
   var invalidPost = {
     title: 'invalid options',
-    createdAt: 3134999944,
-    modifiedAt: 3134999944,
     status: 'draft'
   };
 
@@ -238,8 +288,6 @@ var TestConfig = function () {
     name: 'greg',
     email: 'sender@example.com',
     password: 'someFakePass0',
-    createdAt: 3134999944,
-    modifiedAt: 3134999945,
     lastLogin: 0,
     status: 'created',
     role: 'admin'
@@ -249,11 +297,47 @@ var TestConfig = function () {
     name: 'greg',
     email: 'sender@exmaple.com',
     password: 'someFakePass0',
-    createdAt: 3134999944,
-    modifiedAt: 3134999945,
     role: 'admin'
   };
   
+  var validProduct = {
+    userName: 'chahm',
+    name: 'Acme 16-oz Claw Hammer',
+    labels: ['tools'],
+    price: '$9.99',
+    imageFile: 'images/acme/claw_hammer.png',
+    description: '* Acme\'s most popular hammer\n' +
+      '* Excellent durability\n' +
+      '* Comfortable grip',
+    visibility: 'public',
+    status: 'draft'
+  };
+
+  var anotherValidProduct = {
+    userName: 'chahm',
+    name: 'Acme Phillips Screwdriver',
+    labels: ['tools'],
+    price: '$8.99',
+    imageFile: 'images/acme/phillips_screwdriver.png',
+    description: '* Acme\'s most popular screwdriver\n' +
+      '* Comfortable grip allows maximum torque',
+    visibility: 'public',
+    status: 'draft'
+  };
+
+  var invalidProduct = {
+    name: 'invalid product'
+  }
+
+  var validCustomerId = 'chahm@caprahorn.com';
+
+  var validCard = {
+    number: '4242424242424242',
+    exp_month: 12,
+    exp_year: 2020,
+    cvc: '123'
+  };
+
   return {
     validCoreConfig: validCoreConfig,
     invalidCoreConfig: invalidCoreConfig,
@@ -261,6 +345,8 @@ var TestConfig = function () {
     invalidAdminConfig: invalidAdminConfig,
     validAuthorConfig: validAuthorConfig,
     invalidAuthorConfig: invalidAuthorConfig,
+    validMerchantConfig: validMerchantConfig,
+    invalidMerchantConfig: invalidMerchantConfig,
     validPage: validPage,
     anotherValidPage: anotherValidPage,
     invalidPage: invalidPage,
@@ -269,6 +355,11 @@ var TestConfig = function () {
     invalidPost: invalidPost,
     validUser: validUser,
     invalidUser: invalidUser,
+    validProduct: validProduct,
+    anotherValidProduct: anotherValidProduct,
+    invalidProduct: invalidProduct,
+    validCustomerId: validCustomerId,
+    validCard: validCard,
     invalidDatabase: invalidDatabase
   };
 };

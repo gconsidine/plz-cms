@@ -171,7 +171,7 @@ var AuthorPage = function (plz, database) {
       return;
     }
 
-    var currentTimestamp = new Date();
+    var currentTimestamp = Date.now();
 
     var query = {
       collectionName: member.collectionName

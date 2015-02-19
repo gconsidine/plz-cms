@@ -51,6 +51,7 @@ describe('author.page | Public API', function () {
     });
 
     it('should insert a page with required fields present', function(done) {
+      var beforeCreateDate = new Date();
       plz.create.page(Tc.validPage, function (error) {
         error.should.be.false;
 
@@ -65,11 +66,18 @@ describe('author.page | Public API', function () {
                   var arrayString = result[field].toString();
                   arrayString.should.equal(Tc.validPage[field].toString());
                 }
+                else if(typeof result[field] === 'object'){
+                  result[field].toString().should.equal(Tc.validPage[field].toString());
+                }
                 else{
                   result[field].should.equal(Tc.validPage[field]);
                 }
               }
             }
+            var afterCreateDate = new Date();
+            var createDate = new Date(result.createdAt);
+            (createDate.getTime() >= beforeCreateDate.getTime()).should.be.true;
+            (createDate.getTime() <= afterCreateDate.getTime()).should.be.true;
             done();
           });
         });
