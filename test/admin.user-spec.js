@@ -91,7 +91,23 @@ describe('admin.user | Public API', function () {
     it('should return an empty array if user does not exist', function (done) {
       plz.get.user({name: 'zanzabar'}, function (error, result) {
         error.should.be.false;
-        result.should.be.eql([]);
+        result.data.should.be.eql([]);
+        done();
+      });
+    });
+
+    it('should callback error JSON if database fails', function (done) {
+      var database = {
+        getDocument: function (query, callback) { 
+          callback(true, { ok: false, message: 'Mocked Failure', data: null });
+        }
+      };
+
+      require('../app/admin.user')(plz, database); 
+
+      plz.get.user({name: 'zanzabar'}, function (error, result) {
+        error.should.be.true;
+        result.should.be.an.Object;
         done();
       });
     });
@@ -117,17 +133,19 @@ describe('admin.user | Public API', function () {
     });
 
     it('should remove a user that exists', function (done) {
-      plz.remove.user({name: 'greg'}, function (error, res) {
+      plz.remove.user({name: 'greg'}, function (error, result) {
         error.should.be.false;
-        res.result.n.should.equal(1);
+        result.data.ok.should.equal(1);
+        result.data.n.should.equal(1);
         done();
       });
     });
 
     it('should return error if user does not exist', function (done) {
-      plz.remove.user({name: 'doppio'}, function (error, res) {
-        error.should.be.false;
-        res.result.n.should.equal(0);
+      plz.remove.user({name: 'doppio'}, function (error, result) {
+        error.should.be.true;
+        result.ok.should.be.false;
+        (result.data === null).should.be.true;
         done();
       });
     });
@@ -164,24 +182,26 @@ describe('admin.user | Public API', function () {
 
       plz.get.user({name: 'greg'}, function (error, result) {
         error.should.be.false;
-        result[0].name.should.equal('greg');
+        result.data[0].name.should.equal('greg');
 
         plz.edit.user(options, function (error, result) {
           error.should.be.false;
-          result.lastErrorObject.updatedExisting.should.be.true;
+          result.data.updatedExisting.should.be.true;
+          result.data.n.should.be.equal(1);
 
           plz.get.user({name: 'doppio'}, function (error, result) {
-            result[0].name.should.equal('doppio');
+            result.data[0].name.should.equal('doppio');
             done();
           });
         });
       });
     });
 
-    it('should return an empty result if user does not exist', function (done) {
-      plz.get.user({name: 'greg'}, function (error, result) {
-        error.should.be.false;
-        result.should.eql([]);
+    it('should return an error result if user does not exist', function (done) {
+      plz.edit.user({email: 'majora@maskshop.com'}, function (error, result) {
+        error.should.be.true;
+        result.ok.should.be.false;
+        (result.data === null).should.be.true;
         done();
       });
     });
@@ -196,101 +216,6 @@ describe('admin.user | Public API', function () {
 
   });
 
-  describe('plz.restrict.user()', function () {
-    var user;
-
-    before(function (done) {
-      plz = require('../app/core.hub')(Tc.validAdminConfig);
-
-      plz.create.user(Tc.validUser, function (error, result) {
-        user = result.ops[0];
-        done();
-      });
-    });
-
-    it('should return true if a user has access', function (done) {
-      var options = {
-        user: user,
-        roles: ['peasant', 'peon']
-      };
-
-      plz.restrict.user(options, function (error, access) {
-        error.should.be.false;
-        access.should.be.true;
-        done();
-      });
-    });
-
-    it('should return false if a user does not have access', function (done) {
-      var options = {
-        user: user,
-        roles: ['admin']
-      };
-
-      plz.restrict.user(options, function (error, access) {
-        error.should.be.false;
-        access.should.be.false;
-        done();
-      });
-    });
-
-    after(function (done) {
-      db.getDatabase(function (error, database) {
-        database.collection('user').drop(function () {
-          done();
-        });
-      });
-    });
-
-  });
-
-  describe('plz.allow.user()', function () {
-    var user;
-
-    before(function (done) {
-      plz = require('../app/core.hub')(Tc.validAdminConfig);
-
-      plz.create.user(Tc.validUser, function (error, result) {
-        user = result.ops[0];
-        done();
-      });
-    });
-
-    it('should return true if a user has access', function (done) {
-      var options = {
-        user: user,
-        roles: ['admin']
-      };
-
-      plz.allow.user(options, function (error, access) {
-        error.should.be.false;
-        access.should.be.true;
-        done();
-      });
-    });
-
-    it('should return false if a user does not have access', function (done) {
-      var options = {
-        user: user,
-        roles: ['super-admin']
-      };
-
-      plz.allow.user(options, function (error, access) {
-        error.should.be.false;
-        access.should.be.false;
-        done();
-      });
-    });
-
-    after(function (done) {
-      db.getDatabase(function (error, database) {
-        database.collection('user').drop(function () {
-          done();
-        });
-      });
-    });
-
-  });
 });
 
 describe('admin.user | Private API', function () {

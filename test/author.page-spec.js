@@ -145,11 +145,14 @@ describe('author.page | Public API', function () {
         error.should.be.false;
         var request = {
           userName: 'chahm',
-          _id: result.insertedId
+          _id: result.data[0]._id
         };
+
         plz.publish.page(request, function (error, result) {
           error.should.be.false;
-          result.should.not.be.empty;
+          result.ok.should.be.true;
+          result.data.updatedExisting.should.be.true;
+          result.data.n.should.equal(1);
 
           pageCollection.findOne(request, function (error, result) {
             result.visibility.should.equal("public");
@@ -166,8 +169,9 @@ describe('author.page | Public API', function () {
       };
 
       plz.publish.page(request, function (error, result) {
-        error.should.be.false;
-        (result.value === null).should.be.true;
+        error.should.be.true;
+        result.ok.should.be.false;
+        (result.data === null).should.be.true;
         done();
       });
     });
@@ -235,15 +239,18 @@ describe('author.page | Public API', function () {
     it('should fetch multiple pages using label', function(done) {
       Tc.anotherValidPage.title = 'page 3';
       Tc.anotherValidPage._id = undefined;
+
       plz.create.page(Tc.anotherValidPage, function (error) {
         error.should.be.false;
+
         var request = {
           label: 'mainmenu'
         };
+
         plz.get.page(request, function (error, result) {
           error.should.be.false;
-          result.should.not.be.empty;
-          result.length.should.equal(3);
+          result.data.should.not.be.empty;
+          result.data.length.should.equal(3);
           done();
         });
       });
@@ -256,8 +263,8 @@ describe('author.page | Public API', function () {
       };
       plz.get.page(request, function (error, result) {
         error.should.be.false;
-        result.should.not.be.empty;
-        result.length.should.equal(request.limit);
+        result.data.should.not.be.empty;
+        result.data.length.should.equal(request.limit);
         done();
       });
     });
@@ -271,14 +278,14 @@ describe('author.page | Public API', function () {
 
       plz.edit.page(editRequest, function (error, result) {
         error.should.be.false;
-        result.should.not.be.empty;
+        result.data.should.not.be.empty;
 
         var getRequest = { label: 'mainmenu' };
 
         plz.get.page(getRequest, function (error, result) {
           error.should.be.false;
-          result.should.not.be.empty;
-          result.length.should.equal(3);
+          result.data.should.not.be.empty;
+          result.data.length.should.equal(3);
           done();
         });
       });
@@ -292,7 +299,28 @@ describe('author.page | Public API', function () {
 
       plz.get.page(request, function (error, result) {
         error.should.be.false;
-        result.should.eql([]);
+        result.data.should.eql([]);
+        done();
+      });
+    });
+
+    it('should callback error and return if database fails', function(done) {
+      var mockDatabase = {
+        getDocument: function (query, callback) {
+          callback(true, { ok: false, message: 'Mock failure', data: null });
+        }
+      };
+
+      var request = {
+        userName: 'chahm',
+        title: 'nonexistent post',
+      };
+
+      require('../app/author.page')(plz, mockDatabase);
+
+      plz.get.page(request, function (error, result) {
+        error.should.be.true;
+        result.should.be.an.Object;
         done();
       });
     });
@@ -328,9 +356,11 @@ describe('author.page | Public API', function () {
 
       plz.edit.page(invalidRequest, function (error) {
         error.should.be.true;
+
         var requestWithoutCriteria = {
           userName: 'chahm',
         };
+
         plz.edit.page(requestWithoutCriteria, function (error) {
           error.should.be.true;
           done();
@@ -346,7 +376,7 @@ describe('author.page | Public API', function () {
 
       plz.edit.page(options, function (error, result) {
         error.should.be.true;
-        result.should.be.a.String;
+        result.ok.should.be.false;
         done();
       });
     });
@@ -366,7 +396,7 @@ describe('author.page | Public API', function () {
 
       plz.edit.page(options, function (error, result) {
         error.should.be.true;
-        result.should.be.a.String;
+        result.ok.should.be.false;
         done();
       });
     });
@@ -377,7 +407,7 @@ describe('author.page | Public API', function () {
       };
 
       mockDatabase.editDocument = function (query, callback) {
-        callback(true, 'Mock failure');
+        callback(true, { ok: false, message: 'error', result: null });
       };
 
       require('../app/author.page')(plz, mockDatabase);
@@ -390,8 +420,7 @@ describe('author.page | Public API', function () {
 
       plz.edit.page(options, function (error, result) {
         error.should.be.true;
-        result[0].status.should.equal('archived');
-        result[0].revisionNumber.should.equal(1);
+        result.ok.should.be.false;
         done();
       });
     });
@@ -419,9 +448,10 @@ describe('author.page | Public API', function () {
         error.should.be.false;
         var request = {
           userName: 'chahm',
-          _id: result.insertedId,
+          _id: result.data[0]._id,
           content: 'more new content'
         };
+
         plz.edit.page(request, function (error, result) {
           error.should.be.false;
           result.should.not.be.empty;
@@ -443,7 +473,37 @@ describe('author.page | Public API', function () {
 
       plz.get.page(request, function (error, result) {
         error.should.be.false;
-        result.should.eql([]);
+        result.data.should.eql([]);
+        done();
+      });
+    });
+
+    it('should callback an error and return if database fails', function(done) {
+      var mockDatabase = {};
+
+      mockDatabase.getDocument = function (query, callback) {
+        callback(false, [{_id: '0001', status: 'something', revisionNumber: 1}]);
+      };
+
+      mockDatabase.editDocument = function (query, callback) {
+        callback(false, { ok: true, message: 'Mock Success', data: {} });
+      };
+
+      mockDatabase.createDocument = function (query, callback) {
+        callback(true, { ok: false, message: 'Mock failure', data: null });
+      };
+
+      require('../app/author.page')(plz, mockDatabase);
+
+      var request = {
+        userName: 'chahm',
+        title: 'a page',
+        content: 'blah blah blah...',
+      };
+
+      plz.edit.page(request, function (error, result) {
+        error.should.be.true;
+        result.should.be.an.Object;
         done();
       });
     });
@@ -513,7 +573,7 @@ describe('author.page | Public API', function () {
         error.should.be.false;
         var request = {
           userName: 'chahm',
-          _id: result.insertedId
+          _id: result.data[0]._id
         };
         plz.remove.page(request, function (error, result) {
           error.should.be.false;
@@ -535,7 +595,28 @@ describe('author.page | Public API', function () {
 
       plz.get.page(request, function (error, result) {
         error.should.be.false;
-        result.should.eql([]);
+        result.data.should.eql([]);
+        done();
+      });
+    });
+
+    it('should callback an error and return if database fails', function(done) {
+      var mockDatabase = {};
+
+      mockDatabase.removeDocument = function (query, callback) {
+        callback(true, { ok: false, message: 'Mock failure', data: null });
+      };
+
+      require('../app/author.page')(plz, mockDatabase);
+
+      var request = {
+        userName: 'chahm',
+        title: 'nonexistent post',
+      };
+
+      plz.remove.page(request, function (error, result) {
+        error.should.be.true;
+        result.should.be.an.Object;
         done();
       });
     });

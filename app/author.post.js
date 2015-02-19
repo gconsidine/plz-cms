@@ -22,8 +22,7 @@ var AuthorPost = function (plz, database) {
   };
 
   /**
-  * Creates a post with given options and inserts it into the database, 
-  * if allowed.
+  * Creates a post with given options and inserts it into the database, if allowed.
   *
   * @memberof author
   * @param {object} options
@@ -34,21 +33,19 @@ var AuthorPost = function (plz, database) {
   * @param {string} options.visibility - public / private / privileged
   * @param {string} options.contentType - plain test / HTML / markdown
   * @param {string} options.content - String containing actual contents of post
-  * @param {string} options.createdAt - Current timestamp upon successful 
-  * insertion into database
-  * @param {string} options.modifiedAt - Current timestamp upon successful 
-  * insertion into database
+  * @param {string} options.createdAt - Current timestamp upon successful insertion into database
+  * @param {string} options.modifiedAt - Current timestamp upon successful insertion into database
   * @param {string} options.status -- draft/pending review/published
   * @param {post} callback
   */
   plz.create.post = function (options, callback) {
     member.checkRequiredOptions(options, function (error, result) {
       if(error) {
-        callback(true, result);
+        callback(true, { ok: false, message: result, data: null });
         return;
       }
 
-      var currentTimestamp = new Date().getTime() / 1000;
+      var currentTimestamp = Date.now();
 
       options.revisionNumber = 0;
       options.createdAt = currentTimestamp;
@@ -61,8 +58,13 @@ var AuthorPost = function (plz, database) {
         uniqueFields: {title: options.title}
       };
 
-      database.createDocument(query, function(error, result){
-        callback(error, result);
+      database.createDocument(query, function(error, result) {
+        if(error) {
+          callback(error, { ok: false, message: result, data: null });
+          return;
+        }
+
+        callback(false, { ok: true, message: 'success', data: result.ops });
       });
     });
   };
@@ -75,13 +77,12 @@ var AuthorPost = function (plz, database) {
   * @param {object} options
   * @param {string} options.userName - Used to check permissions
   * @param {string} options._id - Unique id from db used in post lookup
-  * @param {string} options.title - Optional string used for post lookup
-  * in case _id is not provided
+  * @param {string} options.title - Optional string used for post lookup in case _id is not provided
   * @param {post} callback
   */
   plz.publish.post = function (options, callback) {
-    if(typeof options.userName !== 'string') {
-      callback(true, 'Required field not present in options');
+    if(typeof options.userName !== 'string'){ 
+      callback(true, { ok: false, message: 'Required field not present in options', data: null });
       return;
     }
 
@@ -94,17 +95,22 @@ var AuthorPost = function (plz, database) {
       update: { $set:{ visibility: "public", status: "published" } }
     };
 
-    if(options.hasOwnProperty('_id')) {
+    if(options._id) {
       query.criteria = { _id: options._id };
-    } else if(options.hasOwnProperty('title')) {
+    } else if(options.title) {
       query.criteria = { title: options.title };
     } else {
-      callback(true, 'Valid criteria field not present in options');
+      callback(true, { ok: false, message: 'Valid criteria not present in options', data: null });
       return;
     }
 
     database.editDocument(query, function(error, result) {
-      callback(error, result);
+      if(error) {
+        callback(true, { ok: false, message: result, data: null });
+        return;
+      }
+
+      callback(false, { ok: true, message: 'success', data: result });
     });
   };
 
@@ -125,26 +131,31 @@ var AuthorPost = function (plz, database) {
       collectionName: member.collectionName
     };
 
-    if(options.hasOwnProperty('_id')) {
+    if(options._id) {
       query.criteria = { _id: options._id };
-    } else if(options.hasOwnProperty('label')) {
+    } else if(options.label) {
       query.criteria = {
         labels: { $in: [options.label] },
         status: { $ne: 'archived' }
       };
-    } else if(options.hasOwnProperty('title')) {
+    } else if(options.title) {
       query.criteria = { title: options.title };
     } else {
-      callback(true, 'Valid criteria field not present in options');
+      callback(true, { ok: false, message: 'Valid criteria not present in options', data: null });
       return;
     }
 
-    if(options.hasOwnProperty('limit')) {
+    if(options.limit) {
       query.limit = options.limit;
     }
 
     database.getDocument(query, function (error, result) {
-      callback(error, result);
+      if(error) {
+        callback(true, { ok: false, message: result, data: null });
+        return;
+      }
+
+      callback(false, { ok: true, message: 'success', data: result });
     });
   };
 
@@ -161,11 +172,11 @@ var AuthorPost = function (plz, database) {
   */
   plz.edit.post = function (options, callback) {
     if(typeof options.userName !== 'string' || typeof options.content !== 'string') {
-      callback(true, 'Required field not present in options');
+      callback(true, { ok: false, message: 'Required field not present in options', data: null });
       return;
     }
 
-    var currentTimestamp = new Date(),
+    var currentTimestamp = Date.now(),
         query,
         oldPost,
         id;
@@ -180,20 +191,21 @@ var AuthorPost = function (plz, database) {
     } else if (options.title) {
       query.criteria = { title: options.title };
     } else {
-      callback(true, 'Valid criteria field not present in options');
+      callback(true, { ok: false, message: 'Valid criteria not present in options', data: null });
       return;
     }
 
-    database.getDocument(query, function (error, getResult) {
-      if(error) {
-        callback(true, 'Existing post matching criteria not found');
+    database.getDocument(query, function (error, result) {
+      if(error || result.length === 0) {
+        callback(true, { ok: false, message: 'Existing page criteria not found', data: null });
         return;
       }
 
-      id = getResult[0]._id;
+      id = result[0]._id;
 
-      oldPost = getResult[0];
+      oldPost = result[0];
       oldPost.status = "archived";
+
       delete oldPost._id;
 
       query = {
@@ -202,15 +214,15 @@ var AuthorPost = function (plz, database) {
         update: {
           $set:{
             modifiedAt: currentTimestamp,
-            revisionNumber: oldPost.revisionNumber+1,
+            revisionNumber: oldPost.revisionNumber + 1,
             content: options.content
           }
         }
       };
 
       database.editDocument(query, function(error) {
-        if (error) {
-          callback(error, getResult);
+        if(error) {
+          callback(true, { ok: false, message: 'Database error in post edit attempt', data: null });
           return;
         }
 
@@ -223,16 +235,20 @@ var AuthorPost = function (plz, database) {
           }
         };
 
-        database.createDocument(query, function(error, createResult){
-          callback(error, createResult);
+        database.createDocument(query, function(error, result){
+          if(error) {
+            callback(error, { ok: false, message: result, data: null });
+            return;
+          }
+
+          callback(false, { ok: true, message: 'success', data: result.ops });
         });
       });
     });
   };
 
   /**
-  * Deletes a post if it exists based on the criteria options passed as the
-  * first argument.
+  * Deletes a post if it exists based on the criteria options passed as the first argument.
   *
   * @memberof author
   * @param {object} options
@@ -241,27 +257,29 @@ var AuthorPost = function (plz, database) {
   * @param {post} callback
   */
   plz.remove.post = function (options, callback) {
-    if(typeof options.userName !== 'string') {
-      callback(true, 'Required field not present in options');
+    if(typeof options.userName !== 'string'){ 
+      callback(true, { ok: false, message: 'Required field not present in options', data: null });
       return;
     }
 
-    var query = {
-      collectionName: member.collectionName,
-      limit: '*'
-    };
+    var query = { collectionName: member.collectionName };
 
-    if(options.hasOwnProperty('_id')) {
+    if(options._id) {
       query.criteria = { _id: options._id };
-    } else if(options.hasOwnProperty('title')) {
+    } else if(options.title) {
       query.criteria = { title: options.title };
     } else {
-      callback(true, 'Valid criteria field not present in options');
+      callback(true, { ok: false, message: 'Valid criteria not present in options', data: null });
       return;
     }
 
     database.removeDocument(query, function(error, result) {
-      callback(error, result);
+      if(error) {
+        callback(true, { ok: false, message: result, data: null });
+        return;
+      }
+
+      callback(false, { ok: true, message: 'success', data: result });
     });
   };
 
