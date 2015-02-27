@@ -53,7 +53,8 @@ describe('admin.account | Public API', function () {
 
       plz.login.user(login, function (error, result) {
         error.should.be.false;
-        result.data[0].password.should.equal(login.password.current);
+        result.data[0].should.be.an.Object;
+        (!result.data[0].password).should.be.true;
         done();
       });
     });
@@ -68,7 +69,7 @@ describe('admin.account | Public API', function () {
       };
 
       plz.login.user(login, function (error, result) {
-        error.should.be.true;
+        error.should.be.false;
         result.ok.should.not.be.ok;
         done();
       });

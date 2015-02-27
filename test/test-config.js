@@ -241,7 +241,7 @@ var TestConfig = function () {
     createdAt: 3134999944,
     modifiedAt: 3134999945,
     lastLogin: 0,
-    status: 'created',
+    status: 'active',
     role: 'admin'
   };
 

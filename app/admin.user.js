@@ -33,7 +33,7 @@ var AdminUser = function (plz, database, crypto) {
       }
 
       options.createdAt = Date.now();
-      options.status = 'unactivated';
+      options.status = options.status || 'unactivated';
       options.tempAuth = crypto.createHash('sha256').update(JSON.stringify(options)).digest('hex');
       
       var query = {
@@ -72,6 +72,8 @@ var AdminUser = function (plz, database, crypto) {
         callback(true, { ok: false, message: result, data: null });
         return;
       }
+      
+      // TODO: Strip password and tempAuth from user before return to client.
 
       callback(false, { ok: true, message: 'success', data: result });
     });
