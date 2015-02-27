@@ -39,7 +39,13 @@ var AdminAccount = function (plz, database, mailer, crypto) {
       return;
     }
 
-    var criteria = { email: options.email };
+    var criteria = { 
+      email: options.email,
+      $or: [
+        { status: 'active' },
+        { status: 'reset-pending' }
+      ]
+    };
 
     if(options.password.hash === 'none') {
       criteria.password =  options.password.current;
@@ -61,18 +67,20 @@ var AdminAccount = function (plz, database, mailer, crypto) {
       }
 
       if(result.length === 0) {
-        callback(true, { ok: false, message: 'Invalid credentials', data: null });
+        callback(false, { ok: false, message: 'Invalid credentials', data: null });
         return;
       }
 
-      // TODO: Strip password from user before return
+      // Strip password and tempAuth from user before return to client.
+      delete result[0].password;
+      delete result[0].tempAuth;
 
       callback(false, { ok: true, message: 'success', data: result });
     });
   };
 
   /**
-  * Send a password reset link to the email specified in the options providided 
+  * Send a password reset link to the email specified in the options provided 
   * the user already has an active account.  Email is sent from the default 
   * mailer set in the plz-cms configuration options.
   *
@@ -81,7 +89,6 @@ var AdminAccount = function (plz, database, mailer, crypto) {
   * @param {object} options.email - A user's email address 
   * @param {string} options.subject - The subject of the email
   * @param {string} options.body - The message body of the email
-  * @param {string} options.tempAuth - The hash used for reset validation
   * @param {mail} callback
   */
   plz.send.reset = function (options, callback) {
@@ -214,7 +221,7 @@ var AdminAccount = function (plz, database, mailer, crypto) {
       }
 
       if(result.length === 0) {
-        callback(true, { ok: false, message: 'Invalid credentials', data: null });
+        callback(false, { ok: false, message: 'Invalid credentials', data: null });
         return;
       }
 
@@ -246,7 +253,7 @@ var AdminAccount = function (plz, database, mailer, crypto) {
       }
 
       if(!plz.validate.match(options.password.new, options.password.confirm)) {
-        callback(true, { ok: false, message: 'Passwords do not match', data: null });
+        callback(false, { ok: false, message: 'Passwords do not match', data: null });
         return;
       }
 
