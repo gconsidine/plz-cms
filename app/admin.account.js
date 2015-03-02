@@ -2,15 +2,15 @@
 * @memberof admin
 * @namespace admin.account
 */
-var AdminAccount = function (plz, database, mailer, crypto) {
+var AdminAccount = function (plz, mailer, crypto) {
   'use strict';
   
-  database = database || require('./utility.database')(plz);
   mailer = mailer || require('./utility.mailer')(plz);
   crypto = crypto || require('crypto');
 
   plz = plz || {};
   plz.login = plz.login || {};
+  plz.prep = plz.prep || {};
   plz.send = plz.send || {};
   plz.authorize = plz.authorize || {};
   plz.complete = plz.complete || {};
@@ -55,27 +55,55 @@ var AdminAccount = function (plz, database, mailer, crypto) {
                                 .digest('hex');
     }
 
-    var query = {
-      collectionName: plz.config.admin.collection,
-      criteria: criteria
-    };
+    plz.get.user(criteria, function (error, result) {
+      if(result.data && result.data.length === 0) {
+        callback(error, { ok: false, message: 'Invalid credentials', data: null });
+        return;
+      }
 
-    database.getDocument(query, function (error, result) {
+      callback(error, result);
+    });
+  };
+
+  /**
+  * Set a new temporary authentication hash to be used in authenticating a reset request via
+  * email.
+  *
+  * @memberof admin.account
+  * @param {object} options
+  * @param {object} options.email - A user's email address 
+  * @param {user} callback
+  */
+  plz.prep.reset = function (options, callback) {
+    plz.get.user(options, function (error, result) {
       if(error) {
-        callback(true, { ok: false, message: result, data: null });
+        callback(error, result);
         return;
       }
 
-      if(result.length === 0) {
-        callback(false, { ok: false, message: 'Invalid credentials', data: null });
+      if(result.data.length === 0) {
+        callback(false, { ok: false, message: 'Account does not exist.', data: null });
         return;
       }
 
-      // Strip password and tempAuth from user before return to client.
-      delete result[0].password;
-      delete result[0].tempAuth;
+      var user = result.data[0];
 
-      callback(false, { ok: true, message: 'success', data: result });
+      user.tempAuth = crypto.createHash('sha256').update(JSON.stringify(user)).digest('hex'); 
+
+      var editOptions = {
+        criteria: options,
+        update: { tempAuth: user.tempAuth }
+      };
+
+      plz.edit.user(editOptions, function (error, result) {
+        if(!result.ok) {
+          callback(error, result);
+          return;
+        }
+
+        result.data = [user];
+        callback(error, result);
+      });
     });
   };
 
@@ -167,22 +195,17 @@ var AdminAccount = function (plz, database, mailer, crypto) {
   };
 
   member.sendLink = function (options, callback) {
-    var collectionName = plz.config.admin.collection;
-
     var query = {
-      collectionName: collectionName, 
       criteria: { email: options.user.email },
       update: {
-        $set: {
-          status: options.status,
-          modifiedAt: Date.now()
-        }
+        status: options.status,
+        modifiedAt: Date.now()
       }
     };
 
-    database.editDocument(query, function (error, result) {
+    plz.edit.user(query, function (error, result) {
       if(error) {
-        callback(true, result);
+        callback(error, result);
         return;
       }
 
@@ -204,28 +227,19 @@ var AdminAccount = function (plz, database, mailer, crypto) {
   };
 
   member.authorize = function (options, callback) {
-    var collectionName = plz.config.admin.collection;
-
-    var query = {
-      collectionName: collectionName,
-      criteria: { 
-        email: options.email,
-        tempAuth: options.tempAuth
-      }
+    var query = { 
+      email: options.email,
+      tempAuth: options.tempAuth,
+      $or: [ {status: 'reset-pending'}, {status: 'activation-pending'} ]
     };
 
-    database.getDocument(query, function (error, result) {
-      if(error) {
-        callback(true, { ok: false, message: result, data: null });
-        return;
-      }
-
-      if(result.length === 0) {
+    plz.get.user(query, function (error, result) {
+      if(result.data && result.data.length === 0) {
         callback(false, { ok: false, message: 'Invalid credentials', data: null });
         return;
       }
 
-      callback(false, { ok: true, message: 'success', data: result });
+      callback(error, result);
     });
   };
 
@@ -235,9 +249,7 @@ var AdminAccount = function (plz, database, mailer, crypto) {
       return;
     }
 
-    var collectionName = plz.config.admin.collection;
-
-    var set = {
+    var update = {
       status: 'active',
       modifiedAt: Date.now()
     };
@@ -257,26 +269,28 @@ var AdminAccount = function (plz, database, mailer, crypto) {
         return;
       }
 
-      set.password = crypto.createHash(options.password.hash)
-                           .update(options.password.new)
-                           .digest('hex');
+      update.password = crypto.createHash(options.password.hash)
+                              .update(options.password.new)
+                              .digest('hex');
     } else {
-      set.password = options.password.new;
+      update.password = options.password.new;
     }
 
-    var query = {
-      collectionName: collectionName,
-      criteria: { email: options.email, tempAuth: options.tempAuth },
-      update: { $set: set }
+    var editOptions = {
+      criteria: { 
+        email: options.email, 
+        tempAuth: options.tempAuth,
+        $or: [ {status: 'reset-pending'}, {status: 'activation-pending'} ]
+      },
+      update: update
     };
 
-    database.editDocument(query, function (error, result) {
-      if(error) {
-        callback(true, { ok: false, message: result, data: null });
-        return;
-      }
-
-      callback(false, { ok: true, message: 'success', data: result });
+    editOptions.update.tempAuth = crypto.createHash('sha256')
+                                        .update(JSON.stringify(editOptions))
+                                        .digest('hex');
+    
+    plz.edit.user(editOptions, function (error, result) {
+      callback(error, result);
     });
   };
 

@@ -42,7 +42,7 @@ var AdminUser = function (plz, database, crypto) {
         uniqueFields: {email: options.email}
       };
 
-      database.createDocument(query, function(error, result){
+      database.createDocument(query, function (error, result) {
         if(error) {
           callback(true, { ok: false, message: result, data: null });
           return;
@@ -73,7 +73,11 @@ var AdminUser = function (plz, database, crypto) {
         return;
       }
       
-      // TODO: Strip password and tempAuth from user before return to client.
+      // Strip password and tempAuth from user before return to client.
+      for(var i = 0; i < result.length; i++) {
+        delete result[i].password;
+        delete result[i].tempAuth;
+      }
 
       callback(false, { ok: true, message: 'success', data: result });
     });
@@ -116,10 +120,12 @@ var AdminUser = function (plz, database, crypto) {
     var query = {
       collectionName: plz.config.admin.collection,
       criteria: options.criteria,
-      update: options.update
+      update: {
+        $set: options.update
+      }
     };
 
-    database.editDocument(query, function(error, result){
+    database.editDocument(query, function(error, result) {
       if(error) {
         callback(true, { ok: false, message: result, data: null });
         return;

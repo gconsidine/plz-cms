@@ -80,10 +80,6 @@ var TestConfig = function () {
       required: {
         name: 'string',
         email: 'email',
-        password: 'password',
-        createdAt: 'number',
-        modifiedAt: 'number',
-        lastLogin: 'number',
         status: 'string'
       }
     }
