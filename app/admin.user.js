@@ -73,10 +73,9 @@ var AdminUser = function (plz, database, crypto) {
         return;
       }
       
-      // Strip password and tempAuth from user before return to client.
+      // Strip password from user before return to client.
       for(var i = 0; i < result.length; i++) {
         delete result[i].password;
-        delete result[i].tempAuth;
       }
 
       callback(false, { ok: true, message: 'success', data: result });
