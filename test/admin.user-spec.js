@@ -84,6 +84,12 @@ describe('admin.user | Public API', function () {
       plz.get.user({name: 'greg'}, function (error, result) {
         error.should.be.false;
         result.should.not.be.empty;
+
+        // password should be stripped from user before return to client.
+        for(var i = 0; i < result.length; i++) {
+          result[i].password.hasOwnProperty('password').should.be.false;
+        }
+
         done();
       });
     });

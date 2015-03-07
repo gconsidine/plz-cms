@@ -22,10 +22,19 @@ describe('admin.account | Public API', function () {
         callback(true, 'Mock failure');
       };
 
-      require('../app/admin.account')(plz, mockDatabase);
+      require('../app/admin.user')(plz, mockDatabase);
 
-      plz.login.user({}, function (error) {
+      var login = {
+        email: 'sender@example.com',
+        password: {
+          current: 'someFakePass0',
+          hash: 'none'
+        }
+      };
+      plz.login.user(login, function (error, result) {
         error.should.be.true;
+        result.ok.should.be.false;
+        result.message.should.equal('Mock failure');
         done();
       });
     });
@@ -56,6 +65,41 @@ describe('admin.account | Public API', function () {
         result.data[0].should.be.an.Object;
         (!result.data[0].password).should.be.true;
         done();
+      });
+    });
+
+    it('should return a user with matching email/password hash', function (done) {
+      var crypto = require('crypto');
+      var password_sha256 = crypto.createHash('sha256')
+                                  .update('someFakePass0')
+                                  .digest('hex');
+      var options = {
+        criteria: {
+          email: 'sender@example.com'
+        },
+        update: {
+          password: password_sha256
+        }
+      };
+
+      plz.edit.user(options, function (error, result) {
+        error.should.be.false;
+        result.should.not.equal(null);
+
+        var login = {
+          email: 'sender@example.com',
+          password: {
+            current: 'someFakePass0',
+            hash: 'sha256'
+          }
+        };
+
+        plz.login.user(login, function (error, result) {
+          error.should.be.false;
+          result.data[0].should.be.an.Object;
+          (!result.data[0].password).should.be.true;
+          done();
+        });
       });
     });
 
@@ -356,7 +400,7 @@ describe('admin.account | Private API', function () {
       });
     });
 
-    it('should callback an error if result is empty', function (done) {
+    it('should callback not ok if result is empty', function (done) {
       plz.get.user = function (query, callback) {
         callback(false, {ok: false, message: 'mock empty result', data: [] });
       };
@@ -393,6 +437,14 @@ describe('admin.account | Private API', function () {
   });
 
   describe('completeAction()', function () {
+    before(function (done) {
+      var testUser = Tc.validUser;
+      testUser.email = 'merlin@sonofamberandchaos.com';
+      testUser.password = 'password';
+      plz.create.user(testUser, function () {
+        done();
+      });
+    });
     beforeEach(function () {
       plz = require('../app/core.hub')(Tc.validAdminConfig);
       account = require('../app/admin.account')(plz);
@@ -417,7 +469,7 @@ describe('admin.account | Private API', function () {
         password: {
           new: 'password',
           confirm: 'password',
-          hash: 'none'
+          hash: 'md5'
         }
       };
 
