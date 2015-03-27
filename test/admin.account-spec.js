@@ -171,6 +171,96 @@ describe('admin.account | Public API', function () {
     });
   });
 
+  describe('plz.prep.reset()', function () {
+    before(function () {
+      plz = require('../app/core.hub')(Tc.validAdminConfig);
+    });
+
+    it('should callback false and JSON on reset failure', function (done) {
+      require('../app/admin.account')(plz);
+
+      plz.get = {
+        user: function (options, callback) {
+          callback(true, 'Mock failure');
+        }
+      };
+
+      var options = {};
+
+      plz.prep.reset(options, function (error) {
+        error.should.be.true;
+        done();
+      });
+    });
+
+    it('should callback false and JSON if result is empty', function (done) {
+      require('../app/admin.account')(plz);
+
+      plz.get = {
+        user: function (options, callback) {
+          callback(false, {data: []});
+        }
+      };
+
+      var options = {};
+
+      plz.prep.reset(options, function (error, result) {
+        result.ok.should.not.be.ok;
+        error.should.be.false;
+        done();
+      });
+    });
+
+    it('should edit a user on successful get user operation', function (done) {
+      require('../app/admin.account')(plz);
+
+      var options = {};
+
+      plz.get = {
+        user: function (options, callback) {
+          callback(false, {data: [{tempAuth: 'mockedTempAuth'}]});
+        }
+      };
+
+      plz.edit = {
+        user: function (options, callback) {
+          callback(true, {ok: false});
+        }
+      };
+
+      plz.prep.reset(options, function (error, result) {
+        result.ok.should.be.false;
+        error.should.be.true;
+        done();
+      });
+    });
+
+    it('should edit a user on successful get user operation', function (done) {
+      require('../app/admin.account')(plz);
+
+      var options = {};
+
+      plz.get = {
+        user: function (options, callback) {
+          callback(false, {data: [{tempAuth: 'mockedTempAuth'}]});
+        }
+      };
+
+      plz.edit = {
+        user: function (options, callback) {
+          callback(false, {ok: true});
+        }
+      };
+
+      plz.prep.reset(options, function (error, result) {
+        result.ok.should.be.true;
+        error.should.be.false;
+        done();
+      });
+    });
+
+  });
+
   describe('plz.send.reset()', function () {
     before(function () {
       plz = require('../app/core.hub')(Tc.validAdminConfig);
@@ -186,7 +276,6 @@ describe('admin.account | Public API', function () {
       var options = {};
 
       plz.send.reset(options, function (error, result) {
-        console.log(options, error, result);
         options.status.should.be.ok;
         error.should.be.true;
         result.ok.should.be.false;
@@ -484,14 +573,14 @@ describe('admin.account | Private API', function () {
       var options = {
         email: 'merlin@sonofamberandchaos.com',
         password: {
-          new: 'password',
+          new: 'passwordFa09f9f!',
           confirm: 'passwordOopsies',
-          hash: 'none'
+          hash: 'sha256'
         }
       };
 
       account.completeAction(options, function (error, result) {
-        error.should.be.true;
+        error.should.be.false;
         result.ok.should.be.false;
         done();
       });
