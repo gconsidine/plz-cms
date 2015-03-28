@@ -41,14 +41,6 @@ var CoreHub = function (config) {
           return false;
         }
         break;
-      case 'author':
-        if(typeof options.author !== 'object' ||
-           typeof options.author.page.collection !== 'string' ||
-           typeof options.author.post.collection !== 'string') {
-
-          return false;
-        }
-        break;
     }
 
     return true;

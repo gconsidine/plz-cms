@@ -144,6 +144,23 @@ describe('utility.database | Private API', function () {
       });
     });
 
+    it('should return error when no documents were affected', function(done) {
+      var plz = require('../app/core.hub')(Tc.validCoreConfig),
+          db = require('../app/utility.database')(plz);
+
+      var options = {
+        collectionName: 'test',
+        criteria: { testField: 'stValue' },
+        update: { zanzibar: true }
+      };
+
+      db.editDocument(options, function (error, result) {
+        error.should.be.true; 
+        result.should.be.type('string');
+        done();
+      });
+    });
+
     after(function (done) {
       var plz = require('../app/core.hub')(Tc.validCoreConfig),
           db = require('../app/utility.database')(plz);
