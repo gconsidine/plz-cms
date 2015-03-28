@@ -57,7 +57,10 @@ var TestConfig = function () {
 
   var validAdminConfig = {
     modules: {
-      admin: true
+      admin: true,
+      author: false,
+      merchant: false,
+      scout: false,
     },
     database: {
       default: {
