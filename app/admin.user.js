@@ -28,8 +28,7 @@ var AdminUser = function (plz, database, crypto) {
   plz.create.user = function (options, callback) {
     member.prepareUserCreation(options, function (error, result) {
       if(error) {
-        callback(true, { ok: false, message: result, data: null });
-        return;
+        return callback(true, { ok: false, message: result, data: null });
       }
 
       options.createdAt = Date.now();
@@ -44,11 +43,14 @@ var AdminUser = function (plz, database, crypto) {
 
       database.createDocument(query, function (error, result) {
         if(error) {
-          callback(true, { ok: false, message: result, data: null });
-          return;
+          return callback(true, { 
+            ok: false, 
+            message: 'Unable to create user. Please try again later.', 
+            data: null 
+          });
         }
 
-        callback(false, { ok: true, message: 'success', data: result.ops });
+        callback(false, { ok: true, message: 'User successfully created', data: result.ops });
       });
     });
   };
@@ -69,8 +71,11 @@ var AdminUser = function (plz, database, crypto) {
 
     database.getDocument(query, function (error, result) {
       if(error) {
-        callback(true, { ok: false, message: result, data: null });
-        return;
+        return callback(true, { 
+          ok: false, 
+          message: 'Unable to fetch users. Please try again later.', 
+          data: null 
+        });
       }
       
       // Strip password from user before return to client.
@@ -78,7 +83,7 @@ var AdminUser = function (plz, database, crypto) {
         delete result[i].password;
       }
 
-      callback(false, { ok: true, message: 'success', data: result });
+      callback(false, { ok: true, message: 'User(s) successfully fetched.', data: result });
     });
   };
 
@@ -98,11 +103,14 @@ var AdminUser = function (plz, database, crypto) {
 
     database.removeDocument(query, function(error, result) {
       if(error) {
-        callback(true, { ok: false, message: result, data: null });
-        return;
+        return callback(true, { 
+          ok: false, 
+          message: 'Could not remove user.  Please try again later', 
+          data: null 
+        });
       }
 
-      callback(false, { ok: true, message: 'success', data: result });
+      callback(false, { ok: true, message: 'User(s) successfully removed.', data: result });
     });
   };
 
@@ -126,8 +134,11 @@ var AdminUser = function (plz, database, crypto) {
 
     database.editDocument(query, function(error, result) {
       if(error) {
-        callback(true, { ok: false, message: result, data: null });
-        return;
+        return callback(true, { 
+          ok: false, 
+          message: 'Could not edit user.  Please try again later.', 
+          data: null
+        });
       }
 
       callback(false, { ok: true, message: 'success', data: result });

@@ -34,7 +34,6 @@ describe('admin.account | Public API', function () {
       plz.login.user(login, function (error, result) {
         error.should.be.true;
         result.ok.should.be.false;
-        result.message.should.equal('Mock failure');
         done();
       });
     });
