@@ -1,98 +1,47 @@
 # plz-cms [![Build Status](https://travis-ci.org/gconsidine/plz-cms.svg)](https://travis-ci.org/gconsidine/plz-cms) [![Coverage Status](https://img.shields.io/coveralls/gconsidine/plz-cms.svg)](https://coveralls.io/r/gconsidine/plz-cms) [![Dependency Status](https://david-dm.org/gconsidine/plz-cms.svg)](https://david-dm.org/gconsidine/plz-cms) [![devDependency Status](https://david-dm.org/gconsidine/plz-cms/dev-status.svg)](https://david-dm.org/gconsidine/plz-cms#info=devDependencies)
 
+**plz-cms** is a configurable CMS and e-commerce library intended to be used to expedite the development of a project within the context of your favorite Node.js framework.  Oftentimes it's just a wrapper for well-made projects within the community that aims to expose a consistent (if not slightly unconventional) interface through them.
 
-A Node.js module built as a hub for the following plz-cms components:
+When **plz-cms** is included in a project, it requires a configuration object to get started.  This will include information about which components you'll include, the database(s) you'll be using, email account(s), and optionally other values that will adjust how users, blogs, etc. are stored.
 
-  * [admin](https://github.com/gconsidine/plz-cms/wiki/admin)
-  * [author](https://github.com/gconsidine/plz-cms/wiki/author)
-  * [merchant](https://github.com/gconsidine/plz-cms/wiki/merchant)
-  * [scout](https://github.com/gconsidine/plz-cms/wiki/scout)
-  * [socialite](https://github.com/gconsidine/plz-cms/wiki/socialite)
+The API is partially inspired by the readability of APIs for BDD libraries.  Conventionally, objects are nouns.  In the case of this project, there is a single parent object `plz` and it contains verb categories like `create`, `get`, etc.  Properties of these verb categories are finally actions, the methods, that perform a given task.
 
-Browse the components above to see how the plz-cms API can be extended when
-included in a configuration.
+In putting everything together you have a readable (albeit silly) API.  Now you can tell your application to please get a user like, "`plz.get.user()`".  This has the other advantage (if the previous thing can even be considered a true advantage) of making the API searchable by verb category.  If you've ever wondered, "What can I `create` with this library?", since **plz-cms** has a limited set of verb categories, you'll be able to quickly discover that you can `create`, users, pages, posts, etc.
 
-- - -
- 
+### Heads Up
+
+This project is still in the very early stages of development.  Development is planned in vertical slices starting with Core, then Admin, then Author, and on down the list.  Realistically, it won't be very useful until Author, and the components that come before it, are complete.  This documentation is also a work in progress.
+
 ### Configuration
 
-  When plz-cms is require()'d for use, a configuration object should be passed
-  to the module, as in `var plz = require('plz-cms')(config);` -- Here are 
-  basic configuration options for the core component of plz-cms:
+* [Overview](https://github.com/gconsidine/plz-cms/wiki/Configuration)
 
-    {
-      components: {
-        admin: false,
-        author: false // unused modules can be ommitted to the same effect
-      },
-      database: {  // Can accept multiple database connections...
-        default: { // ...but must have a default Mongo connection
-          uri: <your_mongo_uri_here>
-        }
-      },
-      mailer: {    // Can accept multiple mailers ...
-        default: { // ...but must have a default address
-          service: 'Gmail', // only Gmail supported for now
-          address: <your_email_address>,
-          password: <your_email_password>
-        }
-      }
-    }
+### Components
 
-  What components you choose determines the properties of the configuration 
-  options passed and the API at your disposal.
+* [Core](https://github.com/gconsidine/plz-cms/wiki/Core)
+* [Admin](https://github.com/gconsidine/plz-cms/wiki/Admin)
+* [Author](Author)
+* [Merchant](Merchant)
+* [Socialite](Socialite)
+* [Scout](Scout)
 
-### Basic Usage
+### Guides
 
-  Here's a basic configuration including just the *Admin* component:
+* [Getting Started](GettingStarted)
 
-    var config = {
-      modules: {
-        admin: true
-      },
-      database: {
-        default: {
-          uri: mongodb://localhost:27017/plz-test'
-        }
-      },
-      mailer: {
-        default: {
-          service: 'Gmail',
-          address: name@domain.tld,
-          password: some-password
-        }
-      },
-      admin: {
-        collection: 'user',
-        roles: {
-          admin: true,
-          user: true
-        },
-        required: {
-          name: 'string',
-          email: 'email',
-          password: 'password',
-          createdAt: 'number',
-          modifiedAt: 'number',
-          lastLogin: 'number',
-          status: 'string'
-        }
-      }
-    };
+### Examples
 
-    var plz = require('plz-cms')(config);
-    
-    plz.validate.typeAs('string', 'success'); // true
+* [Link to Example Project](link-to-example-project)
 
-### API
+### Development
 
-  plz-cms takes on the API structure of `plz`, followed by a verb category 
-  (e.g. validate, sanitize, create), followed by an actor or a descriptor 
-  (user, typeAs, string, number).  
-  
-  The goal is to make the API consistent, concise, and read more like a request
-  to a human for a thing or an action.
+* [Building](GettingStarted)
+* [Testing](Testing)
+* [Contributing](Contributing)
+* [Style Guide](StyleGuide)
+* [Changelog](Changelog)
+* [Road Map](RoadMap)
 
-  *"Please create a user"* becomes `plz.create.user(options, callback)`
+
 
 
