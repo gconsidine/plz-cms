@@ -14,34 +14,31 @@ This project is still in the very early stages of development.  Development is p
 
 ### Configuration
 
-* [Overview](https://github.com/gconsidine/plz-cms/wiki/Configuration)
+* [Overview](Configuration)
 
 ### Components
 
-* [Core](https://github.com/gconsidine/plz-cms/wiki/Core)
-* [Admin](https://github.com/gconsidine/plz-cms/wiki/Admin)
-* [Author](Author)
-* [Merchant](Merchant)
-* [Socialite](Socialite)
-* [Scout](Scout)
+* [Core](Core)
+* [Admin](Admin)
+* Author
+* Merchant
+* Socialite
+* Scout
 
 ### Guides
 
-* [Getting Started](GettingStarted)
+* Getting Started
 
 ### Examples
 
-* [Link to Example Project](link-to-example-project)
+* [Cockpit (sample-server)](https://github.com/gconsidine/cockpit)
 
 ### Development
 
 * [Building](GettingStarted)
-* [Testing](Testing)
-* [Contributing](Contributing)
-* [Style Guide](StyleGuide)
-* [Changelog](Changelog)
-* [Road Map](RoadMap)
-
-
-
+* Testing
+* Contributing
+* Style Guide
+* Changelog
+* Road Map
 
