@@ -14,12 +14,12 @@ This project is still in the very early stages of development.  Development is p
 
 ### Configuration
 
-* [Overview](Configuration)
+* [Overview](https://github.com/gconsidine/plz-cms/wiki/Configuration)
 
 ### Components
 
-* [Core](Core)
-* [Admin](Admin)
+* [Core](https://github.com/gconsidine/plz-cms/wiki/Core)
+* [Admin](https://github.com/gconsidine/plz-cms/wiki/admin)
 * Author
 * Merchant
 * Socialite
@@ -35,7 +35,7 @@ This project is still in the very early stages of development.  Development is p
 
 ### Development
 
-* [Building](GettingStarted)
+* Building
 * Testing
 * Contributing
 * Style Guide
