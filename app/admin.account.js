@@ -35,8 +35,7 @@ var AdminAccount = function (plz, mailer, crypto) {
   */
   plz.login.user = function (options, callback) {
     if(!options.password || !options.password.current || !options.password.hash) {
-      callback(true, { ok: false, message: 'Invalid password options object', data: null });
-      return;
+      return callback(true, { ok: false, message: 'Invalid password options object', data: null });
     }
 
     var criteria = { 
@@ -57,8 +56,7 @@ var AdminAccount = function (plz, mailer, crypto) {
 
     plz.get.user(criteria, function (error, result) {
       if(result.data && result.data.length === 0) {
-        callback(error, { ok: false, message: 'Invalid credentials', data: null });
-        return;
+        return callback(error, { ok: false, message: 'Invalid credentials', data: null });
       }
 
       callback(error, result);
@@ -82,8 +80,7 @@ var AdminAccount = function (plz, mailer, crypto) {
       }
 
       if(result.data.length === 0) {
-        callback(false, { ok: false, message: 'Account does not exist.', data: null });
-        return;
+        return callback(false, { ok: false, message: 'Account does not exist.', data: null });
       }
 
       var user = result.data[0];
@@ -97,8 +94,7 @@ var AdminAccount = function (plz, mailer, crypto) {
 
       plz.edit.user(editOptions, function (error, result) {
         if(!result.ok) {
-          callback(error, result);
-          return;
+          return callback(error, result);
         }
 
         result.data = [user];
@@ -124,11 +120,10 @@ var AdminAccount = function (plz, mailer, crypto) {
 
     member.sendLink(options, function (error, result) {
       if(error) {
-        callback(true, { ok: false, message: result, data: null });
-        return;
+        return callback(true, { ok: false, message: result, data: null });
       }
 
-      callback(false, { ok: true, message: 'success', data: result });
+      callback(false, { ok: true, message: 'Password reset email sent.', data: result });
     });
   };
 
@@ -148,11 +143,10 @@ var AdminAccount = function (plz, mailer, crypto) {
 
     member.sendLink(options, function (error, result) {
       if(error) {
-        callback(true, { ok: false, message: result, data: null });
-        return;
+        return callback(true, { ok: false, message: result, data: null });
       }
 
-      callback(false, { ok: true, message: 'success', data: result });
+      callback(false, { ok: true, message: 'Activation email sent.', data: result });
     });
   };
 
@@ -168,11 +162,10 @@ var AdminAccount = function (plz, mailer, crypto) {
   */
   plz.allow.user = function (options, callback) {
     if(options.roles.indexOf(options.user.role) === -1) {
-      callback(true, { ok: false, message: 'User\'s role not permitted', data: null });
-      return;
+      return callback(true, { ok: false, message: 'User\'s role not permitted', data: null });
     }
 
-    callback(false, { ok: true, message: 'success', data: null });
+    callback(false, { ok: true, message: 'Permission granted', data: null });
   };
 
   /**
@@ -187,11 +180,10 @@ var AdminAccount = function (plz, mailer, crypto) {
   */
   plz.restrict.user = function (options, callback) {
     if(options.roles.indexOf(options.user.role) !== -1) {
-      callback(true, { ok: false, message: 'User\'s role not permitted', data: null });
-      return;
+      return callback(true, { ok: false, message: 'User\'s role not permitted', data: null });
     }
 
-    callback(false, { ok: true, message: 'success', data: null });
+    callback(false, { ok: true, message: 'Permission granted', data: null });
   };
 
   member.sendLink = function (options, callback) {
@@ -205,8 +197,7 @@ var AdminAccount = function (plz, mailer, crypto) {
 
     plz.edit.user(query, function (error, result) {
       if(error) {
-        callback(error, result);
-        return;
+        return callback(error, result);
       }
 
       var mailOptions = {
@@ -217,8 +208,7 @@ var AdminAccount = function (plz, mailer, crypto) {
       
       mailer.sendMail(mailOptions, function (error, result) {
         if(error) {
-          callback(true, 'Mail not sent');
-          return;
+          return callback(true, 'Mail not sent');
         }
 
         callback(false, result);
@@ -235,8 +225,7 @@ var AdminAccount = function (plz, mailer, crypto) {
 
     plz.get.user(query, function (error, result) {
       if(result.data && result.data.length === 0) {
-        callback(false, { ok: false, message: 'Invalid credentials', data: null });
-        return;
+        return callback(false, { ok: false, message: 'Invalid credentials', data: null });
       }
 
       callback(error, result);
@@ -256,12 +245,11 @@ var AdminAccount = function (plz, mailer, crypto) {
 
     if(options.password.hash !== 'none') {
       if(!plz.validate.complexity(options.password.new)) {
-        callback(true, { 
+        return callback(true, { 
           ok: false, 
           message: 'Password does not meet the complexity requirements',
           data: null 
         });
-        return;
       }
 
       if(!plz.validate.match(options.password.new, options.password.confirm)) {
